@@ -1,0 +1,34 @@
+{
+  "name": "api-server",
+  "version": "1.0.0",
+  "main": "src/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Spiderjockey02/API-server.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Spiderjockey02/API-server/issues"
+  },
+  "homepage": "https://github.com/Spiderjockey02/API-server#readme",
+  "description": "",
+  "devDependencies": {
+    "eslint": "^8.7.0"
+  },
+  "dependencies": {
+    "@tensorflow/tfjs-node": "^3.13.0",
+    "axios": "^0.25.0",
+    "compression": "^1.7.4",
+    "cors": "^2.8.5",
+    "express": "^4.17.2",
+    "helmet": "^5.0.1",
+    "node-fetch": "^1.7.3",
+    "nsfwjs": "^2.4.1",
+    "puppeteer": "^13.1.2"
+  }
+}
