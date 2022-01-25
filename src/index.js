@@ -16,7 +16,6 @@ const corsOpt = {
 
 // normal assets such as index.html or else.
 const assets = __dirname + '/assets';
-console.log(process.cwd());
 
 app.use(helmet())
 	.use(cors(corsOpt))
