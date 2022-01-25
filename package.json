@@ -28,8 +28,10 @@
     "cors": "^2.8.5",
     "express": "^4.17.2",
     "helmet": "^5.0.1",
+    "minecraft-server-util": "^5.2.9",
     "node-fetch": "^1.7.3",
     "nsfwjs": "^2.4.1",
-    "puppeteer": "^13.1.2"
+    "puppeteer": "^13.1.2",
+    "r6api.js": "^4.0.0"
   }
 }

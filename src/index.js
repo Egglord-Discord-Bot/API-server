@@ -28,6 +28,6 @@ app.use(helmet())
 	// /files endpoint for showing files
 	.use('/image', require('./routes/images'))
 	.use('/misc', require('./routes/misc'))
-	// .use('/games', require('./routes/games'))
+	.use('/games', require('./routes/games'))
 	.use('/nsfw', require('./routes/nsfw'))
 	.listen(port, () => console.log(`Started on PORT: ${port}`));
