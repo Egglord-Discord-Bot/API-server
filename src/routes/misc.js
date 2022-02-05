@@ -1,6 +1,7 @@
 const { Router } = require('express'),
 	router = Router(),
 	Puppeteer = require('puppeteer'),
+	{ createCanvas } = require('canvas'),
 	fetch = require('node-fetch');
 
 // Get random advice
@@ -36,6 +37,19 @@ router.get('/screenshot', async (req, res) => {
 		data = await page.screenshot();
 		await browser.close();
 		res.json({ success: data });
+	} catch (err) {
+		res.json({ error: err.message });
+	}
+});
+
+router.get('/colour', (req, res) => {
+	if (!req.query.colour) return res.json({ error: 'Missing colour query' });
+	try {
+		const canvas = createCanvas(200, 200),
+			context = canvas.getContext('2d');
+		context.fillStyle = req.query.colour;
+		context.fillRect(0, 0, 200, 200);
+		res.json({ success: canvas.toBuffer('image/png') });
 	} catch (err) {
 		res.json({ error: err.message });
 	}
