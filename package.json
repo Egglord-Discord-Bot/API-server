@@ -32,6 +32,7 @@
     "node-fetch": "^1.7.3",
     "nsfwjs": "^2.4.1",
     "puppeteer": "^13.1.2",
-    "r6api.js": "^4.0.0"
+    "r6api.js": "^4.0.0",
+    "tesseract.js": "^2.1.5"
   }
 }

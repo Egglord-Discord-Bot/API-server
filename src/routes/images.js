@@ -59,4 +59,5 @@ router.get('/blur', async (req, res) => {
 		res.json({ error: err.message });
 	}
 });
+
 module.exports = router;

@@ -2,6 +2,7 @@ const { Router } = require('express'),
 	router = Router(),
 	Puppeteer = require('puppeteer'),
 	{ createCanvas } = require('canvas'),
+	Tesseract = require('tesseract.js'),
 	fetch = require('node-fetch');
 
 // Get random advice
@@ -42,6 +43,7 @@ router.get('/screenshot', async (req, res) => {
 	}
 });
 
+// Create a 200x200 square of a colour
 router.get('/colour', (req, res) => {
 	if (!req.query.colour) return res.json({ error: 'Missing colour query' });
 	try {
@@ -53,6 +55,13 @@ router.get('/colour', (req, res) => {
 	} catch (err) {
 		res.json({ error: err.message });
 	}
+});
+
+// Extract text from an image
+router.get('/get-text', async (req, res) => {
+	if (!req.query.url) return res.json({ error: 'Missing URL query' });
+	const { data } = await Tesseract.recognize(req.query.url, 'eng');
+	res.json({ text: data.text ?? 'No text was found!' });
 });
 
 module.exports = router;

@@ -15,14 +15,15 @@ const corsOpt = {
 };
 
 // normal assets such as index.html or else.
-const assets = __dirname + '/assets';
-
 app.use(helmet())
 	.use(cors(corsOpt))
 	.use(compression())
-	.get('/favicon.ico', (req, res) => res.status(200).sendFile(assets + '/favicon.ico'))
 	// for web-scalpers
-	.get('/robots.txt', (req, res) => res.sendFile(assets + '/robots.txt'))
+	.get('/robots.txt', (req, res) => {
+		res
+			.type('text/plain')
+			.send('User-agent: *\ndisallow: /');
+	})
 	// Home page
 	.get('/', (req, res) => res.status(200).send('OK'))
 	// /files endpoint for showing files
