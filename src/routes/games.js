@@ -3,22 +3,37 @@ const { Router } = require('express'),
 	{ fortniteAPI, rainbow } = require('../config'),
 	{ status } = require('minecraft-server-util'),
 	R6API = require('r6api.js').default,
+	Profile = require('../utils/classes'),
 	{ findByUsername, getProgression, getRanks, getStats } = new R6API({ email: rainbow.email, password: rainbow.password }),
 	fetch = require('node-fetch');
 
-// Get random advice
+/**
+  * GET /games/fortnite
+  * @summary Endpoint for fetching fortnite accounts
+	* @tags Games
+	* @param {string} platform.query.required - The platform the user is on
+	* @param {string} username.query.required - The username of the account.
+  * @return {Profile} 200 - success response - application/json
+*/
 router.get('/fortnite', async (req, res) => {
 	const { platform, username } = req.query;
 	try {
 		const data = await fetch(`https://api.fortnitetracker.com/v1/profile/${platform}/${encodeURIComponent(username)}`, {
 			headers: { 'TRN-Api-Key': fortniteAPI },
 		}).then(r => r.json());
-		res.json(data);
+		res.json(new Profile(data));
 	} catch (err) {
 		res.json({ error: err.message });
 	}
 });
 
+/**
+  * GET /games/mc
+  * @summary Minecraft
+	* @tags Games
+	* @param {string} IP.query.required - name param description
+  * @return {object} 200 - success response - application/json
+*/
 router.get('/mc', async (req, res) => {
 	const { IP } = req.query;
 	try {
@@ -29,6 +44,14 @@ router.get('/mc', async (req, res) => {
 	}
 });
 
+/**
+  * GET /games/r6
+  * @summary Minecraft
+	* @tags Games
+	* @param {string} platform.query.required - name param description
+	* @param {string} player.query.required - name param description
+  * @return {object} 200 - success response - application/json
+*/
 router.get('/r6', async (req, res) => {
 	let { platform, player } = req.query;
 	if (platform === 'xbl') player = player.replace('_', '');

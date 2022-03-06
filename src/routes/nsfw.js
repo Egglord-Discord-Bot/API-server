@@ -4,7 +4,13 @@ const { Router } = require('express'),
 	tf = require('@tensorflow/tfjs-node'),
 	nsfwjs = require('nsfwjs');
 
-// Get random advice
+/**
+  * GET /nsfw/image
+  * @summary Endpoint for fetching fortnite accounts
+	* @tags NSFW
+	* @param {string} type.query.required - The name of the pokemon
+  * @return {object} 200 - success response - application/json
+*/
 router.get('/image', async (req, res) => {
 	try {
 		const { data } = await get(`https://nekobot.xyz/api/image?type=${req.query.type}`);
@@ -14,7 +20,13 @@ router.get('/image', async (req, res) => {
 	}
 });
 
-// Get information on a random pokemon
+/**
+  * GET /nsfw/check
+  * @summary Endpoint for fetching fortnite accounts
+	* @tags NSFW
+	* @param {string} url.query.required - The name of the pokemon
+  * @return {object} 200 - success response - application/json
+*/
 router.get('/check', async (req, res) => {
 	try {
 		const model = await nsfwjs.load();
