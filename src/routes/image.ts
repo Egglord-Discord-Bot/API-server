@@ -1,12 +1,12 @@
 import { Router } from 'express';
 const router = Router();
-import { checkImage } from '../utils/index';
+import { chechAuth, checkImage } from '../utils/middleware';
 import canvacord from 'canvacord';
 
 
 export default function() {
 
-	router.get('/affect', checkImage, async (req, res) => {
+	router.get('/affect', chechAuth, checkImage, async (req, res) => {
 		const image = req.query.image;
 		try {
 			const img = await canvacord.Canvas.affect(image as string);

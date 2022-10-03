@@ -3,3 +3,6 @@ config.ts
 src/assets/nsfw
 *.traineddata
 /dist
+prisma/migrations
+src/utils/logs
+.env

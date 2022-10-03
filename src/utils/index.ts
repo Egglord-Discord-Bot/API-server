@@ -1,12 +1,6 @@
-import type { Request, Response, NextFunction } from 'express';
 import axios from 'axios';
 
-export function checkImage(req: Request, res: Response, next: NextFunction) {
-	const image = req.query.image;
-	if (!image) return res.json({ error: 'Missing image query' });
-	next();
-}
-
+// Fetch and parse a subreddit
 export async function fetchSubreddit(subreddit: string) {
 	// Fetch subreddit data
 	try	{

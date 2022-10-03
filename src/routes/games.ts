@@ -5,9 +5,10 @@ import R6API from 'r6api.js';
 import { status } from 'minecraft-server-util';
 import config from '../config';
 const { findByUsername, getProgression, getRanks, getStats } = new R6API({ email: config.rainbow.email, password: config.rainbow.password });
+import { chechAuth } from '../utils/middleware';
 
 export default function() {
-	router.get('/fortnite', async (req, res) => {
+	router.get('/fortnite', chechAuth, async (req, res) => {
 		const { platform, username } = req.query;
 		try {
 			const data = await axios.get(`https://api.fortnitetracker.com/v1/profile/${platform}/${encodeURIComponent(username as string)}`, {
@@ -20,7 +21,7 @@ export default function() {
 		}
 	});
 
-	router.get('/mc', async (req, res) => {
+	router.get('/mc', chechAuth, async (req, res) => {
 		const { IP } = req.query;
 		try {
 			const response = await status(IP as string);
@@ -31,7 +32,7 @@ export default function() {
 		}
 	});
 
-	router.get('/r6', async (req, res) => {
+	router.get('/r6', chechAuth, async (req, res) => {
 		type Platform = 'xbl' | 'uplay' | 'psn';
 		let { player } = req.query;
 		const { platform } = req.query;
@@ -56,9 +57,7 @@ export default function() {
 			console.log(err);
 			res.json({ err: err.message });
 		}
-		// /
 	});
-
 
 	return router;
 }
