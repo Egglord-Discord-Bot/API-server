@@ -13,12 +13,16 @@ export async function fetchUser(data: userID) {
 	});
 }
 
+type createUser = {
+	id: string
+	token: string
+}
 // Create a user with token
-export async function createUser(data: userID) {
+export async function createUser(data: createUser) {
 	return client.user.create({
 		data: {
 			id: data.id,
-			token: '1',
+			token: data.token,
 		},
 	});
 }
@@ -32,14 +36,19 @@ export async function deleteServer(data: userID) {
 	});
 }
 
+type updateUser = {
+	id: string
+	newToken: string
+}
+
 // Update a user
-export async function updateUser(data: userID) {
+export async function updateUser(data: updateUser) {
 	return client.user.update({
 		where: {
 			id: data.id,
 		},
 		data: {
-			token: '2',
+			token: data.newToken,
 		},
 	});
 }

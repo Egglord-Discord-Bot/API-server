@@ -1,31 +1,12 @@
 import { Router } from 'express';
 const router = Router();
 import passport from 'passport';
-import { Strategy } from 'passport-discord';
-import config from '../config';
-import { fetchUser, createUser } from '../database/User';
 import { fetchEndpointUsagesPerUser } from '../database/endpointUsage';
+import { updateUser } from '../database/User'
 import type { Profile } from 'passport-discord';
+import { TokenGenerator, TokenBase } from 'ts-token-generator';
 
 export default function() {
-	// Works in background for user storage
-	passport.serializeUser((user, done) => {
-		done(null, user);
-	});
-
-	passport.deserializeUser((obj, done) => {
-		done(null, obj as false);
-	});
-
-	// Discord Ouath2 data
-	passport.use(new Strategy({
-		clientID: config.bot.id,
-		clientSecret:config.bot.clientSecret,
-		callbackURL: 'http://localhost:4500/callback',
-		scope: ['identify'],
-	}, (_accessToken, _refreshToken, profile, done) => {
-		process.nextTick(() => done(null, profile));
-	}));
 
 	// home page
 	router.get('/', async (req, res) => {
@@ -35,10 +16,7 @@ export default function() {
 	});
 
 	// login page
-	router.get('/login', (_req, _res, next) => {
-		// Forward the request to the passport middleware.
-		next();
-	}, passport.authenticate('discord'));
+	router.get('/login', passport.authenticate('discord'));
 
 	// Gets login details
 	router.get('/callback', passport.authenticate('discord', {
@@ -56,17 +34,23 @@ export default function() {
 	router.get('/settings', async (req, res) => {
 		// Make sure the person trying to connect is logged in
 		if (!req.isAuthenticated()) return res.redirect('/login');
-
-		// Create the user if one doesn't exist already
-		let user = await fetchUser({ id: (req.user as Profile).id });
-		if (!user) user = await createUser({ id: (req.user as Profile).id });
-		user = Object.assign(req.user, user);
+		console.log('settings', req.user)
 		const history = await fetchEndpointUsagesPerUser({ id: (req.user as Profile).id });
 		// Render the page
 		res.render('settings', {
-			user, history,
+			user: req.user, history,
 		});
 	});
+
+	router.patch('/settings', async (req, res) => {
+		// Updating/Changing the user's token
+		try {
+			await updateUser({id: (req.user as Profile).id, newToken: new TokenGenerator({ bitSize: 512, baseEncoding: TokenBase.BASE62 }).generate() })
+			res.json({ success: 'Success' })
+		} catch (err: any) {
+			res.json({ error: err.message })
+		}
+	})
 
 
 	return router;

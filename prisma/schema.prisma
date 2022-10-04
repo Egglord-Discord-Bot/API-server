@@ -20,7 +20,7 @@ model User {
 
 model EndpointUsage {
   id          Int   @id   @default(autoincrement())
-  user        User    @relation(fields: [userId], references: [id])
+  user        User    @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId      String
   endpoint    String
   createdAt   DateTime @default(now())

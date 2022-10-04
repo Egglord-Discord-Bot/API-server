@@ -10,6 +10,7 @@ import passport from 'passport';
 import session from 'express-session';
 
 (async () => {
+	(await import('./utils/passport')).default(passport)
 	// The web server
 	app.use(helmet({
 		contentSecurityPolicy: {
