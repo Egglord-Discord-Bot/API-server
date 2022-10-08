@@ -1,5 +1,6 @@
 // dependecies
 import express from 'express';
+import type { Request, Response, NextFunction } from 'express';
 import cors from 'cors';
 const app = express();
 import helmet from 'helmet';
@@ -10,9 +11,13 @@ import passport from 'passport';
 import session from 'express-session';
 import { Utils } from './utils/Utils';
 import { join } from 'path';
+import RateLimter from './helpers/RateLimiter';
+
 
 (async () => {
 	(await import('./utils/passport')).default(passport);
+	const RateLimiterHandler = new RateLimter();
+
 	// The web server
 	app.use(helmet({
 		contentSecurityPolicy: {
@@ -52,7 +57,12 @@ import { join } from 'path';
 		// Home page
 		.engine('html', (await import('ejs')).renderFile)
 		.set('view engine', 'ejs')
-		.set('views', './src/views');
+		.set('views', './src/views')
+		.use((req: Request, res: Response, next: NextFunction) => {
+			// Handle custom rate limits
+			if (req.originalUrl.startsWith('/api')) return RateLimiterHandler.checkRateLimit(req, res, next);
+			next();
+		});
 	// /files endpoint for showing files
 	// Get all routes
 	const endpoints = Utils.generateRoutes(join(__dirname, './', 'routes'));
