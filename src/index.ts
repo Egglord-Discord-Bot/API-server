@@ -8,9 +8,11 @@ import config from './config';
 import morgan from 'morgan';
 import passport from 'passport';
 import session from 'express-session';
+import { Utils } from './utils/Utils';
+import { join } from 'path';
 
 (async () => {
-	(await import('./utils/passport')).default(passport)
+	(await import('./utils/passport')).default(passport);
 	// The web server
 	app.use(helmet({
 		contentSecurityPolicy: {
@@ -50,13 +52,16 @@ import session from 'express-session';
 		// Home page
 		.engine('html', (await import('ejs')).renderFile)
 		.set('view engine', 'ejs')
-		.set('views', './src/views')
-		// /files endpoint for showing files
-		.use('/', (await import('./routes/index')).default())
-		.use('/image', (await import('./routes/image')).default())
-		.use('/games', (await import('./routes/games')).default())
-		.use('/misc', (await import('./routes/misc')).default())
-		.use('/info', (await import('./routes/info')).default())
-		.use('/nsfw', (await import('./routes/nsfw')).default())
-		.listen(config.port, () => console.log(`Started on PORT: ${config.port}`));
+		.set('views', './src/views');
+	// /files endpoint for showing files
+	// Get all routes
+	const endpoints = Utils.generateRoutes(join(__dirname, './', 'routes'));
+
+	for (const endpoint of endpoints) {
+		console.log(`Loading: ${endpoint.route} endpoint.`, 'log');
+		app.use(endpoint.route, (await import(endpoint.path)).default());
+	}
+
+	// Run the server on port
+	app.listen(config.port, () => console.log(`Started on PORT: ${config.port}`));
 })();

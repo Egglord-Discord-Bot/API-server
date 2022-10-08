@@ -1,14 +1,10 @@
 import client from './client';
 
-type userID = {
-	id: string
-}
-
 // Fetch a user
-export async function fetchUser(data: userID) {
+export async function fetchUser(id: string) {
 	return client.user.findUnique({
 		where: {
-			id: data.id,
+			id: id,
 		},
 	});
 }
@@ -28,10 +24,10 @@ export async function createUser(data: createUser) {
 }
 
 // Delete a user
-export async function deleteServer(data: userID) {
+export async function deleteServer(id: string) {
 	return client.user.delete({
 		where: {
-			id: data.id,
+			id: id,
 		},
 	});
 }
@@ -53,14 +49,11 @@ export async function updateUser(data: updateUser) {
 	});
 }
 
-type fetchUserByToken = {
-	token: string
-}
 
-export async function fetchUserByToken(data: fetchUserByToken) {
+export async function fetchUserByToken(token: string) {
 	return client.user.findUnique({
 		where: {
-			token: data.token,
+			token: token,
 		},
 	});
 }

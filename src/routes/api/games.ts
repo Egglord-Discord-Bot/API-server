@@ -1,11 +1,12 @@
 import { Router } from 'express';
 const router = Router();
 import axios from 'axios';
+import type { AxiosError } from 'axios';
 import R6API from 'r6api.js';
 import { status } from 'minecraft-server-util';
-import config from '../config';
+import config from '../../config';
 const { findByUsername, getProgression, getRanks, getStats } = new R6API({ email: config.rainbow.email, password: config.rainbow.password });
-import { chechAuth } from '../utils/middleware';
+import { chechAuth } from '../../utils/middleware';
 
 export default function() {
 	router.get('/fortnite', chechAuth, async (req, res) => {
@@ -15,16 +16,14 @@ export default function() {
 				headers: { 'TRN-Api-Key': config.fortniteAPI },
 			});
 			res.json(data);
-		} catch (err: any) {
+		} catch (err: unknown | Error | AxiosError) {
 			console.log(err);
-			res.json({ error: err.message });
 		}
 	});
 
 	router.get('/mc', chechAuth, async (req, res) => {
-		const { IP } = req.query;
 		try {
-			const response = await status(IP as string);
+			const response = await status(req.query.IP as string);
 			res.json(response);
 		} catch (err: any) {
 			console.log(err);
@@ -41,11 +40,9 @@ export default function() {
 		let foundPlayer;
 		try {
 			foundPlayer = await findByUsername(platform as Platform, player as string);
-			console.log();
 		} catch (err: any) {
 			return res.json({ error: err.message });
 		}
-		console.log(foundPlayer);
 		// Makes sure that user actually exist
 		if (foundPlayer.length == 0) res.json({ error: 'No player found.' });
 

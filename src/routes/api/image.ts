@@ -1,6 +1,6 @@
 import { Router } from 'express';
 const router = Router();
-import { chechAuth, checkImage } from '../utils/middleware';
+import { chechAuth, checkImage } from '../../utils/middleware';
 import canvacord from 'canvacord';
 
 

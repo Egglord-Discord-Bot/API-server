@@ -1,10 +1,10 @@
 import { Router } from 'express';
 const router = Router();
-import Puppeteer from 'puppeteer';
+// import Puppeteer from 'puppeteer';
 import { createCanvas } from 'canvas';
 import Tesseract from 'tesseract.js';
 import axios from 'axios';
-import { chechAuth } from '../utils/middleware';
+import { chechAuth } from '../../utils/middleware';
 
 export default function() {
 	router.get('/advice', chechAuth, async (_req, res) => {
@@ -26,6 +26,7 @@ export default function() {
 		}
 	});
 
+	/*
 	router.get('/screenshot', chechAuth, async (req, res) => {
 		const { url } = req.query;
 		try {
@@ -43,6 +44,7 @@ export default function() {
 			res.json({ error: err.message });
 		}
 	});
+	*/
 
 	router.get('/colour', chechAuth, (req, res) => {
 		if (!req.query.colour) return res.json({ error: 'Missing colour query' });
