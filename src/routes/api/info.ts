@@ -1,13 +1,12 @@
 import { Router } from 'express';
 const router = Router();
 import axios from 'axios';
-import { chechAuth } from '../../utils/middleware';
 import { fetchSubreddit } from '../../utils/index';
 
-const covidCache = new Map();
-
 export default function() {
-	router.get('/covid', chechAuth, async (req, res) => {
+	const covidCache = new Map();
+
+	router.get('/covid', async (req, res) => {
 		// Check cache first
 		let data = {};
 		const country = req.query.country as string;
@@ -28,7 +27,7 @@ export default function() {
 		res.json(data);
 	});
 
-	router.get('/reddit', chechAuth, async (req, res) => {
+	router.get('/reddit', async (req, res) => {
 		if (!req.query.sub) return res.json({ error: 'Error, specify a subreddit' });
 		const data = await fetchSubreddit(req.query.sub as string);
 		return res.json(data);

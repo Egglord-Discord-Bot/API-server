@@ -1,7 +1,14 @@
 import type { Request, Response, NextFunction } from 'express';
 import type { Profile } from 'passport-discord';
 import { fetchUserByToken } from '../database/User';
+type RouteLimitPath = {
+  [key: string]: number[]
+}
 
+import RouteLimitPath from '../assets/ratelimits.json';
+const endpointRatelimits: RouteLimitPath = RouteLimitPath;
+
+let lastChecked = new Date().getTime();
 type endpointUsage = {
   name: string
   lastAccess: Array<Date>
@@ -63,13 +70,12 @@ export default class RateLimit {
 		}
 	}
 
-
 	checkEndpointUsage(userID: string, endpoint: string) {
 		if (this.userRatelimit.get(userID)) {
 			// User has been cached
 			if (this.userRatelimit.get(userID)?.endpoints.find(e => e.name == endpoint)) {
 				const end = this.userRatelimit.get(userID)?.endpoints.find(e => e.name == endpoint);
-				return (end!.lastAccess.sort((a, b) => a.getTime() - b.getTime())[0].getTime() >= new Date().getTime() - 5000);
+				return (end!.lastAccess.sort((a, b) => a.getTime() - b.getTime())[0].getTime() >= new Date().getTime() - endpointRatelimits[endpoint][2] ?? 5000);
 			}
 		}
 
@@ -93,9 +99,9 @@ export default class RateLimit {
 	_sendRateLimitMessage(res: Response, type: RateLimitType, userID?: string, endpoint?: string) {
 		if (userID) {
 			res.set({
-				'X-RateLimit-Limit': `${type.global ? 100 : 5}`,
-				'X-RateLimit-Remaining': `${type.global ? 0 : 5 - (this.userRatelimit.get(userID as string)?.endpoints.find(e => e.name == endpoint)?.lastAccess.length ?? 0)}`,
-				'X-RateLimit-Reset': `${new Date()}`,
+				'X-RateLimit-Limit': `${type.global ? 100 : endpointRatelimits[endpoint as string][0]}`,
+				'X-RateLimit-Remaining': `${type.global ? 0 : (endpointRatelimits[endpoint as string][0] ?? 5) - (this.userRatelimit.get(userID as string)?.endpoints.find(e => e.name == endpoint)?.lastAccess.length ?? 0)}`,
+				'X-RateLimit-Reset': `${new Date().getTime() + (type.global ? 0 : endpointRatelimits[endpoint as string][1])}`,
 			})
 				.status(429)
 				.json({ error: `You are being ratelimited ${type.global ? 'globally' : 'on this endpoint.'}, Please try again later!` });
@@ -110,10 +116,11 @@ export default class RateLimit {
 		setInterval(() => {
 			// Loop through each user
 			for (const endpointData of this.userRatelimit.values()) {
-				for (const { lastAccess } of endpointData.endpoints) {
-					lastAccess.filter(i => i.getTime() <= new Date().getTime() - 5000);
+				for (const { lastAccess, name } of endpointData.endpoints) {
+					lastAccess.filter(i => i.getTime() <= new Date().getTime() - endpointRatelimits[name][1]);
 				}
 			}
+			lastChecked = new Date().getTime();
 		}, 1000);
 	}
 }

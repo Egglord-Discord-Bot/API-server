@@ -4,11 +4,10 @@ import axios from 'axios';
 import * as tf from '@tensorflow/tfjs-node';
 import * as nsfwjs from 'nsfwjs';
 import type { Tensor3D } from '@tensorflow/tfjs-node';
-import { chechAuth } from '../../utils/middleware';
 
 export default function() {
 
-	router.get('/image', chechAuth, async (req, res) => {
+	router.get('/image', async (req, res) => {
 		try {
 			const { data } = await axios.get(`https://nekobot.xyz/api/image?type=${req.query.type}`);
 			res.json({ success: data.message });
@@ -17,7 +16,7 @@ export default function() {
 		}
 	});
 
-	router.get('/check', chechAuth, async (req, res) => {
+	router.get('/check', async (req, res) => {
 		if (!req.query?.url) return res.json({ error: 'Error' });
 
 		try {

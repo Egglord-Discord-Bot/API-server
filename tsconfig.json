@@ -27,6 +27,7 @@
      "allowSyntheticDefaultImports": true,
      "experimentalDecorators": true,
      "importsNotUsedAsValues": "error",
+     "resolveJsonModule": true
    },
    "exclude": ["node_modules"],
 }
