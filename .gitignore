@@ -1,5 +1,4 @@
 node_modules
-config.ts
 src/assets/nsfw
 *.traineddata
 /dist

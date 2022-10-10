@@ -1,5 +1,4 @@
 import { Strategy } from 'passport-discord';
-import config from '../config';
 import type { Profile } from 'passport-discord';
 import { fetchUser, createUser } from '../database/User';
 import { TokenGenerator, TokenBase } from 'ts-token-generator';
@@ -8,8 +7,8 @@ import type { VerifyCallback } from 'passport-oauth2';
 export default function(passport: any) {
 	// Discord Oauth2 data
 	passport.use(new Strategy({
-		clientID: config.bot.id,
-		clientSecret:config.bot.clientSecret,
+		clientID: process.env.discordBotId as string,
+		clientSecret: process.env.discordBotClientSecret as string,
 		callbackURL: 'http://localhost:4500/callback',
 		scope: ['identify'],
 	}, async (_accessToken, _refreshToken, profile, done) => {

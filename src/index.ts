@@ -5,14 +5,14 @@ import cors from 'cors';
 const app = express();
 import helmet from 'helmet';
 import compression from 'compression';
-import config from './config';
 import morgan from 'morgan';
 import passport from 'passport';
 import session from 'express-session';
 import { Utils } from './utils/Utils';
 import { join } from 'path';
 import RateLimter from './helpers/RateLimiter';
-
+import * as dotenv from 'dotenv';
+dotenv.config();
 
 (async () => {
 	(await import('./utils/passport')).default(passport);
@@ -40,7 +40,7 @@ import RateLimter from './helpers/RateLimiter';
 		}))
 		.use(compression())
 		.use(session({
-			secret: config.sessionSecret,
+			secret: process.env.sessionSecret as string,
 			resave: false,
 			saveUninitialized: false,
 		}))
@@ -73,5 +73,5 @@ import RateLimter from './helpers/RateLimiter';
 	}
 
 	// Run the server on port
-	app.listen(config.port, () => console.log(`Started on PORT: ${config.port}`));
+	app.listen(process.env.port, () => console.log(`Started on PORT: ${process.env.port}`));
 })();
