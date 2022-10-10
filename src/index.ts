@@ -63,15 +63,16 @@ dotenv.config();
 			if (req.originalUrl.startsWith('/api')) return RateLimiterHandler.checkRateLimit(req, res, next);
 			next();
 		});
-	// /files endpoint for showing files
-	// Get all routes
-	const endpoints = Utils.generateRoutes(join(__dirname, './', 'routes'));
 
+	// Dynamically load all endpoints
+	const endpoints = Utils.generateRoutes(join(__dirname, './', 'routes')).filter(e => e.route !== '/index');
 	for (const endpoint of endpoints) {
 		console.log(`Loading: ${endpoint.route} endpoint.`, 'log');
 		app.use(endpoint.route, (await import(endpoint.path)).default());
 	}
 
 	// Run the server on port
-	app.listen(process.env.port, () => console.log(`Started on PORT: ${process.env.port}`));
+	app
+		.use('/', (await import('./routes/index')).default())
+		.listen(process.env.port, () => console.log(`Started on PORT: ${process.env.port}`));
 })();
