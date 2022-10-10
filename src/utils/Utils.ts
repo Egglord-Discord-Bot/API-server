@@ -31,6 +31,9 @@ export class Utils {
 		}
 		return files;
 	}
+	public static randomInteger(num1: number, num2 = 1) {
+		return Math.floor(Math.random() * num1) + num2;
+	}
 }
 
 interface FileOptions {
