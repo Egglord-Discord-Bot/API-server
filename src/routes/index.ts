@@ -1,10 +1,11 @@
 import { Router } from 'express';
 const router = Router();
 import passport from 'passport';
-import { fetchEndpointUsagesPerUser } from '../database/endpointUsage';
+import { fetchEndpointUsagesPerUser } from '../database/userHistory';
 import { updateUser } from '../database/User';
 import type { Profile } from 'passport-discord';
 import { TokenGenerator, TokenBase } from 'ts-token-generator';
+import { fetchEndpointData } from '../database/endpointData';
 
 export default function() {
 
@@ -50,6 +51,14 @@ export default function() {
 		} catch (err: any) {
 			res.json({ error: err.message });
 		}
+	});
+
+	router.get('/docs', async (req, res) => {
+		const endpoints = await fetchEndpointData();
+		res.render('endpoints', {
+			user: req.isAuthenticated() ? req.user : null,
+			endpoints,
+		});
 	});
 
 	return router;

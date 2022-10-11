@@ -51,6 +51,7 @@ dotenv.config();
 		.use(passport.initialize())
 		.use(passport.session())
 		.use(morgan(':method :url :status :res[content-length] - :response-time ms'))
+		.use(express.static('./src/assets'))
 		// for web-scalpers
 		.get('/robots.txt', (_req, res) => {
 			res
