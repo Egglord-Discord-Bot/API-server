@@ -2,7 +2,7 @@ import axios from 'axios';
 import CacheHandler from './CacheHandler';
 export type redditType = 'hot' | 'new';
 
-export default class Reddit extends CacheHandler {
+export default class Covid extends CacheHandler {
 
 	async fetchData(country: string) {
 		if (this.data.get(country ?? '/all')) {
@@ -19,6 +19,7 @@ export default class Reddit extends CacheHandler {
 				this.data.set('/all', data);
 			}
 			this._addData({ id: country, data: data });
+			return data;
 		}
 	}
 }

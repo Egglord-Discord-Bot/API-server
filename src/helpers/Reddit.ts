@@ -4,14 +4,12 @@ import CacheHandler from './CacheHandler';
 import { Utils } from '../utils/Utils';
 export type redditType = 'hot' | 'new';
 
-
 type redditChild = {
 	data: object
 }
 type redditData = {
-	children: Array<redditChild>
+	children: redditChild[]
 }
-
 
 export default class Reddit extends CacheHandler {
 	async fetchSubreddit(subreddit: string, type: redditType = 'hot') {
@@ -20,7 +18,6 @@ export default class Reddit extends CacheHandler {
 			if (this.data.get(`${subreddit}_${type}`)) {
 				console.log('Hit cache');
 				const data = this.data.get(`${subreddit}_${type}`) as redditData;
-				console.log(data);
 				return new RedditPost(data.children[Utils.randomInteger(21)].data);
 			} else {
 				console.log('Didn\'t hit cache');
