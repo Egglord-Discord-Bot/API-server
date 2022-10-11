@@ -15,7 +15,10 @@ import * as dotenv from 'dotenv';
 dotenv.config();
 
 (async () => {
+	// Load passport and endpoint data
 	(await import('./utils/passport')).default(passport);
+	await (await import('./helpers/EndpointData')).default();
+
 	const RateLimiterHandler = new RateLimter();
 
 	// The web server
@@ -63,7 +66,6 @@ dotenv.config();
 			if (req.originalUrl.startsWith('/api')) return RateLimiterHandler.checkRateLimit(req, res, next);
 			next();
 		});
-
 	// Dynamically load all endpoints
 	const endpoints = Utils.generateRoutes(join(__dirname, './', 'routes')).filter(e => e.route !== '/index');
 	for (const endpoint of endpoints) {
