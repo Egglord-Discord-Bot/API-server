@@ -13,15 +13,22 @@ datasource db {
 model User {
   id          String    @id
   token       String    @unique
-  endpoints   EndpointUsage[]
+  history     UserHistory[]
   isBlocked   Boolean   @default(false)
   isPremium   Boolean   @default(false)
 }
 
-model EndpointUsage {
-  id          Int   @id   @default(autoincrement())
+model UserHistory {
+  id          Int     @id   @default(autoincrement())
   user        User    @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId      String
   endpoint    String
   createdAt   DateTime @default(now())
+}
+
+model Endpoint {
+  name          String    @id
+  cooldown      Int       @default(2000)
+  maxRequests   Int       @default(5)
+  maxRequestper Int       @default (60000)
 }

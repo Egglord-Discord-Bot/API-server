@@ -1,5 +1,5 @@
 import { PrismaClient } from '@prisma/client';
-import { logger } from '../utils/logger';
+import { Logger } from '../utils/Logger';
 
 
 const client = new PrismaClient({ errorFormat: 'pretty',
@@ -10,25 +10,25 @@ const client = new PrismaClient({ errorFormat: 'pretty',
 	] });
 
 client.$use(async (params, next) => {
-	const startTime = Date.now();
-	const result = await next(params);
-	const timeTook = Date.now() - startTime;
+	const startTime = Date.now(),
+		result = await next(params),
+		timeTook = Date.now() - startTime;
 
-	logger(`Query ${params.model}.${params.action} took ${timeTook}ms`, 'debug');
+	Logger.debug(`Query ${params.model}.${params.action} took ${timeTook}ms`);
 
 	return result;
 });
 
 client.$on('info', (data) => {
-	logger(data.message, 'log');
+	Logger.log(data.message, 'log');
 });
 
 client.$on('warn', (data) => {
-	logger(data.message, 'warn');
+	Logger.warn(data.message);
 });
 
 client.$on('error', (data) => {
-	logger(data.message, 'error');
+	Logger.error(data.message);
 });
 
 export default client;

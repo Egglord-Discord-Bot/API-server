@@ -5,10 +5,10 @@ import cors from 'cors';
 const app = express();
 import helmet from 'helmet';
 import compression from 'compression';
-import morgan from 'morgan';
 import passport from 'passport';
 import session from 'express-session';
 import { Utils } from './utils/Utils';
+import { Logger } from './utils/Logger';
 import { join } from 'path';
 import RateLimter from './helpers/RateLimiter';
 import * as dotenv from 'dotenv';
@@ -50,7 +50,10 @@ dotenv.config();
 		// Initializes passport and session.
 		.use(passport.initialize())
 		.use(passport.session())
-		.use(morgan(':method :url :status :res[content-length] - :response-time ms'))
+		.use((req, res, next) => {
+			if (req.originalUrl !== '/favicon.ico') Logger.connection(req, res);
+			next();
+		})
 		.use(express.static('./src/assets'))
 		// for web-scalpers
 		.get('/robots.txt', (_req, res) => {
@@ -77,5 +80,5 @@ dotenv.config();
 	// Run the server on port
 	app
 		.use('/', (await import('./routes/index')).default())
-		.listen(process.env.port, () => console.log(`Started on PORT: ${process.env.port}`));
+		.listen(process.env.port, () => Logger.log(`Started on PORT: ${process.env.port}`));
 })();
