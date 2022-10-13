@@ -1,5 +1,5 @@
 import client from './client';
-import type { userID } from '../utils/types'
+import type { userID } from '../utils/types';
 
 /**
 	* Create a record of user accessing the endpoint
@@ -7,8 +7,8 @@ import type { userID } from '../utils/types'
 	* @param {string} data.endpoint The endpoint the user is trying to access
 	* @returns Record of user used the endpoint
 */
-export async function createEndpoint({id, endpoint}: userID) {
-	return client.endpointUsage.create({
+export async function createEndpoint({ id, endpoint }: userID) {
+	return client.userHistory.create({
 		data: {
 			endpoint: endpoint,
 			user: {
@@ -26,8 +26,8 @@ export async function createEndpoint({id, endpoint}: userID) {
 	* @param {string} data.endpoint The endpoint
 	* @returns Record of user used the endpoint
 */
-export async function fetchEndpointUsagePerUser({id, endpoint}: userID) {
-	return client.endpointUsage.findMany({
+export async function fetchEndpointUsagePerUser({ id, endpoint }: userID) {
+	return client.userHistory.findMany({
 		where: {
 			endpoint: endpoint,
 			userId: id,
@@ -37,11 +37,11 @@ export async function fetchEndpointUsagePerUser({id, endpoint}: userID) {
 
 /**
 	* Check if an image was sent with the request
-	* @param data The endpoint the user is trying to access
+	* @param id The endpoint the user is trying to access
 	* @returns Whether or not they are being ratelimited
 */
 export async function fetchEndpointUsagesPerUser(id: string) {
-	return client.endpointUsage.findMany({
+	return client.userHistory.findMany({
 		where: {
 			userId: id,
 		},
