@@ -1,14 +1,9 @@
 import type { Request, Response, NextFunction } from 'express';
 import type { Profile } from 'passport-discord';
 import { fetchUserByToken } from '../database/User';
-type RouteLimitPath = {
-  [key: string]: number[]
-}
+import { fetchEndpointData } from '../database/endpointData';
+import { createEndpoint } from '../database/userHistory';
 
-import RouteLimitPath from '../assets/ratelimits.json';
-const endpointRatelimits: RouteLimitPath = RouteLimitPath;
-
-let lastChecked = new Date().getTime();
 type endpointUsage = {
   name: string
   lastAccess: Array<Date>
@@ -19,6 +14,12 @@ type RateLimitType = {
 	isLoggedIn?: boolean
 	isEndpoint?: boolean
 }
+type endpointDataFromDB = {
+  name: string
+  cooldown: number
+  maxRequests: number
+  maxRequestper: number
+}
 
 interface endpointData {
   endpoints: endpointUsage[]
@@ -26,10 +27,15 @@ interface endpointData {
 
 export default class RateLimit {
 	userRatelimit: Map<string, endpointData>;
+	lastChecked: number;
+	endpointData: Array<endpointDataFromDB>;
 	constructor() {
+		this.endpointData = [];
 		this.userRatelimit = new Map();
+		this.lastChecked = new Date().getTime();
 
 		this._sweep();
+		this._fetchEndpointData();
 	}
 
 	async checkRateLimit(req: Request, res: Response, next: NextFunction) {
@@ -42,8 +48,8 @@ export default class RateLimit {
 		if (isGloballyRateLimited) return this._sendRateLimitMessage(res, { global: true }, userID);
 
 		// Now check if user is rate limited by endpoint
-		const isRateLimitedByEndpoint = this.checkEndpointUsage(userID, req.baseUrl.split('?')[0]);
-		if (isRateLimitedByEndpoint) return this._sendRateLimitMessage(res, { global: false }, userID);
+		const isRateLimitedByEndpoint = this.checkEndpointUsage(userID, req.originalUrl.split('?')[0]);
+		if (isRateLimitedByEndpoint.isRateLimted) return this._sendRateLimitMessage(res, { global: false, isEndpoint: isRateLimitedByEndpoint.reason == 2 }, userID);
 
 		// User is logged in and not ratelimited at all
 		next();
@@ -64,6 +70,7 @@ export default class RateLimit {
 	_checkGlobalCooldown(userID: string) {
 		if (this.userRatelimit.get(userID)) {
 			const data = this.userRatelimit.get(userID)?.endpoints.reduce((a, b) => b.lastAccess.length + a, 0) ?? 0;
+			// console.log('_checkGlobalCooldown', data);
 			return (data >= 100);
 		} else {
 			return false;
@@ -71,16 +78,24 @@ export default class RateLimit {
 	}
 
 	checkEndpointUsage(userID: string, endpoint: string) {
+		let isRateLimted = { isRateLimted: false, reason: 0 };
 		if (this.userRatelimit.get(userID)) {
 			// User has been cached
 			if (this.userRatelimit.get(userID)?.endpoints.find(e => e.name == endpoint)) {
 				const end = this.userRatelimit.get(userID)?.endpoints.find(e => e.name == endpoint);
-				return (end!.lastAccess.sort((a, b) => a.getTime() - b.getTime())[0].getTime() >= new Date().getTime() - endpointRatelimits[endpoint][2] ?? 5000);
+				// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+				if (end!.lastAccess.length >= this.endpointData.find(e => e.name == endpoint)!.maxRequests) return { isRateLimted: true, reason: 1 };
+
+				isRateLimted = {
+					// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+					isRateLimted: end!.lastAccess.sort((a, b) => b.getTime() - a.getTime())[0].getTime() >= new Date().getTime() - (this.endpointData.find(e => e.name == endpoint)?.cooldown ?? 2000),
+					reason: 2 };
 			}
 		}
 
-		this.addEndpoint(userID, endpoint);
-		return false;
+		// Only save to user's history if not ratelimited
+		if (!isRateLimted.isRateLimted) this.addEndpoint(userID, endpoint);
+		return isRateLimted;
 	}
 
 	addEndpoint(userId: string, endpoint: string) {
@@ -94,17 +109,25 @@ export default class RateLimit {
 		} else {
 			this.userRatelimit.set(userId, { endpoints: [{ name: endpoint, lastAccess: [new Date()] }] });
 		}
+
+		// Save to users' history
+		createEndpoint({ id: userId, endpoint: endpoint });
 	}
 
 	_sendRateLimitMessage(res: Response, type: RateLimitType, userID?: string, endpoint?: string) {
 		if (userID) {
+			console.log(type);
+			const rateLimitPointsRemaining = `${type.global || type.isEndpoint ?
+				0
+				: (this.endpointData.find(e => e.name == endpoint)?.maxRequests ?? 5) - (this.userRatelimit.get(userID as string)?.endpoints.find(e => e.name == endpoint)?.lastAccess.length ?? 0)}`;
+
 			res.set({
-				'X-RateLimit-Limit': `${type.global ? 100 : endpointRatelimits[endpoint as string][0]}`,
-				'X-RateLimit-Remaining': `${type.global ? 0 : (endpointRatelimits[endpoint as string][0] ?? 5) - (this.userRatelimit.get(userID as string)?.endpoints.find(e => e.name == endpoint)?.lastAccess.length ?? 0)}`,
-				'X-RateLimit-Reset': `${new Date().getTime() + (type.global ? 0 : endpointRatelimits[endpoint as string][1])}`,
+				'X-RateLimit-Limit': `${type.global ? 100 : this.endpointData.find(e => e.name == endpoint)?.maxRequests ?? 5}`,
+				'X-RateLimit-Remaining': rateLimitPointsRemaining,
+				'X-RateLimit-Reset': `${new Date().getTime() + (type.global ? 0 : this.endpointData.find(e => e.name == endpoint)?.cooldown ?? 60000)}`,
 			})
 				.status(429)
-				.json({ error: `You are being ratelimited ${type.global ? 'globally' : 'on this endpoint.'}, Please try again later!` });
+				.json({ error: `You are being ratelimited ${type.global ? 'globally' : 'on this endpoint'}, Please try again later!` });
 		} else {
 			res
 				.status(403)
@@ -112,15 +135,23 @@ export default class RateLimit {
 		}
 	}
 
+	async _fetchEndpointData() {
+		this.endpointData = await fetchEndpointData();
+		return this.endpointData;
+	}
+
 	_sweep() {
 		setInterval(() => {
 			// Loop through each user
-			for (const endpointData of this.userRatelimit.values()) {
+			for (const [userID, endpointData] of this.userRatelimit.entries()) {
 				for (const { lastAccess, name } of endpointData.endpoints) {
-					lastAccess.filter(i => i.getTime() <= new Date().getTime() - endpointRatelimits[name][1]);
+					// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+					const newlastAccess = lastAccess.filter(i => i.getTime() >= (new Date().getTime() - this.endpointData.find(e => e.name == name)!.maxRequestper));
+					// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+					this.userRatelimit.get(userID)!.endpoints.find(e => e.name == name)!.lastAccess = newlastAccess;
 				}
 			}
-			lastChecked = new Date().getTime();
+			this.lastChecked = new Date().getTime();
 		}, 1000);
 	}
 }
