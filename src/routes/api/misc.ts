@@ -1,7 +1,7 @@
 import { Router } from 'express';
 const router = Router();
 // import Puppeteer from 'puppeteer';
-import { createCanvas } from 'canvas';
+import { createCanvas } from '@napi-rs/canvas';
 import Tesseract from 'tesseract.js';
 import axios from 'axios';
 
