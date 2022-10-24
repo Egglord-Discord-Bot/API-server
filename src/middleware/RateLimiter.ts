@@ -145,8 +145,7 @@ export default class RateLimit {
 			// Loop through each user
 			for (const [userID, endpointData] of this.userRatelimit.entries()) {
 				for (const { lastAccess, name } of endpointData.endpoints) {
-					// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-					const newlastAccess = lastAccess.filter(i => i.getTime() >= (new Date().getTime() - this.endpointData.find(e => e.name == name)!.maxRequestper));
+					const newlastAccess = lastAccess.filter(i => i.getTime() >= new Date().getTime() - (this.endpointData.find(e => e.name == name)?.maxRequestper ?? 60000));
 					// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 					this.userRatelimit.get(userID)!.endpoints.find(e => e.name == name)!.lastAccess = newlastAccess;
 				}

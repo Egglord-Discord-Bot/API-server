@@ -10,13 +10,13 @@ import session from 'express-session';
 import { Utils } from './utils/Utils';
 import { Logger } from './utils/Logger';
 import { join } from 'path';
-import RateLimter from './helpers/RateLimiter';
+import RateLimter from './middleware/RateLimiter';
 import * as dotenv from 'dotenv';
 dotenv.config();
 
 (async () => {
 	// Load passport and endpoint data
-	(await import('./utils/passport')).default(passport);
+	(await import('./middleware/passport')).default(passport);
 	await (await import('./helpers/EndpointData')).default();
 
 	const RateLimiterHandler = new RateLimter();
