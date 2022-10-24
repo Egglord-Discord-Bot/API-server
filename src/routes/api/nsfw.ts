@@ -8,6 +8,8 @@ import type { Tensor3D } from '@tensorflow/tfjs-node';
 export default function() {
 
 	router.get('/image', async (req, res) => {
+		if (!req.query.type) return res.json({ error: 'Stuff' });
+
 		try {
 			const { data } = await axios.get(`https://nekobot.xyz/api/image?type=${req.query.type}`);
 			res.json({ success: data.message });
@@ -27,7 +29,11 @@ export default function() {
 			const data = await model.classify(decodedImage as Tensor3D);
 			decodedImage.dispose();
 
-			res.json({ success: { url: req.query.url, isNSFW: (['Porn', 'Hentai', 'Sexy'].includes(data[0].className)) } });
+			res.json({ success: {
+				url: req.query.url,
+				isNSFW: (['Porn', 'Hentai', 'Sexy'].includes(data[0].className)),
+				probabilities: data },
+			});
 		} catch (err: any) {
 			console.log(err);
 			res.json({ error: err.message });
