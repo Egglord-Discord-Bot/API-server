@@ -1,4 +1,6 @@
 import type { Request, Response, NextFunction } from 'express';
+import type { User } from '@prisma/client';
+import { fetchUser } from '../database/User';
 
 /**
 	* Check if an image was sent with the request
@@ -11,4 +13,16 @@ export function checkImage(req: Request, res: Response, next: NextFunction) {
 	const image = req.query.image;
 	if (!image) return res.json({ error: 'Missing image query' });
 	next();
+}
+
+export async function checkAdmin(req: Request, res: Response, next: NextFunction) {
+	// Make sure user is logged in and isAdmin
+	if (req.isAuthenticated()) {
+		const user = await fetchUser((req.user as User).id);
+		if (user?.isAdmin) return next();
+	}
+
+	return res
+		.status(403)
+		.json({ error: 'You are not authorised to access this endpoint' });
 }

@@ -16,6 +16,8 @@ model User {
   history     UserHistory[]
   isBlocked   Boolean   @default(false)
   isPremium   Boolean   @default(false)
+  isAdmin     Boolean   @default(false)
+  createdAt   DateTime  @default(now()) @map("created_at")
 }
 
 model UserHistory {
@@ -30,5 +32,6 @@ model Endpoint {
   name          String    @id
   cooldown      Int       @default(2000)
   maxRequests   Int       @default(5)
-  maxRequestper Int       @default (60000)
+  maxRequestper Int       @default(60000)
+  isBlocked     Boolean   @default(false)
 }

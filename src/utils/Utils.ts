@@ -75,7 +75,7 @@ export class Utils {
 			if (req.socket && CONSTANTS.ipv4Regex.test(req.socket.remoteAddress ?? '')) return req.socket.remoteAddress;
 		}
 
-		return undefined;
+		return req.ip;
 	}
 }
 

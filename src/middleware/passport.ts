@@ -1,10 +1,10 @@
 import { Strategy } from 'passport-discord';
-import type { Profile } from 'passport-discord';
 import { fetchUser, createUser } from '../database/User';
 import { TokenGenerator, TokenBase } from 'ts-token-generator';
-import type { VerifyCallback } from 'passport-oauth2';
+import type { PassportStatic } from 'passport';
+import type { Profile } from 'passport-discord';
 
-export default function(passport: any) {
+export default function(passport: PassportStatic) {
 	// Discord Oauth2 data
 	passport.use(new Strategy({
 		clientID: process.env.discordBotId as string,
@@ -26,12 +26,12 @@ export default function(passport: any) {
 	}));
 
 	// serialize the user (Log them in)
-	passport.serializeUser((user: Profile, done: VerifyCallback) => {
+	passport.serializeUser((user, done) => {
 		done(null, user);
 	});
 
 	// deserialize the user (Log them out)
-	passport.deserializeUser((obj: Profile, done: VerifyCallback) => {
-		done(null, obj);
+	passport.deserializeUser((user: Profile, done) => {
+		done(null, user);
 	});
 }

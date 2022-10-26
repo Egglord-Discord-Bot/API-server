@@ -9,6 +9,10 @@ export async function fetchUser(id: string) {
 	});
 }
 
+export async function fetchUsers() {
+	return client.user.findMany();
+}
+
 type createUser = {
 	id: string
 	token: string
@@ -24,7 +28,7 @@ export async function createUser(data: createUser) {
 }
 
 // Delete a user
-export async function deleteServer(id: string) {
+export async function deleteUser(id: string) {
 	return client.user.delete({
 		where: {
 			id: id,
@@ -34,7 +38,10 @@ export async function deleteServer(id: string) {
 
 type updateUser = {
 	id: string
-	newToken: string
+	newToken?: string
+	isAdmin?: boolean
+	isBlocked?: boolean
+	isPremium?: boolean
 }
 
 // Update a user
@@ -44,7 +51,10 @@ export async function updateUser(data: updateUser) {
 			id: data.id,
 		},
 		data: {
-			token: data.newToken,
+			token: data.newToken != null ? data.newToken : undefined,
+			isAdmin: data.isAdmin != null ? data.isAdmin : undefined,
+			isBlocked: data.isBlocked != null ? data.isBlocked : undefined,
+			isPremium: data.isPremium != null ? data.isPremium : undefined,
 		},
 	});
 }
