@@ -22,7 +22,5 @@ export async function checkAdmin(req: Request, res: Response, next: NextFunction
 		if (user?.isAdmin) return next();
 	}
 
-	return res
-		.status(403)
-		.json({ error: 'You are not authorised to access this endpoint' });
+	return res.redirect('/login');
 }

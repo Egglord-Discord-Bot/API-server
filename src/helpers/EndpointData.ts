@@ -14,7 +14,7 @@ export default async function EndpointData() {
 		}).flat();
 
 	const endpointsBasedOnDB = await fetchEndpointData();
-	const endpointsNotOnDB = files.filter(e => !endpointsBasedOnDB.map(end => end.name).includes(e));
+	const endpointsNotOnDB = files.filter(e => !endpointsBasedOnDB.map(end => end.name).includes(e) && e.startsWith('/api/'));
 
 	console.log(`Found ${endpointsNotOnDB.length} new endpoints`);
 	for (const newEndpoint of endpointsNotOnDB) {
