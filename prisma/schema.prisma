@@ -11,13 +11,17 @@ datasource db {
 }
 
 model User {
-  id          String    @id
-  token       String    @unique
-  history     UserHistory[]
-  isBlocked   Boolean   @default(false)
-  isPremium   Boolean   @default(false)
-  isAdmin     Boolean   @default(false)
-  createdAt   DateTime  @default(now()) @map("created_at")
+  id            String        @id
+  token         String        @unique
+  avatar        String?    
+  discriminator String?
+  locale        String?
+  email         String?
+  history       UserHistory[]
+  isBlocked     Boolean       @default(false)
+  isPremium     Boolean       @default(false)
+  isAdmin       Boolean       @default(false)
+  createdAt     DateTime      @default(now()) @map("created_at")
 }
 
 model UserHistory {

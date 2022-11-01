@@ -18,7 +18,7 @@ export default function(passport: PassportStatic) {
 			if (!user) {
 				user = await createUser({ id: profile.id, token: new TokenGenerator({ bitSize: 512, baseEncoding: TokenBase.BASE62 }).generate() });
 			}
-			profile = Object.assign(profile, { token: user.token });
+			profile = Object.assign(profile, user);
 			return done(null, profile);
 		} catch (err) {
 			return done(null, false);

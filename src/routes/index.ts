@@ -35,9 +35,9 @@ export default function() {
 	router.get('/settings', async (req, res) => {
 		// Make sure the person trying to connect is logged in
 		if (!req.isAuthenticated()) return res.redirect('/login');
-		console.log('settings', req.user);
-		const history = await fetchEndpointUsagesPerUser((req.user as Profile).id);
+
 		// Render the page
+		const history = await fetchEndpointUsagesPerUser((req.user as Profile).id);
 		res.render('settings', {
 			user: req.user, history,
 		});

@@ -4,8 +4,10 @@
   <body>
     <div class="container">
       <%- include('./blocks/navbar') %>
+      <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.1/jquery.min.js"></script>
       <div class="row">
         <div class="col-xl-6">
+          <h4>API Endpoints</h4>
           <table class="table">
             <thead>
               <tr>
@@ -30,6 +32,7 @@
           </table>
         </div>
         <div class="col-xl-6">
+          <h4>Users Registered</h4>
           <table class="table">
             <thead>
               <tr>
@@ -44,14 +47,14 @@
                 <tr>
                   <% if (u.id == user.id) { %>
                     <th scope="row"><%= u.id %></th>
-                    <td><input class="form-check-input" type="checkbox" onchange="this.form.submit()" id="flexCheckChecked" disabled <% if (u.isBlocked) { %> checked<% }%>> <%= u.isBlocked %></td>
-                    <td><input class="form-check-input" type="checkbox" id="flexCheckChecked" disabled <% if (u.isPremium) { %> checked<% }%>>  <%= u.isPremium %></td>
-                    <td><input class="form-check-input" type="checkbox" id="flexCheckChecked" disabled <% if (u.isAdmin) { %> checked<% }%>>  <%= u.isAdmin %></td>
+                    <td><input class="form-check-input" type="checkbox" onchange="updateUser('block', '<%= u.id%>')" id="flexCheckChecked" disabled <% if (u.isBlocked) { %> checked<% }%>> <%= u.isBlocked %></td>
+                    <td><input class="form-check-input" type="checkbox" onchange="updateUser('premium', '<%= u.id%>')" id="flexCheckChecked" disabled <% if (u.isPremium) { %> checked<% }%>>  <%= u.isPremium %></td>
+                    <td><input class="form-check-input" type="checkbox" onchange="updateUser('admin', '<%= u.id%>')" id="flexCheckChecked" disabled <% if (u.isAdmin) { %> checked<% }%>>  <%= u.isAdmin %></td>
                   <% } else { %>
                     <th scope="row"><%= u.id %></th>
-                    <td><input class="form-check-input" type="checkbox" id="flexCheckChecked" <% if (u.isBlocked) { %> checked<% }%>> <%= u.isBlocked %></td>
-                    <td><input class="form-check-input" type="checkbox" id="flexCheckChecked" <% if (u.isPremium) { %> checked<% }%>>  <%= u.isPremium %></td>
-                    <td><input class="form-check-input" type="checkbox" id="flexCheckChecked" <% if (u.isAdmin) { %> checked<% }%>>  <%= u.isAdmin %></td>
+                    <td><input class="form-check-input" type="checkbox" onchange="updateUser('block', '<%= u.id%>')" id="flexCheckChecked" <% if (u.isBlocked) { %> checked<% }%>> <%= u.isBlocked %></td>
+                    <td><input class="form-check-input" type="checkbox" onchange="updateUser('premium', '<%= u.id%>')" id="flexCheckChecked" <% if (u.isPremium) { %> checked<% }%>>  <%= u.isPremium %></td>
+                    <td><input class="form-check-input" type="checkbox" onchange="updateUser('admin', '<%= u.id%>')" id="flexCheckChecked" <% if (u.isAdmin) { %> checked<% }%>>  <%= u.isAdmin %></td>
                   <% } %>
                 </tr>
               <% } %>
@@ -59,7 +62,37 @@
           </table>
         </div>
       </div>
+      <h4>API endpoint usage</h4>
+      <table class="table">
+        <thead>
+          <tr>
+            <th scope="col">UserID</th>
+            <th scope="col">Endpoint</th>
+            <th scope="col">Accessed at</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% for (history of userHistory) { %>
+            <tr>
+              <th scope="row"><%= history.userId %></th>
+              <td><%= history.endpoint %></td>
+              <td><%= new Date(history.createdAt).toDateString() %> <%= new Date(history.createdAt).toLocaleTimeString() %></td>
+            </tr>
+          <% } %>
+        </tbody>
+      </table>
       <script src="/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
+      <script>
+        function updateUser(type, userId) {
+          $.ajax({
+        		url: `/api/admin/user?userId=${userId}`,
+        		type: 'PATCH',
+        		data: JSON.stringify((type == "block") ? {isBlocked: true} : {isPremium: true}),
+        		dataType: 'json',
+        		contentType: 'application/json',
+        	});
+        }
+      </script>
     </div>
   </body>
 </html>

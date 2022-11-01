@@ -47,3 +47,7 @@ export async function fetchEndpointUsagesPerUser(id: string) {
 		},
 	});
 }
+
+export async function fetchAllEndpointUsage() {
+	return client.userHistory.findMany();
+}

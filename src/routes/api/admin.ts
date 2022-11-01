@@ -8,7 +8,7 @@ export default function() {
 	// home page
 	router.patch('/user', checkAdmin, async (req, res) => {
 		// Get userID
-		const userID = req.query.userID;
+		const userID = req.query.userId;
 		const { isBlocked, isPremium } = req.body;
 		if (!userID) return res.json({ error: 'Missing userID query.' });
 

@@ -11,6 +11,7 @@ import { Utils } from './utils/Utils';
 import { Logger } from './utils/Logger';
 import { join } from 'path';
 import RateLimter from './middleware/RateLimiter';
+import bodyParser from 'body-parser';
 import * as dotenv from 'dotenv';
 dotenv.config();
 
@@ -47,6 +48,7 @@ dotenv.config();
 			resave: false,
 			saveUninitialized: false,
 		}))
+		.use(bodyParser.json())
 		// Initializes passport and session.
 		.use(passport.initialize())
 		.use(passport.session())
@@ -67,7 +69,7 @@ dotenv.config();
 		.set('views', './src/views')
 		.use((req: Request, res: Response, next: NextFunction) => {
 			// Handle custom rate limits
-			if (req.originalUrl.startsWith('/api')) return RateLimiterHandler.checkRateLimit(req, res, next);
+			if (req.originalUrl.startsWith('/api') && !req.originalUrl.startsWith('/api/admin')) return RateLimiterHandler.checkRateLimit(req, res, next);
 			next();
 		});
 	// Dynamically load all endpoints
