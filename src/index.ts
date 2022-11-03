@@ -56,7 +56,7 @@ dotenv.config();
 			if (req.originalUrl !== '/favicon.ico') Logger.connection(req, res);
 			next();
 		})
-		.use(express.static('./src/assets'))
+		.use(express.static('./src/public'))
 		// for web-scalpers
 		.get('/robots.txt', (_req, res) => {
 			res

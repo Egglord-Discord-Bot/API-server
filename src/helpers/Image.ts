@@ -57,13 +57,13 @@ export default class Image {
 
 	// Get the background image
 	static _getImage(image: string) {
-		return fs.readFileSync(`${process.cwd()}/src/assets/images/${image}.png`);
+		return fs.readFileSync(`${process.cwd()}/assets/${image}.png`);
 	}
 
 	// Generate the image to show in the examples folder
 	static generateImage(data: Buffer, name: string) {
-		if (!fs.existsSync(`${process.cwd()}/src/views/exampleImages/${name}.png`)) {
-			fs.writeFileSync(`${process.cwd()}/src/views/exampleImages/${name}.png`, data);
+		if (!fs.existsSync(`${process.cwd()}/src/public/images/${name}.png`)) {
+			fs.writeFileSync(`${process.cwd()}/src/public/images/${name}.png`, data);
 		}
 	}
 }

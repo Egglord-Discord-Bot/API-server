@@ -6,7 +6,8 @@
     "build": "tsc",
     "prestart": "npm run build",
     "start": "node .",
-    "db": "npx prisma studio"
+    "db": "npx prisma studio",
+    "rebuild": "npm rebuild @tensorflow/tfjs-node --build-from-source"
   },
   "repository": {
     "type": "git",
