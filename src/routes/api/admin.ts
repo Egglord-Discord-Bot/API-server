@@ -9,7 +9,6 @@ export default function() {
 	router.patch('/user', checkAdmin, async (req, res) => {
 		// Get userID
 		const userID = req.query.userId;
-		const { isBlocked, isPremium } = req.body;
 		if (!userID) return res.json({ error: 'Missing userID query.' });
 
 		// Fetch user by ID
@@ -17,9 +16,10 @@ export default function() {
 		if (!user) return res.json({ error: 'User not found with that ID' });
 
 		try {
-			await updateUser({ id: user.id, isBlocked: (isBlocked as boolean), isPremium: (isPremium as boolean) });
-		} catch(err) {
+			await updateUser(Object.assign({ id: user.id }, req.body));
+		} catch(err: any) {
 			console.log(err);
+			res.json({ err: err.message });
 		}
 	});
 

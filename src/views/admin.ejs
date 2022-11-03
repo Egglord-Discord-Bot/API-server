@@ -47,14 +47,14 @@
                 <tr>
                   <% if (u.id == user.id) { %>
                     <th scope="row"><%= u.id %></th>
-                    <td><input class="form-check-input" type="checkbox" onchange="updateUser('block', '<%= u.id%>')" id="flexCheckChecked" disabled <% if (u.isBlocked) { %> checked<% }%>> <%= u.isBlocked %></td>
-                    <td><input class="form-check-input" type="checkbox" onchange="updateUser('premium', '<%= u.id%>')" id="flexCheckChecked" disabled <% if (u.isPremium) { %> checked<% }%>>  <%= u.isPremium %></td>
-                    <td><input class="form-check-input" type="checkbox" onchange="updateUser('admin', '<%= u.id%>')" id="flexCheckChecked" disabled <% if (u.isAdmin) { %> checked<% }%>>  <%= u.isAdmin %></td>
+                    <td><input class="form-check-input" type="checkbox" onchange="updateUser('block', '<%= u.id%>')" id="<%= u.id%>_block" disabled <% if (u.isBlocked) { %> checked<% }%>> <%= u.isBlocked %></td>
+                    <td><input class="form-check-input" type="checkbox" onchange="updateUser('premium', '<%= u.id%>')" id="<%= u.id%>_premium" disabled <% if (u.isPremium) { %> checked<% }%>>  <%= u.isPremium %></td>
+                    <td><input class="form-check-input" type="checkbox" onchange="updateUser('admin', '<%= u.id%>')" id="<%= u.id%>_admin" disabled <% if (u.isAdmin) { %> checked<% }%>>  <%= u.isAdmin %></td>
                   <% } else { %>
                     <th scope="row"><%= u.id %></th>
-                    <td><input class="form-check-input" type="checkbox" onchange="updateUser('block', '<%= u.id%>')" id="flexCheckChecked" <% if (u.isBlocked) { %> checked<% }%>> <%= u.isBlocked %></td>
-                    <td><input class="form-check-input" type="checkbox" onchange="updateUser('premium', '<%= u.id%>')" id="flexCheckChecked" <% if (u.isPremium) { %> checked<% }%>>  <%= u.isPremium %></td>
-                    <td><input class="form-check-input" type="checkbox" onchange="updateUser('admin', '<%= u.id%>')" id="flexCheckChecked" <% if (u.isAdmin) { %> checked<% }%>>  <%= u.isAdmin %></td>
+                    <td><input class="form-check-input" type="checkbox" onchange="updateUser('block', '<%= u.id%>')" id="<%= u.id%>_block" <% if (u.isBlocked) { %> checked<% }%>> <%= u.isBlocked %></td>
+                    <td><input class="form-check-input" type="checkbox" onchange="updateUser('premium', '<%= u.id%>')" id="<%= u.id%>_premium" <% if (u.isPremium) { %> checked<% }%>>  <%= u.isPremium %></td>
+                    <td><input class="form-check-input" type="checkbox" onchange="updateUser('admin', '<%= u.id%>')" id="<%= u.id%>_admin" <% if (u.isAdmin) { %> checked<% }%>>  <%= u.isAdmin %></td>
                   <% } %>
                 </tr>
               <% } %>
@@ -84,10 +84,21 @@
       <script src="/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
       <script>
         function updateUser(type, userId) {
+          // Check if user value will be true or false
+          const isChecked = document.getElementById(`${userId}_${type}`)?.checked ?? false;
+          console.log(isChecked)
+          // Get the value that will be edited
+          const option = {
+            'block': 'isBlocked',
+            'premium': 'isPremium',
+            'admin': 'isAdmin',
+          }[type]
+
+          // Send the request to update user
           $.ajax({
         		url: `/api/admin/user?userId=${userId}`,
         		type: 'PATCH',
-        		data: JSON.stringify((type == "block") ? {isBlocked: true} : {isPremium: true}),
+        		data: JSON.stringify({ [option]: isChecked }),
         		dataType: 'json',
         		contentType: 'application/json',
         	});
