@@ -16,6 +16,10 @@ export async function fetchUsers() {
 type createUser = {
 	id: string
 	token: string
+	discriminator?: string
+	avatar?: string
+	locale?: string
+	email?: string
 }
 // Create a user with token
 export async function createUser(data: createUser) {
@@ -23,6 +27,10 @@ export async function createUser(data: createUser) {
 		data: {
 			id: data.id,
 			token: data.token,
+			discriminator: data.discriminator,
+			avatar: data.avatar,
+			locale: data.locale,
+			email: data.email,
 		},
 	});
 }

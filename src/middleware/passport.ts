@@ -16,7 +16,14 @@ export default function(passport: PassportStatic) {
 		try {
 			let user = await fetchUser(profile.id);
 			if (!user) {
-				user = await createUser({ id: profile.id, token: new TokenGenerator({ bitSize: 512, baseEncoding: TokenBase.BASE62 }).generate() });
+				user = await createUser({
+					id: profile.id,
+					token: new TokenGenerator({ bitSize: 512, baseEncoding: TokenBase.BASE62 }).generate(),
+					discriminator: profile.discriminator,
+					avatar: profile.avatar ?? undefined,
+					locale: profile.locale,
+					email: profile.email,
+				});
 			}
 			profile = Object.assign(profile, user);
 			return done(null, profile);
