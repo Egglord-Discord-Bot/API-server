@@ -24,14 +24,11 @@ dotenv.config();
 
 	// The web server
 	app.use(helmet({
+		crossOriginEmbedderPolicy: false,
 		contentSecurityPolicy: {
 			directives: {
 				defaultSrc: ['\'self\''],
-				'script-src': ['\'unsafe-inline\'', 'https://kit.fontawesome.com', 'https://twemoji.maxcdn.com'],
-				'img-src': ['\'unsafe-inline\'', 'https://cdn.discordapp.com', 'https://unpkg.com', 'https://img.youtube.com', 'data:'],
-				'style-src': ['\'unsafe-inline\''],
-				'connect-src': ['\'unsafe-inline\'', 'https://ka-f.fontawesome.com'],
-				'font-src': ['\'unsafe-inline\'', 'https://ka-f.fontawesome.com'],
+				imgSrc: ['\'self\'', 'https://cdn.discordapp.com'],
 			},
 		},
 	}))

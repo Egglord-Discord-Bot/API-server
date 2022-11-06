@@ -51,7 +51,7 @@
     "express": "^4.17.2",
     "express-rate-limit": "^6.6.0",
     "express-session": "^1.17.3",
-    "helmet": "^4.3.1",
+    "helmet": "^6.0.0",
     "minecraft-server-util": "^5.2.9",
     "nsfwjs": "^2.4.1",
     "on-finished": "^2.4.1",
