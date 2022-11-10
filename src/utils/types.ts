@@ -1,9 +1,18 @@
+import type { SKRSContext2D } from '@napi-rs/canvas';
+
 export type userID = {
 	id: string
 	endpoint: string
 }
 
 export type loggerTypes = 'log' | 'warn' | 'error' | 'debug' | 'ready'
+
+export type imageParam = Buffer | string
+export type getLines = {
+	text: string
+	ctx: SKRSContext2D
+	maxWidth: number
+}
 
 export class RedditPost {
 	constructor(data: any) {

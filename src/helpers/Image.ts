@@ -1,14 +1,8 @@
 import Canvas from '@napi-rs/canvas';
 import fs from 'node:fs';
-import type { SKRSContext2D } from '@napi-rs/canvas';
 import { GifEncoder } from '@skyra/gifenc';
-
-type imageParam = Buffer | string
-type getLines = {
-	text: string
-	ctx: SKRSContext2D
-	maxWidth: number
-}
+import type { SKRSContext2D } from '@napi-rs/canvas';
+import type { imageParam, getLines } from '../utils/types';
 
 export default class Image {
 	static async affect(image: imageParam) {
@@ -351,7 +345,7 @@ export default class Image {
 
 	// Get the background image
 	static _getImage(image: string) {
-		return fs.readFileSync(`${process.cwd()}/assets/${image}.png`);
+		return fs.readFileSync(`${process.cwd()}/assets/images/${image}.png`);
 	}
 
 	static _circle(ctx: SKRSContext2D, w: number, h: number) {
