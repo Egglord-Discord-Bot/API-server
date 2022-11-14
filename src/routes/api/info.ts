@@ -5,6 +5,8 @@ import { CONSTANTS } from '../../utils/CONSTANTS';
 import axios from 'axios';
 import { Utils } from '../../utils/Utils';
 import { RedditPost } from '../../utils/types';
+import { translate } from '@vitalets/google-translate-api';
+import languages from '../../assets/JSON/languages.json';
 
 export type redditType = 'hot' | 'new';
 
@@ -85,6 +87,23 @@ export default function() {
 			bugs: data.bugs,
 			license: data.license,
 		});
+	});
+
+	type stuff = 'English' | 'Afrikaans'
+	router.get('/translate', async (req, res) => {
+		// Get text to translate
+		const text = req.query.text;
+		if (!text) return res.json({ error: 'Missing text in query' });
+
+		const lang = languages[req.query.lang as unknown as stuff ?? 'English'];
+		if (!lang) return res.json({ error: 'Invalid language' });
+
+		try {
+			const { text: response } = await translate(text as string, { to: lang });
+			res.json({ success: response });
+		} catch (err: any) {
+			res.json({ error: err.message });
+		}
 	});
 
 	return router;

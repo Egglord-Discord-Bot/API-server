@@ -345,7 +345,7 @@ export default class Image {
 
 	// Get the background image
 	static _getImage(image: string) {
-		return fs.readFileSync(`${process.cwd()}/assets/images/${image}.png`);
+		return fs.readFileSync(`${process.cwd()}/src/assets/images/${image}.png`);
 	}
 
 	static _circle(ctx: SKRSContext2D, w: number, h: number) {
