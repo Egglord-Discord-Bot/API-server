@@ -60,3 +60,19 @@ export interface RedditPost {
 		downvotes: number,
 	},
 }
+
+export type ParamAPIEndpoint = {
+	name?: string
+	description?: string
+	required?: boolean
+	type?: string
+}
+
+export type APIEndpointData = {
+	endpoint: string
+	method: string
+	description: string
+	tag: string
+	responses: Array<string>
+	parameters?: Array<ParamAPIEndpoint>
+}

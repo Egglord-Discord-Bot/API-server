@@ -19,6 +19,7 @@ dotenv.config();
 	// Load passport and endpoint data
 	(await import('./middleware/passport')).default(passport);
 	await (await import('./helpers/EndpointData')).default();
+	console.log((await import('./helpers/RouteParser')).default());
 
 	const RateLimiterHandler = new RateLimter();
 
