@@ -6,6 +6,7 @@ import { updateUser } from '../database/User';
 import type { Profile } from 'passport-discord';
 import { TokenGenerator, TokenBase } from 'ts-token-generator';
 import { fetchEndpointData } from '../database/endpointData';
+import build from '../helpers/RouteParser';
 
 export default function() {
 
@@ -55,9 +56,10 @@ export default function() {
 
 	router.get('/docs', async (req, res) => {
 		const endpoints = await fetchEndpointData();
+		const endpointData = build();
 		res.render('endpoints', {
 			user: req.isAuthenticated() ? req.user : null,
-			endpoints,
+			endpoints, endpointData,
 		});
 	});
 

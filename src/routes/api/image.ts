@@ -4,7 +4,18 @@ import { checkImage } from '../../middleware/middleware';
 import Image from '../../helpers/Image';
 
 export default function() {
-
+	/**
+	 * @API
+	 * /image/affect:
+	 *   get:
+	 *     description: Create an affect image
+	 *     tags: image
+	 *			parameters:
+	 *       - name: image1
+	 *         description: The URL of the message
+	 *         required: true
+	 *         type: string
+	 */
 	router.get('/affect', checkImage(1), async (req, res) => {
 		const image = req.query.image1;
 		try {
@@ -16,6 +27,18 @@ export default function() {
 		}
 	});
 
+	/**
+	 * @API
+	 * /image/beautiful:
+	 *   get:
+	 *     description: Create a beautiful image
+	 *     tags: image
+	 *			parameters:
+	 *       - name: image1
+	 *         description: The URL of the message
+	 *         required: true
+	 *         type: string
+	 */
 	router.get('/beautiful', checkImage(1), async (req, res) => {
 		const image = req.query.image1;
 		try {
@@ -27,6 +50,22 @@ export default function() {
 		}
 	});
 
+	/**
+	 * @API
+	 * /image/bed:
+	 *   get:
+	 *     description: Create an affect image
+	 *     tags: image
+	 *			parameters:
+	 *       - name: image1
+	 *         description: The URL of the message
+	 *         required: true
+	 *         type: string
+	 *       - name: image2
+	 *         description: The URL of the message
+	 *         required: true
+	 *         type: string
+	 */
 	router.get('/bed', checkImage(2), async (req, res) => {
 		const image = req.query.image1;
 		const image2 = req.query.image2;
@@ -39,6 +78,18 @@ export default function() {
 		}
 	});
 
+	/**
+	 * @API
+	 * /image/blur:
+	 *   get:
+	 *     description: Create an affect image
+	 *     tags: image
+	 *			parameters:
+	 *       - name: image1
+	 *         description: The URL of the message
+	 *         required: true
+	 *         type: string
+	 */
 	router.get('/blur', checkImage(1), async (req, res) => {
 		const image = req.query.image1;
 		try {
@@ -50,6 +101,18 @@ export default function() {
 		}
 	});
 
+	/**
+	 * @API
+	 * /image/changemymind:
+	 *   get:
+	 *     description: Create an affect image
+	 *     tags: image
+	 *			parameters:
+	 *       - name: text
+	 *         description: The text on the board
+	 *         required: true
+	 *         type: string
+	 */
 	router.get('/changemymind', async (req, res) => {
 		const text = req.query.text;
 		if (!text) return res.json({ error: 'Missing text in query' });
@@ -63,6 +126,18 @@ export default function() {
 		}
 	});
 
+	/**
+	 * @API
+	 * /image/circle:
+	 *   get:
+	 *     description: Create an affect image
+	 *     tags: image
+	 *			parameters:
+	 *       - name: image1
+	 *         description: The URL of the message
+	 *         required: true
+	 *         type: string
+	 */
 	router.get('/circle', checkImage(1), async (req, res) => {
 		const image = req.query.image1;
 		try {
@@ -74,6 +149,18 @@ export default function() {
 		}
 	});
 
+	/**
+	 * @API
+	 * /image/distracted:
+	 *   get:
+	 *     description: Create an affect image
+	 *     tags: image
+	 *			parameters:
+	 *       - name: image1
+	 *         description: The URL of the message
+	 *         required: true
+	 *         type: string
+	 */
 	router.get('/distracted', checkImage(2), async (req, res) => {
 		const image1 = req.query.image1;
 		const image2 = req.query.image2;
@@ -87,6 +174,18 @@ export default function() {
 		}
 	});
 
+	/**
+	 * @API
+	 * /image/facepalm:
+	 *   get:
+	 *     description: Create an affect image
+	 *     tags: image
+	 *			parameters:
+	 *       - name: image1
+	 *         description: The URL of the message
+	 *         required: true
+	 *         type: string
+	 */
 	router.get('/facepalm', checkImage(1), async (req, res) => {
 		const image = req.query.image1;
 		try {
@@ -98,6 +197,18 @@ export default function() {
 		}
 	});
 
+	/**
+	 * @API
+	 * /image/invert:
+	 *   get:
+	 *     description: Create an affect image
+	 *     tags: image
+	 *			parameters:
+	 *       - name: image1
+	 *         description: The URL of the message
+	 *         required: true
+	 *         type: string
+	 */
 	router.get('/invert', checkImage(1), async (req, res) => {
 		const image = req.query.image1;
 		try {
@@ -109,6 +220,18 @@ export default function() {
 		}
 	});
 
+	/**
+	 * @API
+	 * /image/joke-over-head:
+	 *   get:
+	 *     description: Create an affect image
+	 *     tags: image
+	 *			parameters:
+	 *       - name: image1
+	 *         description: The URL of the message
+	 *         required: true
+	 *         type: string
+	 */
 	router.get('/joke-over-head', checkImage(1), async (req, res) => {
 		const image = req.query.image1;
 		try {
@@ -120,6 +243,22 @@ export default function() {
 		}
 	});
 
+	/**
+	 * @API
+	 * /image/kiss:
+	 *   get:
+	 *     description: Create an affect image
+	 *     tags: image
+	 *			parameters:
+	 *       - name: image1
+	 *         description: The URL of the message
+	 *         required: true
+	 *         type: string
+	 *       - name: image2
+	 *         description: The URL of the message
+	 *         required: true
+	 *         type: string
+	 */
 	router.get('/kiss', checkImage(2), async (req, res) => {
 		const image1 = req.query.image1;
 		const image2 = req.query.image2;
@@ -132,6 +271,18 @@ export default function() {
 		}
 	});
 
+	/**
+	 * @API
+	 * /image/ohno:
+	 *   get:
+	 *     description: Create an affect image
+	 *     tags: image
+	 *			parameters:
+	 *       - name: text
+	 *         description: The text to for silly dog.
+	 *         required: true
+	 *         type: string
+	 */
 	router.get('/ohno', async (req, res) => {
 		const text = req.query.text;
 		if (!text) return res.json({ error: 'Missing text in query' });
@@ -145,6 +296,18 @@ export default function() {
 		}
 	});
 
+	/**
+	 * @API
+	 * /image/rip:
+	 *   get:
+	 *     description: Create an affect image
+	 *     tags: image
+	 *			parameters:
+	 *       - name: image1
+	 *         description: The URL of the message
+	 *         required: true
+	 *         type: string
+	 */
 	router.get('/rip', checkImage(1), async (req, res) => {
 		const image = req.query.image1;
 		try {
@@ -156,6 +319,18 @@ export default function() {
 		}
 	});
 
+	/**
+	 * @API
+	 * /image/slap:
+	 *   get:
+	 *     description: Create an affect image
+	 *     tags: image
+	 *			parameters:
+	 *       - name: image1
+	 *         description: The URL of the message
+	 *         required: true
+	 *         type: string
+	 */
 	router.get('/slap', checkImage(2), async (req, res) => {
 		const image1 = req.query.image1;
 		const image2 = req.query.image2;
@@ -168,6 +343,22 @@ export default function() {
 		}
 	});
 
+	/**
+	 * @API
+	 * /image/spank:
+	 *   get:
+	 *     description: Create an affect image
+	 *     tags: image
+	 *			parameters:
+	 *       - name: image1
+	 *         description: The URL of the message
+	 *         required: true
+	 *         type: string
+	 *       - name: image2
+	 *         description: The URL of the message
+	 *         required: true
+	 *         type: string
+	 */
 	router.get('/spank', checkImage(2), async (req, res) => {
 		const image1 = req.query.image1;
 		const image2 = req.query.image2;
@@ -180,6 +371,18 @@ export default function() {
 		}
 	});
 
+	/**
+	 * @API
+	 * /image/trigger:
+	 *   get:
+	 *     description: Create an affect image
+	 *     tags: image
+	 *			parameters:
+	 *       - name: image1
+	 *         description: The URL of the message
+	 *         required: true
+	 *         type: string
+	 */
 	router.get('/trigger', checkImage(1), async (req, res) => {
 		const image = req.query.image1;
 		try {

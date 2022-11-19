@@ -6,6 +6,13 @@ import Tesseract from 'tesseract.js';
 import axios from 'axios';
 
 export default function() {
+	/**
+	 * @API
+	 * /misc/advice:
+	 *   get:
+	 *     description: Get some advice
+	 *     tags: misc
+	*/
 	router.get('/advice', async (_req, res) => {
 		try {
 			const advice = await axios.get('https://api.adviceslip.com/advice');
@@ -15,6 +22,18 @@ export default function() {
 		}
 	});
 
+	/**
+	 * @API
+	 * /misc/pokemon:
+	 *   get:
+	 *     description: Get a pokemon's stats
+	 *     tags: misc
+	 *			parameters:
+	 *       - name: pokemon
+	 *         description: The pokemon
+	 *         required: true
+	 *         type: string
+	 */
 	router.get('/pokemon', async (req, res) => {
 		const { pokemon } = req.query;
 		try {
@@ -45,8 +64,21 @@ export default function() {
 	});
 	*/
 
+	/**
+	 * @API
+	 * /misc/colour:
+	 *   get:
+	 *     description: Update a users information
+	 *     tags: misc
+	 *			parameters:
+	 *       - name: colour
+	 *         description: The colour of the square
+	 *         required: true
+	 *         type: string
+	 */
 	router.get('/colour', (req, res) => {
 		if (!req.query.colour) return res.json({ error: 'Missing colour query' });
+
 		try {
 			const canvas = createCanvas(200, 200),
 				context = canvas.getContext('2d');
@@ -58,6 +90,18 @@ export default function() {
 		}
 	});
 
+	/**
+	 * @API
+	 * /misc/get-text:
+	 *   get:
+	 *     description: Update a users information
+	 *     tags: misc
+	 *			parameters:
+	 *       - name: url
+	 *         description: The URL of the image to extract text from.
+	 *         required: true
+	 *         type: string
+	 */
 	router.get('/get-text', async (req, res) => {
 		if (!req.query.url) return res.json({ error: 'Missing URL query' });
 
@@ -75,5 +119,4 @@ export default function() {
 	});
 
 	return router;
-
 }

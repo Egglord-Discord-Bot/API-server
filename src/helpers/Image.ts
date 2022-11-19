@@ -199,7 +199,7 @@ export default class Image {
 		ctx.drawImage(layer, 0, 0, 425, 404);
 
 		const result = await canvas.encode('png');
-		this.generateImage(result, 'jokeOverHead');
+		this.generateImage(result, 'joke-over-head');
 		return result;
 	}
 

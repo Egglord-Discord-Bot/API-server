@@ -18,9 +18,21 @@ type redditData = {
 }
 
 export default function() {
-
-	// Covid endpoint
 	const CovidHandler = new CacheHandler();
+	const RedditHandler = new CacheHandler();
+
+	/**
+	 * @API
+	 * /info/covid:
+	 *   get:
+	 *     description: Get COVID stats on a country or the world.
+	 *     tags: games
+	 *			parameters:
+	 *       - name: country
+	 *         description: The country to get COVID stats from
+	 *         required: false
+	 *         type: string
+	 */
 	router.get('/covid', async (req, res) => {
 		const country = (req.query.country ?? '/all') as string;
 		let data = {};
@@ -43,8 +55,18 @@ export default function() {
 		res.json(data);
 	});
 
-	// Reddit endpoint
-	const RedditHandler = new CacheHandler();
+	/**
+	 * @API
+	 * /info/reddit:
+	 *   get:
+	 *     description: Get a post from a subreddit
+	 *     tags: games
+	 *			parameters:
+	 *       - name: sub
+	 *         description: The subreddit to get the post from.
+	 *         required: true
+	 *         type: string
+	 */
 	router.get('/reddit', async (req, res) => {
 		if (!req.query.sub) return res.json({ error: CONSTANTS.REDDIT_MISSINGQUERY });
 		const sub = req.query.sub as string,
@@ -73,6 +95,18 @@ export default function() {
 		res.json(sentData);
 	});
 
+	/**
+	 * @API
+	 * /info/npm:
+	 *   get:
+	 *     description: Get information on a NPM package
+	 *     tags: games
+	 *			parameters:
+	 *       - name: package
+	 *         description: The name of the package
+	 *         required: true
+	 *         type: string
+	 */
 	router.get('/npm', async (req, res) => {
 		if (!req.query.package) return res.json({ error: 'No NPM package was provided in the query' });
 
@@ -90,6 +124,22 @@ export default function() {
 	});
 
 	type stuff = 'English' | 'Afrikaans'
+	/**
+	 * @API
+	 * /info/translate:
+	 *   get:
+	 *     description: Translate a message
+	 *     tags: games
+	 *			parameters:
+	 *       - name: text
+	 *         description: The text to translate
+	 *         required: true
+	 *         type: string
+	 *       - name: lang
+	 *         description: The language to translate to (Default: English)
+	 *         required: false
+	 *         type: string
+	 */
 	router.get('/translate', async (req, res) => {
 		// Get text to translate
 		const text = req.query.text;

@@ -22,7 +22,7 @@
         <div class="tab-pane fade" id="v-pills-profile" role="tabpanel" aria-labelledby="v-pills-profile-tab">
           <h1>Authentication</h1>
           <hr>
-          <p>If you don’t have an API Key, just head over to {URL} and get one for free key.</p>
+          <p>If you don’t have an API Key, just click login and head to the <a href="/settings">settings</a> page and get one for free key.</p>
           <h5>How to access the API</h5>
           <ul>
             <li>Set your API Key as the Authorization header on every request.</li>
@@ -51,7 +51,25 @@
             </tbody>
           </table>
         </div>
-        <div class="tab-pane fade" id="v-pills-settings" role="tabpanel" aria-labelledby="v-pills-settings-tab">...</div>
+        <div class="tab-pane fade" id="v-pills-settings" role="tabpanel" aria-labelledby="v-pills-settings-tab" style="width:100%;">
+          <div class="accordion" id="accordionPanelsStayOpenExample">
+            <% for (endpoint of endpoints.filter(e => !e.name.startsWith('/api/admin'))) { %>
+              <div class="accordion-item" style="min-width:50vw">
+                <h2 class="accordion-header" id="panelsStayOpen-heading<%= endpoints.indexOf(endpoint)%>">
+                  <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#panelsStayOpen-collapse<%= endpoints.indexOf(endpoint)%>" aria-expanded="true" aria-controls="panelsStayOpen-collapse<%= endpoints.indexOf(endpoint)%>">
+                    <%= endpoint.name.split('/').slice(2).join('/') %>
+                  </button>
+                </h2>
+                <div id="panelsStayOpen-collapse<%= endpoints.indexOf(endpoint)%>" class="accordion-collapse collapse show" aria-labelledby="panelsStayOpen-heading<%= endpoints.indexOf(endpoint)%>">
+                  <div class="accordion-body">
+                    <%- include('./blocks/endpointBlock', { data: Object.assign(endpoint, endpointData.find(i => i.endpoint == `/${endpoint.name.split('/').slice(2).join('/')}:`) ?? {}) }) %>
+
+                  </div>
+                </div>
+              </div>
+            <% } %>
+          </div>
+        </div>
       </div>
     </div>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-u1OknCvxWvY5kfmNBILK2hRnQC3Pr17a+RTT6rIHI7NnikvbZlHgTPOOmMi466C8" crossorigin="anonymous"></script>

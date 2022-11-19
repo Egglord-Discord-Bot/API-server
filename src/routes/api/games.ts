@@ -1,12 +1,27 @@
 import { Router } from 'express';
 const router = Router();
 import axios from 'axios';
-import type { AxiosError } from 'axios';
-import R6API from 'r6api.js';
+import R6API from '../../helpers/R6API';
 import { status } from 'minecraft-server-util';
-const { findByUsername, getProgression, getRanks, getStats } = new R6API({ email: process.env.R6Email, password: process.env.R6Password });
+const R6Handler = new R6API({ email: process.env.R6Email, password: process.env.R6Password });
 
 export default function() {
+	/**
+	 * @API
+	 * /games/fortnite:
+	 *   get:
+	 *     description: Get information on a fortnite player
+	 *     tags: games
+	 *			parameters:
+	 *       - name: platform
+	 *         description: The platform, the user uses
+	 *         required: true
+	 *         type: string
+	 *       - name: username
+	 *         description: The username of the player
+	 *         required: true
+	 *         type: string
+	 */
 	router.get('/fortnite', async (req, res) => {
 		const { platform, username } = req.query;
 		try {
@@ -14,11 +29,35 @@ export default function() {
 				headers: { 'TRN-Api-Key': process.env.fortniteAPI as string },
 			});
 			res.json(data);
-		} catch (err: unknown | Error | AxiosError) {
-			console.log(err);
+		} catch (err) {
+			// check if error is an axios error
+			if (axios.isAxiosError(err)) {
+				switch (err.response?.status) {
+					case (400):
+						return console.log('Missing Username or Password');
+					case (401):
+						return console.log('Unauthorized');
+				}
+			}
 		}
 	});
 
+	/**
+	 * @API
+	 * /games/mc:
+	 *   get:
+	 *     description: Get information on a minecraft server.
+	 *     tags: games
+	 *			parameters:
+	 *       - name: IP
+	 *         description: The IP/address of the MC server
+	 *         required: true
+	 *         type: string
+	 *       - name: port
+	 *         description: The port that the server runs on.
+	 *         required: false
+	 *         type: string
+	 */
 	router.get('/mc', async (req, res) => {
 		if (!req.query.IP) return res.json({ error: 'Missing parameter: IP.' });
 		try {
@@ -30,29 +69,24 @@ export default function() {
 		}
 	});
 
-	router.get('/r6', async (req, res) => {
-		type Platform = 'xbl' | 'uplay' | 'psn';
-		let { player } = req.query;
-		const { platform } = req.query;
-		if (platform === 'xbl') player = (player as string).replace('_', '');
-
-		let foundPlayer;
-		try {
-			foundPlayer = await findByUsername(platform as Platform, player as string);
-		} catch (err: any) {
-			return res.json({ error: err.message });
-		}
-		// Makes sure that user actually exist
-		if (foundPlayer.length == 0) res.json({ error: 'No player found.' });
-
-		// get statistics of player
-		try {
-			const [playerRank, playerStats, playerGame] = await Promise.all([getRanks(platform as Platform, foundPlayer[0].id), getStats(platform as Platform, foundPlayer[0].id), getProgression(platform as Platform, foundPlayer[0].id)]);
-			res.json(Object.assign(playerRank, playerGame, playerStats));
-		} catch (err: any) {
-			console.log(err);
-			res.json({ err: err.message });
-		}
+	/**
+	 * @API
+	 * /games/r6:
+	 *   get:
+	 *     description: Get information on a r6 player
+	 *     tags: games
+	 *			parameters:
+	 *       - name: platform
+	 *         description: The ID of the user
+	 *         required: true
+	 *         type: string
+	 *       - name: username
+	 *         description: The ID of the user
+	 *         required: true
+	 *         type: string
+	 */
+	router.get('/r6', async () => {
+		console.log(await R6Handler.findByUsername('5172a557-50b5-4665-b7db-e3f2e8c5041d', 'ThatGingerGuy02'));
 	});
 
 	return router;
