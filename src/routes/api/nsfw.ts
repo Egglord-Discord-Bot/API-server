@@ -8,7 +8,7 @@ import type { Tensor3D } from '@tensorflow/tfjs-node';
 export default function() {
 	/**
 	  * @API
-	  * /v1/nsfw/image
+	  * /nsfw/image:
 	  *   get:
 	  *     description: Get a link to a NSFW image
 	  *     tags: nsfw
@@ -31,7 +31,7 @@ export default function() {
 
 	/**
 	  * @API
-	  * /v1/nsfw/check
+	  * /nsfw/check:
 	  *   get:
 	  *     description: Check if an image is NSFW or not
 	  *     tags: nsfw

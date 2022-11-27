@@ -40,33 +40,43 @@ export default class RateLimit {
 
 	async checkRateLimit(req: Request, res: Response, next: NextFunction) {
 		// Get the userID from the request
-		const userID = await this._extractUserId(req);
-		if (userID === null) return this._sendRateLimitMessage(res, { isLoggedIn: false });
+		const user = await this._extractUserId(req);
+		if (user === null) return this._sendRateLimitMessage(res, { isLoggedIn: false });
 
 		// Now check if user is rate limited by global rate Limit
-		const isGloballyRateLimited = this._checkGlobalCooldown(userID);
-		if (isGloballyRateLimited) return this._sendRateLimitMessage(res, { global: true }, userID);
+		const isGloballyRateLimited = this._checkGlobalCooldown(user.id);
+		if (isGloballyRateLimited) return this._sendRateLimitMessage(res, { global: true }, user.id);
 
 		// Now check if user is rate limited by endpoint
-		const isRateLimitedByEndpoint = this.checkEndpointUsage(userID, req.originalUrl.split('?')[0]);
-		if (isRateLimitedByEndpoint.isRateLimted) return this._sendRateLimitMessage(res, { global: false, isEndpoint: isRateLimitedByEndpoint.reason == 2 }, userID);
+		const isRateLimitedByEndpoint = this.checkEndpointUsage(user.id, req.originalUrl.split('?')[0]);
+		if (isRateLimitedByEndpoint.isRateLimted) return this._sendRateLimitMessage(res, { global: false, isEndpoint: isRateLimitedByEndpoint.reason == 2 }, user.id);
 
 		// User is logged in and not ratelimited at all
 		next();
 	}
 
+	/**
+    * Extract the user from the request (if any)
+    * @param {Request} req The request
+    * @returns The user who made the request
+  */
 	async _extractUserId(req: Request) {
 		// If they are on browser see if they are logged in
-		if (req.isAuthenticated()) return (req.user as Profile).id;
+		if (req.isAuthenticated()) return (req.user as Profile);
 
 		// They might be trying to connect via their token
 		if (req.headers.authorization || req.query.token) {
 			const user = await fetchUserByToken((req.headers.authorization || req.query.token) as string);
-			return (user) ? user.id : null;
+			return user ?? null;
 		}
 		return null;
 	}
 
+	/**
+  	* Check if the user is globally ratelimited
+  	* @param {string} userID The ID of the user getting checked
+  	* @returns Whether or not they are globally ratelimited
+  */
 	_checkGlobalCooldown(userID: string) {
 		if (this.userRatelimit.get(userID)) {
 			const data = this.userRatelimit.get(userID)?.endpoints.reduce((a, b) => b.lastAccess.length + a, 0) ?? 0;
@@ -77,6 +87,12 @@ export default class RateLimit {
 		}
 	}
 
+	/**
+    * Check if the user is ratelimited on the endpoint
+    * @param {string} userID The ID of the user getting checked
+    * @param {string} endpoint The endpoint name
+    * @returns Whether or not they are ratelimited on the endpoint
+  */
 	checkEndpointUsage(userID: string, endpoint: string) {
 		let isRateLimted = { isRateLimted: false, reason: 0 };
 		if (this.userRatelimit.get(userID)) {
@@ -98,6 +114,11 @@ export default class RateLimit {
 		return isRateLimted;
 	}
 
+	/**
+    * Adds endpoint to user's history
+    * @param {string} userId The ID of the user getting checked
+    * @param {string} endpoint The endpoint name
+  */
 	addEndpoint(userId: string, endpoint: string) {
 		if (this.userRatelimit.get(userId)) {
 			const user = this.userRatelimit.get(userId);
@@ -114,9 +135,16 @@ export default class RateLimit {
 		createEndpoint({ id: userId, endpoint: endpoint });
 	}
 
+	/**
+    * Send the client rate limit message
+    * @param {string} res The response to give
+    * @param {string} type The type of ratelimit
+    * @param {string} userID The user ID
+    * @param {string} endpoint The endpoint name
+    * @returns Whether or not they are ratelimited on the endpoint
+  */
 	_sendRateLimitMessage(res: Response, type: RateLimitType, userID?: string, endpoint?: string) {
 		if (userID) {
-			console.log(type);
 			const rateLimitPointsRemaining = `${type.global || type.isEndpoint ?
 				0
 				: (this.endpointData.find(e => e.name == endpoint)?.maxRequests ?? 5) - (this.userRatelimit.get(userID as string)?.endpoints.find(e => e.name == endpoint)?.lastAccess.length ?? 0)}`;

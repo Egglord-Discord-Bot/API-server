@@ -19,7 +19,6 @@ dotenv.config();
 	// Load passport and endpoint data
 	(await import('./middleware/passport')).default(passport);
 	await (await import('./helpers/EndpointData')).default();
-	console.log((await import('./helpers/RouteParser')).default());
 
 	const RateLimiterHandler = new RateLimter();
 
@@ -73,7 +72,7 @@ dotenv.config();
 	// Dynamically load all endpoints
 	const endpoints = Utils.generateRoutes(join(__dirname, './', 'routes')).filter(e => e.route !== '/index');
 	for (const endpoint of endpoints) {
-		console.log(`Loading: ${endpoint.route} endpoint.`, 'log');
+		Logger.debug(`Loading: ${endpoint.route} endpoint.`);
 		app.use(endpoint.route, (await import(endpoint.path)).default());
 	}
 

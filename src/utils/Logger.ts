@@ -1,9 +1,9 @@
 import chalk from 'chalk';
 import moment from 'moment';
 import { createRollingFileLogger } from 'simple-node-logger';
-import onFinished from 'on-finished'
+import onFinished from 'on-finished';
 import type { loggerTypes } from './types';
-import { Utils } from './Utils'
+import { Utils } from './Utils';
 const log = createRollingFileLogger({
 	logDirectory: './src/utils/logs',
 	fileNamePattern: 'roll-<DATE>.log',
@@ -27,6 +27,8 @@ export class Logger {
 				console.log(`${timestamp} ${chalk.bgRed(type.toUpperCase())} ${content} `);
 				break;
 			case 'debug':
+				console.log(process.env.debug);
+				if (!process.env.debug) return;
 				log.debug(content);
 				console.log(`${timestamp} ${chalk.green(type.toUpperCase())} ${content} `);
 				break;
@@ -77,7 +79,7 @@ export class Logger {
 				let response_time;
 				if (res._endTime && req._endTime) response_time = (res._endTime + req._endTime) - (res._startTime + req._startTime);
 
-			Logger.log(`${requester} ${method} ${url} ${chalk[color](status)} - ${(response_time ?? '?')} ms`, 'log');
+				Logger.log(`${requester} ${method} ${url} ${chalk[color](status)} - ${(response_time ?? '?')} ms`, 'log');
 			});
 		});
 	}

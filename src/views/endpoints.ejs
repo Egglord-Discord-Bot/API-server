@@ -42,7 +42,7 @@
               </tr>
             </thead>
             <tbody>
-              <% [[200,"OK"], [400, "Bad Request"], [401, "Unauthorized"], [403, "Forbidden"], [404, "Not Found"], [413, "Payload Too Large"], [500, "Internal Server Error"], [501, "Not Implemented"], [502, "Bad Gateway"], [503, "Service Unavailable"]].forEach(i => { %>
+              <% [[200,"OK"], [400, "Bad Request"], [401, "Unauthorized"], [403, "Forbidden"], [404, "Not Found"], [413, "Payload Too Large"], [429, "Too many requests"], [500, "Internal Server Error"], [501, "Not Implemented"], [502, "Bad Gateway"], [503, "Service Unavailable"]].forEach(i => { %>
                 <tr>
                   <th scope="row"><%= i[0] %></th>
                   <td><%= i[1] %></td>

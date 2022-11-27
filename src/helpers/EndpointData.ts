@@ -1,9 +1,10 @@
 import { createEndpointData, fetchEndpointData } from '../database/endpointData';
 import { join } from 'path';
 import { Utils } from '../utils/Utils';
+import { Logger } from '../utils/Logger';
 
 export default async function EndpointData() {
-	console.log('Checking database for new endpoints');
+	Logger.debug('Checking database for new endpoints');
 
 	const endpointsBasedOnFiles = Utils.generateRoutes(join(__dirname, '../', 'routes')).filter(e => e.route !== '/index');
 	const fileData = await Promise.all(endpointsBasedOnFiles.map(e => import(`${e.path}`)));
@@ -16,7 +17,7 @@ export default async function EndpointData() {
 	const endpointsBasedOnDB = await fetchEndpointData();
 	const endpointsNotOnDB = files.filter(e => !endpointsBasedOnDB.map(end => end.name).includes(e) && e.startsWith('/api/'));
 
-	console.log(`Found ${endpointsNotOnDB.length} new endpoints`);
+	Logger.debug(`Found ${endpointsNotOnDB.length} new endpoints`);
 	for (const newEndpoint of endpointsNotOnDB) {
 		await createEndpointData({ name: newEndpoint });
 	}
