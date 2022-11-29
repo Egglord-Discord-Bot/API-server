@@ -4,6 +4,7 @@ import axios from 'axios';
 import R6API from '../../helpers/R6API';
 import { status } from 'minecraft-server-util';
 import CacheHandler from '../../helpers/CacheHandler';
+import Error from '../../utils/Errors';
 const R6Handler = new R6API({ email: process.env.R6Email, password: process.env.R6Password });
 
 export default function() {
@@ -26,18 +27,16 @@ export default function() {
 	router.get('/fortnite', async (req, res) => {
 		const { platform, username } = req.query;
 
-		if (!platform || !username) return res.json({ error: 'Error' });
+		if (!platform || !username) return Error.MissingQuery(res, username ? 'platform' : 'username');
 
 		try {
-			console.log(process.env.fortniteAPI);
 			const data = await axios.get(`https://api.fortnitetracker.com/v1/profile/${platform}/${encodeURIComponent(username as string)}`, {
 				headers: { 'TRN-Api-Key': process.env.fortniteAPI as string },
 			});
-			res.json(data);
-		} catch (err) {
+			res.json({ data: data });
+		} catch (err: any) {
 			console.log(err);
-			// check if error is an axios error
-			res.json(err);
+			Error.GenericError(res, err.message);
 		}
 	});
 
@@ -48,7 +47,7 @@ export default function() {
 	 *     description: Get information on a minecraft server.
 	 *     tags: games
 	 *			parameters:
-	 *       - name: IP
+	 *       - name: ip
 	 *         description: The IP/address of the MC server
 	 *         required: true
 	 *         type: string
@@ -58,13 +57,22 @@ export default function() {
 	 *         type: string
 	*/
 	router.get('/mc', async (req, res) => {
-		if (!req.query.IP) return res.json({ error: 'Missing parameter: IP.' });
+		// Check query paramters
+		const { ip, port } = req.query;
+
+		if (!ip) return Error.MissingQuery(res, 'ip');
+		if (Number(port as string)) {
+			if (Number(port) <= 0 || Number(port) >= 65536) return Error.InvalidRange(res, 'port', [0, 65535]);
+		} else {
+			return Error.IncorrectType(res, 'port', 'number');
+		}
+
 		try {
-			const response = await status(req.query.IP as string);
-			res.json(response);
+			const response = await status(ip as string, Number(port) ?? 25565);
+			res.json({ data: response });
 		} catch (err: any) {
 			console.log(err);
-			res.json({ error: err.message });
+			Error.GenericError(res, err.message);
 		}
 	});
 
@@ -136,14 +144,14 @@ export default function() {
 					NumberOfGameBans: data2.players[0].NumberOfGameBans,
 				};
 				SteamHandler._addData({ id: username, data: data });
-			} catch (err) {
+			} catch (err: any) {
 				console.log(err);
-				data = { error: 'Error' };
+				return Error.GenericError(res, err.message);
 			}
 		}
 
 		// Return the data
-		res.json(data);
+		res.json({ data: data });
 	});
 
 	return router;

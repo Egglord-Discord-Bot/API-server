@@ -1,4 +1,4 @@
-import Canvas from '@napi-rs/canvas';
+import Canvas, { createCanvas } from '@napi-rs/canvas';
 import fs from 'node:fs';
 import { GifEncoder } from '@skyra/gifenc';
 import type { SKRSContext2D } from '@napi-rs/canvas';
@@ -342,6 +342,16 @@ export default class Image {
 
 		return lines;
 	}
+
+	static async square(colour: string) {
+		const canvas = createCanvas(200, 200),
+			context = canvas.getContext('2d');
+		context.fillStyle = colour;
+		context.fillRect(0, 0, 200, 200);
+		const result = await canvas.encode('png');
+		return result;
+	}
+
 
 	// Get the background image
 	static _getImage(image: string) {

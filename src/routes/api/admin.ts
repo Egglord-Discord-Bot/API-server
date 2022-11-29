@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { checkAdmin } from '../../middleware/middleware';
 import { fetchUser, updateUser } from '../../database/User';
 import { updateEndpointData } from '../../database/endpointData';
+import Error from '../../utils/Errors';
 const router = Router();
 
 export default function() {
@@ -29,9 +30,9 @@ export default function() {
 
 		try {
 			await updateUser(Object.assign({ id: user.id }, req.body));
-		} catch(err: any) {
+		} catch (err: any) {
 			console.log(err);
-			res.json({ err: err.message });
+			Error.GenericError(res, err.message);
 		}
 	});
 
@@ -50,9 +51,9 @@ export default function() {
 	router.patch('/endpoint', checkAdmin, async (req, res) => {
 		try {
 			await updateEndpointData(Object.assign({ name: 'stuff' }, req.body));
-		} catch (err) {
+		} catch (err: any) {
 			console.log(err);
-			res.json({ err });
+			Error.GenericError(res, err.message);
 		}
 	});
 

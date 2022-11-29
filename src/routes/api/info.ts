@@ -1,12 +1,12 @@
 import { Router } from 'express';
 const router = Router();
 import CacheHandler from '../../helpers/CacheHandler';
-import { CONSTANTS } from '../../utils/CONSTANTS';
 import axios from 'axios';
 import { Utils } from '../../utils/Utils';
 import { RedditPost } from '../../utils/types';
 import { translate } from '@vitalets/google-translate-api';
 import languages from '../../assets/JSON/languages.json';
+import Error from '../../utils/Errors';
 
 export type redditType = 'hot' | 'new';
 
@@ -48,14 +48,14 @@ export default function() {
 					CovidHandler.data.set('/all', data);
 				}
 				CovidHandler._addData({ id: country, data: data });
-			} catch (err) {
+			} catch (err: any) {
 				console.log(err);
-				data = { error: 'Error' };
+				return Error.GenericError(res, err.message);
 			}
 		}
 
 		// Check cache first
-		res.json(data);
+		res.json({ data: data });
 	});
 
 	/**
@@ -72,9 +72,10 @@ export default function() {
 	 */
 	const RedditHandler = new CacheHandler();
 	router.get('/reddit', async (req, res) => {
-		if (!req.query.sub) return res.json({ error: CONSTANTS.REDDIT_MISSINGQUERY });
 		const sub = req.query.sub as string,
 			type = req.query.type ?? 'new';
+
+		if (!sub) return Error.MissingQuery(res, 'sub');
 
 		let sentData;
 		if (RedditHandler.data.get(`${sub}_${type}`)) {
@@ -94,11 +95,11 @@ export default function() {
 				// Return the data
 				RedditHandler._addData({ id: `${sub}_${type}`, data: dataRes.data });
 				sentData = new RedditPost(p);
-			} catch (err) {
+			} catch (err: any) {
 				console.log(err);
-				sentData = { error: 'Error' };
+				return Error.GenericError(res, err.message);
 			}
-			res.json(sentData);
+			res.json({ data: sentData });
 		}
 	});
 
@@ -137,12 +138,12 @@ export default function() {
 				};
 				NPMHandler._addData({ id: npmPackage, data: resp });
 				sentData = resp;
-			} catch (err) {
+			} catch (err: any) {
 				console.log(err);
-				sentData = { error: 'Error' };
+				return Error.GenericError(res, err.message);
 			}
 		}
-		res.json(sentData);
+		res.json({ data: sentData });
 	});
 
 	/**
@@ -169,12 +170,12 @@ export default function() {
 				const data = (await axios.get(`https://api.github.com/repos/${repo}`)).data;
 				GithubHandler._addData({ id: repo, data: data });
 				sentData = data;
-			} catch (err) {
+			} catch (err: any) {
 				console.log(err);
-				sentData = { error: 'Error' };
+				return Error.GenericError(res, err.message);
 			}
 		}
-		res.json(sentData);
+		res.json({ data: sentData });
 	});
 
 	/**
@@ -204,11 +205,12 @@ export default function() {
 
 		try {
 			const { text: response } = await translate(text as string, { to: lang });
-			res.json({ success: response });
+			res.json({ data: response });
 		} catch (err: any) {
-			res.json({ error: err.message });
+			return Error.GenericError(res, err.message);
 		}
 	});
+
 
 	return router;
 }

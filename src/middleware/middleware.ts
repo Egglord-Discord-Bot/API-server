@@ -1,6 +1,7 @@
 import type { Request, Response, NextFunction } from 'express';
 import type { User } from '@prisma/client';
 import { fetchUser } from '../database/User';
+import Error from '../utils/Errors';
 
 /**
 	* Check if an image was sent with the request
@@ -12,7 +13,7 @@ export function checkImage(NumberofImages: number) {
 		// Make sure enough images have been sent aswell
 		for (let i = 1; i <= NumberofImages; i++) {
 			const image = req.query[`image${NumberofImages}`];
-			if (!image) return res.json({ error: `Missing image${NumberofImages} in query` });
+			if (!image) return Error.MissingQuery(res, `image${NumberofImages}`);
 		}
 
 		next();

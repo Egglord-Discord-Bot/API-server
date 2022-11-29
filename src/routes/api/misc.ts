@@ -1,9 +1,10 @@
 import { Router } from 'express';
 const router = Router();
 // import Puppeteer from 'puppeteer';
-import { createCanvas } from '@napi-rs/canvas';
+import Image from '../../helpers/Image';
 import Tesseract from 'tesseract.js';
 import axios from 'axios';
+import Error from '../../utils/Errors';
 
 export default function() {
 	/**
@@ -16,9 +17,9 @@ export default function() {
 	router.get('/advice', async (_req, res) => {
 		try {
 			const advice = await axios.get('https://api.adviceslip.com/advice');
-			res.json({ success: advice.data.slip.advice });
+			res.json({ data: advice.data.slip.advice });
 		} catch (err: any) {
-			res.json({ error: err.message });
+			Error.GenericError(res, err.message);
 		}
 	});
 
@@ -35,12 +36,14 @@ export default function() {
 	 *         type: string
 	 */
 	router.get('/pokemon', async (req, res) => {
-		const { pokemon } = req.query;
+		const pokemon = req.query.pokemon as string;
+		if (!pokemon) return Error.MissingQuery(res, 'pokemon');
+
 		try {
 			const advice = await axios.get(`https://courses.cs.washington.edu/courses/cse154/webservices/pokedex/pokedex.php?pokemon=${pokemon}`);
-			res.json(advice.data);
+			res.json({ data: advice.data });
 		} catch (err: any) {
-			res.json({ error: err.message });
+			Error.GenericError(res, err.message);
 		}
 	});
 
@@ -76,17 +79,16 @@ export default function() {
 	 *         required: true
 	 *         type: string
 	 */
-	router.get('/colour', (req, res) => {
-		if (!req.query.colour) return res.json({ error: 'Missing colour query' });
+	router.get('/colour', async (req, res) => {
+		const colour = req.query.colour as string;
+		if (!colour) return Error.MissingQuery(res, 'colour');
 
 		try {
-			const canvas = createCanvas(200, 200),
-				context = canvas.getContext('2d');
-			context.fillStyle = req.query.colour as string;
-			context.fillRect(0, 0, 200, 200);
-			res.json({ success: canvas.toBuffer('image/png') });
+			const img = await Image.square(colour);
+			res.json({ data: img.toString() });
 		} catch (err: any) {
-			res.json({ error: err.message });
+			console.log(err);
+			Error.GenericError(res, err.message);
 		}
 	});
 
@@ -103,18 +105,19 @@ export default function() {
 	 *         type: string
 	 */
 	router.get('/get-text', async (req, res) => {
-		if (!req.query.url) return res.json({ error: 'Missing URL query' });
+		const url = req.query.url as string;
+		if (!url) return Error.MissingQuery(res, 'url');
 
 		// Extract text from the image provided
 		try {
-			const { data } = await Tesseract.recognize(req.query.url as string, 'eng');
+			const { data } = await Tesseract.recognize(url, 'eng');
 			if (!data.text) {
 				res.json({ error: 'No text was found!' });
 			} else {
-				res.json({ text: data.text });
+				res.json({ data: data.text });
 			}
 		} catch (err: any) {
-			res.json({ error: err.message });
+			Error.GenericError(res, err.message);
 		}
 	});
 
