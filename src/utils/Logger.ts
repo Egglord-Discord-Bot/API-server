@@ -27,7 +27,6 @@ export class Logger {
 				console.log(`${timestamp} ${chalk.bgRed(type.toUpperCase())} ${content} `);
 				break;
 			case 'debug':
-				console.log(process.env.debug);
 				if (!process.env.debug) return;
 				log.debug(content);
 				console.log(`${timestamp} ${chalk.green(type.toUpperCase())} ${content} `);

@@ -1,8 +1,8 @@
 import { Router } from 'express';
 const router = Router();
 import passport from 'passport';
-import { fetchEndpointUsagesPerUser } from '../database/userHistory';
-import { updateUser } from '../database/User';
+import { fetchEndpointUsagesPerUser, fetchAllEndpointUsage } from '../database/userHistory';
+import { updateUser, fetchUsers } from '../database/User';
 import type { Profile } from 'passport-discord';
 import { TokenGenerator, TokenBase } from 'ts-token-generator';
 import { fetchEndpointData } from '../database/endpointData';
@@ -12,8 +12,12 @@ export default function() {
 
 	// home page
 	router.get('/', async (req, res) => {
+		const [users, endpoint, endpointUsage] = await Promise.all([fetchUsers(), fetchEndpointData(), fetchAllEndpointUsage()]);
 		res.render('index', {
 			user: req.isAuthenticated() ? req.user : null,
+			userCount: users.length,
+			endpointCount: endpoint.length,
+			endpointUsageCount: endpointUsage.length,
 		});
 	});
 
