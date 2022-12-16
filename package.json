@@ -43,7 +43,7 @@
     "@napi-rs/canvas": "^0.1.30",
     "@prisma/client": "^4.5.0",
     "@skyra/gifenc": "^1.0.1",
-    "@tensorflow/tfjs-node": "^3.13.0",
+    "@tensorflow/tfjs-node": "^4.1.0",
     "@vitalets/google-translate-api": "^9.0.0",
     "axios": "^0.27.2",
     "body-parser": "^1.20.1",
@@ -61,10 +61,10 @@
     "on-finished": "^2.4.1",
     "passport": "^0.6.0",
     "passport-discord": "^0.1.4",
-    "puppeteer": "^18.0.5",
+    "puppeteer": "^19.4.1",
     "r6api.js": "^4.0.0",
     "simple-node-logger": "^21.8.12",
-    "tesseract.js": "^3.0.3",
+    "tesseract.js": "^4.0.1",
     "ts-token-generator": "^1.0.4"
   }
 }
