@@ -42,7 +42,7 @@
               </tr>
             </thead>
             <tbody>
-              <% for (u of users.flatMap(i => Array.from({ length: 20 }).fill(i))) { %>
+              <% for (u of users) { %>
                 <tr>
                   <% if (u.id == user.id) { %>
                     <th scope="row"><%= u.id %></th>
@@ -82,7 +82,6 @@
           <% } %>
         </tbody>
       </table>
-      <script src="/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
       <script>
         function updateUser(type, userId) {
           // Check if user value will be true or false
