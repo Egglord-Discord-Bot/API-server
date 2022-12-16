@@ -12,3 +12,12 @@ function copyUserToken() {
 	// Alert the copied text
 	alert('Token has been copied');
 }
+
+function ToggleTokenVisibility() {
+	const x = document.getElementById('myInput');
+	if (x.type === 'password') {
+		x.type = 'text';
+	} else {
+		x.type = 'password';
+	}
+}
