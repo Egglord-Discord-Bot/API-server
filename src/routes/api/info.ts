@@ -7,7 +7,7 @@ import { RedditPost } from '../../utils/types';
 import { translate } from '@vitalets/google-translate-api';
 import languages from '../../assets/JSON/languages.json';
 import Error from '../../utils/Errors';
-
+import ud from 'urban-dictionary';
 export type redditType = 'hot' | 'new';
 
 type redditChild = {
@@ -198,7 +198,7 @@ export default function() {
 	router.get('/translate', async (req, res) => {
 		// Get text to translate
 		const text = req.query.text;
-		if (!text) return res.json({ error: 'Missing text in query' });
+		if (!text) return Error.MissingQuery(res, 'text');
 
 		const lang = languages[req.query.lang as unknown as stuff ?? 'English'];
 		if (!lang) return res.json({ error: 'Invalid language' });
@@ -211,6 +211,26 @@ export default function() {
 		}
 	});
 
+	router.get('/lyrics', async (req, res) => {
+		// Get text to translate
+		const title = req.query.title;
+		if (!title) return Error.MissingQuery(res, 'title');
+
+		res.json({ error: 'Coming soon' });
+	});
+
+	router.get('/urban-dictionary', async (req, res) => {
+		// Get text to translate
+		const phrase = req.query.phrase as string;
+		if (!phrase) return Error.MissingQuery(res, 'phrase');
+
+		try {
+			const data = await ud.define(phrase);
+			res.json(data);
+		} catch (err: any) {
+			return Error.GenericError(res, err.message);
+		}
+	});
 
 	return router;
 }

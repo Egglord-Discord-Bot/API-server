@@ -130,7 +130,7 @@ export default function() {
 	 *     tags: misc
 	 */
 	router.get('/random-fact', async (_req, res) => {
-		fs.readFile('./src/assets/json/random-facts.json', async (err, data) => {
+		fs.readFile('./src/assets/JSON/random-facts.json', async (err, data) => {
 
 			if (err) return Error.GenericError(res, err.message);
 
