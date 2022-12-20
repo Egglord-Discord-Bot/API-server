@@ -12,6 +12,7 @@ import { Logger } from './utils/Logger';
 import { join } from 'path';
 import RateLimter from './middleware/RateLimiter';
 import bodyParser from 'body-parser';
+import Error from './utils/Errors';
 import * as dotenv from 'dotenv';
 dotenv.config();
 
@@ -19,7 +20,7 @@ dotenv.config();
 	// Load passport and endpoint data
 	(await import('./middleware/passport')).default(passport);
 	await (await import('./helpers/EndpointData')).default();
-
+	const endpoints = Utils.generateRoutes(join(__dirname, './', 'routes')).filter(e => e.route !== '/index');
 	const RateLimiterHandler = new RateLimter();
 
 	// The web server
@@ -69,8 +70,8 @@ dotenv.config();
 			if (req.originalUrl.startsWith('/api/') && !req.originalUrl.startsWith('/api/admin')) return RateLimiterHandler.checkRateLimit(req, res, next);
 			next();
 		});
+
 	// Dynamically load all endpoints
-	const endpoints = Utils.generateRoutes(join(__dirname, './', 'routes')).filter(e => e.route !== '/index');
 	for (const endpoint of endpoints) {
 		Logger.debug(`Loading: ${endpoint.route} endpoint.`);
 		app.use(endpoint.route, (await import(endpoint.path)).default());
@@ -79,5 +80,8 @@ dotenv.config();
 	// Run the server on port
 	app
 		.use('/', (await import('./routes/index')).default())
+		.use('/api/*', (req, res) => {
+			Error.MissingEndpoint(res, req.originalUrl);
+		})
 		.listen(process.env.port, () => Logger.log(`Started on PORT: ${process.env.port}`));
 })();
