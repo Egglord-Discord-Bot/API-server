@@ -5,6 +5,7 @@ import Image from '../../helpers/Image';
 import Tesseract from 'tesseract.js';
 import axios from 'axios';
 import Error from '../../utils/Errors';
+import * as fs from 'fs';
 
 export default function() {
 	/**
@@ -119,6 +120,25 @@ export default function() {
 		} catch (err: any) {
 			Error.GenericError(res, err.message);
 		}
+	});
+
+	/**
+	 * @API
+	 * /misc/random-fact:
+	 *   get:
+	 *     description: Get a random fact
+	 *     tags: misc
+	 */
+	router.get('/random-fact', async (_req, res) => {
+		fs.readFile('./src/assets/json/random-facts.json', async (err, data) => {
+
+			if (err) return Error.GenericError(res, err.message);
+
+			const { facts } = JSON.parse(data.toString());
+			const num = Math.floor((Math.random() * facts.length));
+
+			res.json({ data: facts[num] });
+		});
 	});
 
 	return router;
