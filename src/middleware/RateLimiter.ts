@@ -3,6 +3,7 @@ import type { Profile } from 'passport-discord';
 import { fetchUserByToken } from '../database/User';
 import { fetchEndpointData } from '../database/endpointData';
 import { createEndpoint } from '../database/userHistory';
+import type { User } from '@prisma/client';
 
 type endpointUsage = {
   name: string
@@ -43,13 +44,16 @@ export default class RateLimit {
 		const user = await this._extractUserId(req);
 		if (user === null) return this._sendRateLimitMessage(res, { isLoggedIn: false });
 
-		// Now check if user is rate limited by global rate Limit
-		const isGloballyRateLimited = this._checkGlobalCooldown(user.id);
-		if (isGloballyRateLimited) return this._sendRateLimitMessage(res, { global: true }, user.id);
+		// Bypass ratelimit if user is an Admin
+		if (!(user as User).isAdmin) {
+			// Now check if user is rate limited by global rate Limit
+			const isGloballyRateLimited = this._checkGlobalCooldown(user.id);
+			if (isGloballyRateLimited) return this._sendRateLimitMessage(res, { global: true }, user.id);
 
-		// Now check if user is rate limited by endpoint
-		const isRateLimitedByEndpoint = this.checkEndpointUsage(user.id, req.originalUrl.split('?')[0]);
-		if (isRateLimitedByEndpoint.isRateLimted) return this._sendRateLimitMessage(res, { global: false, isEndpoint: isRateLimitedByEndpoint.reason == 2 }, user.id);
+			// Now check if user is rate limited by endpoint
+			const isRateLimitedByEndpoint = this.checkEndpointUsage(user.id, req.originalUrl.split('?')[0]);
+			if (isRateLimitedByEndpoint.isRateLimted) return this._sendRateLimitMessage(res, { global: false, isEndpoint: isRateLimitedByEndpoint.reason == 2 }, user.id);
+		}
 
 		// User is logged in and not ratelimited at all
 		next();
@@ -97,14 +101,14 @@ export default class RateLimit {
 		let isRateLimted = { isRateLimted: false, reason: 0 };
 		if (this.userRatelimit.get(userID)) {
 			// User has been cached
-			if (this.userRatelimit.get(userID)?.endpoints.find(e => e.name == endpoint)) {
-				const end = this.userRatelimit.get(userID)?.endpoints.find(e => e.name == endpoint);
+			const end = this.userRatelimit.get(userID)?.endpoints.find(e => e.name == endpoint);
+			if (end != undefined) {
 				// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-				if (end!.lastAccess.length >= this.endpointData.find(e => e.name == endpoint)!.maxRequests) return { isRateLimted: true, reason: 1 };
+				if (end.lastAccess.length >= this.endpointData.find(e => e.name == endpoint)!.maxRequests) return { isRateLimted: true, reason: 1 };
 
 				isRateLimted = {
 					// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-					isRateLimted: end!.lastAccess.sort((a, b) => b.getTime() - a.getTime())[0].getTime() >= new Date().getTime() - (this.endpointData.find(e => e.name == endpoint)?.cooldown ?? 2000),
+					isRateLimted: (end.lastAccess.sort((a, b) => b.getTime() - a.getTime())[0]?.getTime() ?? 0) >= new Date().getTime() - (this.endpointData.find(e => e.name == endpoint)?.cooldown ?? 2000),
 					reason: 2 };
 			}
 		}
