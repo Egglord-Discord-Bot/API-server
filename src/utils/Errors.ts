@@ -30,4 +30,10 @@ export default class Error {
 			.status(500)
 			.json({ error: errMsg });
 	}
+
+	public static MissingEndpoint(res: Response, endpoint: string) {
+		return res
+			.status(404)
+			.json({ error: `${endpoint} is not a valid endpoint.` });
+	}
 }

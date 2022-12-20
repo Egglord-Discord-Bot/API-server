@@ -144,38 +144,6 @@ export default function() {
 
 	/**
 	 * @API
-	 * /info/github:
-	 *   get:
-	 *     description: Get information on a Github repo
-	 *     tags: info
-	 *			parameters:
-	 *       - name: repo
-	 *         description: The name of the author and name of repo
-	 *         required: true
-	 *         type: string
-	*/
-	const GithubHandler = new CacheHandler();
-	router.get('/github', async (req, res) => {
-		const repo = req.query.repo as string;
-
-		let sentData = {};
-		if (GithubHandler.data.get(repo)) {
-			sentData = GithubHandler.data.get(repo) as object;
-		} else {
-			try {
-				const data = (await axios.get(`https://api.github.com/repos/${repo}`)).data;
-				GithubHandler._addData({ id: repo, data: data });
-				sentData = data;
-			} catch (err: any) {
-				console.log(err);
-				return Error.GenericError(res, err.message);
-			}
-		}
-		res.json({ data: sentData });
-	});
-
-	/**
-	 * @API
 	 * /info/translate:
 	 *   get:
 	 *     description: Translate a message
