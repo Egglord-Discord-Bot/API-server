@@ -226,7 +226,7 @@ export default function() {
 
 		try {
 			const data = await ud.define(phrase);
-			res.json(data);
+			res.json({ data });
 		} catch (err: any) {
 			return Error.GenericError(res, err.message);
 		}
