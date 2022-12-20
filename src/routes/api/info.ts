@@ -18,6 +18,8 @@ type redditData = {
 }
 
 export default function() {
+	const CovidHandler = new CacheHandler();
+	const RedditHandler = new CacheHandler();
 
 	/**
 	 * @API
@@ -31,7 +33,6 @@ export default function() {
 	 *         required: false
 	 *         type: string
 	 */
-	const CovidHandler = new CacheHandler();
 	router.get('/covid', async (req, res) => {
 		const country = (req.query.country ?? '/all') as string;
 
@@ -54,7 +55,6 @@ export default function() {
 			}
 		}
 
-		// Check cache first
 		res.json({ data: data });
 	});
 
@@ -70,17 +70,15 @@ export default function() {
 	 *         required: true
 	 *         type: string
 	 */
-	const RedditHandler = new CacheHandler();
 	router.get('/reddit', async (req, res) => {
 		const sub = req.query.sub as string,
 			type = req.query.type ?? 'new';
-
 		if (!sub) return Error.MissingQuery(res, 'sub');
 
 		let sentData;
 		if (RedditHandler.data.get(`${sub}_${type}`)) {
 			const data = RedditHandler.data.get(`${sub}_${type}`) as redditData;
-			sentData = new RedditPost(data.children[Utils.randomInteger(21)].data);
+			sentData = new RedditPost(data.children[Utils.randomInteger(data.children.length)].data);
 		} else {
 			try {
 				const dataRes = (await axios.get(`https://reddit.com/r/${sub}/${type}.json?limit=20`)).data;
@@ -88,9 +86,7 @@ export default function() {
 				// Make sure the subreddit has posts
 				const post = dataRes.data.children[Utils.randomInteger(21)];
 				const p = post?.data;
-				if (!p) {
-					res.json({ error: 'Subreddit does not exist or doesn\'t have any posts yet.' });
-				}
+				if (!p) return Error.GenericError(res, 'Subreddit does not exist or doesn\'t have any posts yet.');
 
 				// Return the data
 				RedditHandler._addData({ id: `${sub}_${type}`, data: dataRes.data });
@@ -99,8 +95,8 @@ export default function() {
 				console.log(err);
 				return Error.GenericError(res, err.message);
 			}
-			res.json({ data: sentData });
 		}
+		res.json({ data: sentData });
 	});
 
 	/**
