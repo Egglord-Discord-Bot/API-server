@@ -58,17 +58,21 @@ export default function() {
 	*/
 	router.get('/mc', async (req, res) => {
 		// Check query paramters
-		const { ip, port } = req.query;
+		const ip = req.query.ip as string;
+		const port = req.query.port as string;
 
 		if (!ip) return Error.MissingQuery(res, 'ip');
-		if (Number(port as string)) {
-			if (Number(port) <= 0 || Number(port) >= 65536) return Error.InvalidRange(res, 'port', [0, 65535]);
-		} else {
-			return Error.IncorrectType(res, 'port', 'number');
+
+		if (port) {
+			if (Number(port as string)) {
+				if (Number(port) <= 0 || Number(port) >= 65536) return Error.InvalidRange(res, 'port', [0, 65535]);
+			} else {
+				return Error.IncorrectType(res, 'port', 'number');
+			}
 		}
 
 		try {
-			const response = await status(ip as string, Number(port) ?? 25565);
+			const response = await status(ip as string, port ? Number(port) : 25565);
 			res.json({ data: response });
 		} catch (err: any) {
 			console.log(err);
