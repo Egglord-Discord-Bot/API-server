@@ -1,10 +1,15 @@
 import { Router } from 'express';
 import CacheHandler from '../../helpers/CacheHandler';
+import TwitchHandler from '../../helpers/TwitchHandler';
 import Error from '../../utils/Errors';
 import axios from 'axios';
 const router = Router();
 
 export default function() {
+	const SteamHandler = new CacheHandler();
+	const GithubHandler = new CacheHandler();
+	const TwitchCacheHandler = new TwitchHandler();
+
 	/**
    * @API
    * /socials/steam:
@@ -21,10 +26,8 @@ export default function() {
    *         required: true
    *         type: string
   */
-	const SteamHandler = new CacheHandler();
 	router.get('/steam', async (req, res) => {
 		const username = req.query.username as string;
-
 		if (!username) return Error.MissingQuery(res, 'username');
 
 		let data = {};
@@ -77,9 +80,9 @@ export default function() {
    *         required: true
    *         type: string
   */
-	const GithubHandler = new CacheHandler();
 	router.get('/github', async (req, res) => {
 		const repo = req.query.repo as string;
+		if (!repo) return Error.MissingQuery(res, 'repo');
 
 		let sentData = {};
 		if (GithubHandler.data.get(repo)) {
@@ -94,6 +97,42 @@ export default function() {
 				return Error.GenericError(res, err.message);
 			}
 		}
+		res.json({ data: sentData });
+	});
+
+	/**
+   * @API
+   * /socials/twitch:
+   *   get:
+   *     description: Get information on a twitch username
+   *     tags: social
+   *			parameters:
+   *       - name: username
+   *         description: The username of the twitch account.
+   *         required: true
+   *         type: string
+  */
+	router.get('/twitch', async (req, res) => {
+		const username = req.query.username as string;
+		if (!username) return Error.MissingQuery(res, 'username');
+
+		let sentData = {};
+		if (TwitchCacheHandler.data.get(username)) {
+			sentData = TwitchCacheHandler.data.get(username) as object;
+		} else {
+			try {
+				const res1 = await TwitchCacheHandler.getUserByUsername(username);
+				const res2 = await TwitchCacheHandler.getStreamByUsername(username);
+				const data = Object.assign(res1, res2);
+
+				TwitchCacheHandler._addData({ id: username, data: data });
+				sentData = data;
+			} catch (err: any) {
+				console.log(err);
+				return Error.GenericError(res, err.message);
+			}
+		}
+
 		res.json({ data: sentData });
 	});
 
