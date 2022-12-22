@@ -122,8 +122,11 @@ export default function() {
 		} else {
 			try {
 				const res1 = await TwitchCacheHandler.getUserByUsername(username);
-				const res2 = await TwitchCacheHandler.getStreamByUsername(username);
-				const data = Object.assign(res1, res2);
+				if (res1.error) return Error.GenericError(res, 'Incorrect Username.');
+
+				// Fetch if their streaming + following count
+				const [res2, followerCount] = await Promise.all([TwitchCacheHandler.getStreamByUsername(username), TwitchCacheHandler.getFollowersFromId(res1.id)]);
+				const data = Object.assign(res1, res2, { followers: followerCount });
 
 				TwitchCacheHandler._addData({ id: username, data: data });
 				sentData = data;

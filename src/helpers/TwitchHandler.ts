@@ -48,8 +48,14 @@ export default class TwitchHandler extends CacheHandler {
 
 			return data;
 		} catch (err: any) {
-			return this.refreshTokens()
-				.then(() => this.request(endpoint, queryParams));
+			switch (err.response.data.error) {
+				case 'Bad Request':
+					return err.data;
+				case 'Unauthorized': {
+					return this.refreshTokens()
+						.then(() => this.request(endpoint, queryParams));
+				}
+			}
 		}
 	}
 
