@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import CacheHandler from '../../helpers/CacheHandler';
 import TwitchHandler from '../../helpers/TwitchHandler';
+import TwitterHandler from '../../helpers/TwitterHandler';
 import Error from '../../utils/Errors';
 import axios from 'axios';
 const router = Router();
@@ -9,6 +10,7 @@ export default function() {
 	const SteamHandler = new CacheHandler();
 	const GithubHandler = new CacheHandler();
 	const TwitchCacheHandler = new TwitchHandler();
+	const TwitterCacheHandler = new TwitterHandler();
 
 	/**
    * @API
@@ -134,6 +136,43 @@ export default function() {
 				console.log(err);
 				return Error.GenericError(res, err.message);
 			}
+		}
+
+		res.json({ data: sentData });
+	});
+
+	/**
+   * @API
+   * /socials/twitter:
+   *   get:
+   *     description: Get information on a twitter username
+   *     tags: social
+   *			parameters:
+   *       - name: username
+   *         description: The username of the twitter account.
+   *         required: true
+   *         type: string
+  */
+	router.get('/twitter', async (req, res) => {
+		const username = req.query.username as string;
+		if (!username) return Error.MissingQuery(res, 'username');
+
+		// Fetch user data if user is found
+		let sentData = {};
+		if (TwitterCacheHandler.data.get(username)) {
+			sentData = TwitterCacheHandler.data.get(username) as object;
+		} else {
+			try {
+				const data = await TwitterCacheHandler.fetchUser(username);
+				if (data.errors) return Error.GenericError(res, data.errors[0].message);
+
+				TwitterCacheHandler._addData({ id: username, data: data });
+				sentData = data;
+			} catch (err: any) {
+				console.log(err);
+				return Error.GenericError(res, err.message);
+			}
+
 		}
 
 		res.json({ data: sentData });

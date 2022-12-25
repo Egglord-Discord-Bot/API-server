@@ -72,7 +72,6 @@ export default class TwitchHandler extends CacheHandler {
 	*/
 	async refreshTokens() {
 		const { data } = await axios.post(`https://id.twitch.tv/oauth2/token?client_id=${process.env.twitchId as string}&client_secret=${process.env.twitchSecret as string}&grant_type=client_credentials`);
-
 		this.access_token = data.access_token;
 	}
 }
