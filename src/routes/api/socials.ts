@@ -141,6 +141,7 @@ export default function() {
 						started_at: res2.started_at,
 						viewer_count: res2.viewer_count,
 						is_mature: res2.is_mature,
+						thumbnail_url: res2.thumbnail_url,
 					} : null });
 
 				TwitchCacheHandler._addData({ id: username, data: data });
