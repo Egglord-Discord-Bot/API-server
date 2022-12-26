@@ -33,6 +33,7 @@
     "@types/passport": "^1.0.11",
     "@types/passport-discord": "^0.1.6",
     "@types/urban-dictionary": "^3.0.0",
+    "@types/xml2js": "^0.4.11",
     "@typescript-eslint/eslint-plugin": "^5.38.1",
     "@typescript-eslint/parser": "^5.38.1",
     "eslint": "^8.7.0",
@@ -67,6 +68,7 @@
     "simple-node-logger": "^21.8.12",
     "tesseract.js": "^4.0.1",
     "ts-token-generator": "^1.0.4",
-    "urban-dictionary": "^3.0.2"
+    "urban-dictionary": "^3.0.2",
+    "xml2js": "^0.4.23"
   }
 }

@@ -8,6 +8,7 @@ import { translate } from '@vitalets/google-translate-api';
 import languages from '../../assets/JSON/languages.json';
 import Error from '../../utils/Errors';
 import ud from 'urban-dictionary';
+import { parseString } from 'xml2js';
 export type redditType = 'hot' | 'new';
 
 type redditChild = {
@@ -20,6 +21,8 @@ type redditData = {
 export default function() {
 	const CovidHandler = new CacheHandler();
 	const RedditHandler = new CacheHandler();
+	const NPMHandler = new CacheHandler();
+	const WeatherHandler = new CacheHandler();
 
 	/**
 	 * @API
@@ -111,7 +114,6 @@ export default function() {
 	 *         required: true
 	 *         type: string
 	*/
-	const NPMHandler = new CacheHandler();
 	router.get('/npm', async (req, res) => {
 		const npmPackage = req.query.package as string;
 		if (!npmPackage) return res.json({ error: 'No NPM package was provided in the query' });
@@ -194,6 +196,37 @@ export default function() {
 		} catch (err: any) {
 			return Error.GenericError(res, err.message);
 		}
+	});
+
+	router.get('/weather', async (req, res) => {
+		// Get location to get weather from
+		const location = req.query.location as string;
+		if (!location) return Error.MissingQuery(res, 'location');
+
+		let sentData = {};
+		if (WeatherHandler.data.get(location)) {
+			sentData = WeatherHandler.data.get(location) as object;
+		} else {
+			try {
+				const { data } = await axios.get(`http://weather.service.msn.com/find.aspx?src=outlook&weadegreetype=C&culture=en-US&weasearchstr=${location}`);
+
+				parseString(data, function(err, result) {
+					if (err) return Error.GenericError(res, err.message);
+
+					const resp = {
+						location: result.weatherdata.weather[0].$.weatherlocationname,
+						current: result.weatherdata.weather[0].current[0].$,
+						forecast: result.weatherdata.weather[0].forecast.map((d: any) => d.$),
+					};
+					WeatherHandler._addData({ id: location, data: resp });
+					sentData = resp;
+				});
+			} catch (err: any) {
+				console.log(err);
+				return Error.GenericError(res, err.message);
+			}
+		}
+		res.json({ data: sentData });
 	});
 
 	return router;
