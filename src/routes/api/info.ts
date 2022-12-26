@@ -200,7 +200,7 @@ export default function() {
 
 	router.get('/weather', async (req, res) => {
 		// Get location to get weather from
-		const location = req.query.location as string;
+		const location = encodeURIComponent(req.query.location as string);
 		if (!location) return Error.MissingQuery(res, 'location');
 
 		let sentData = {};
