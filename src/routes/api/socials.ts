@@ -53,11 +53,15 @@ export default function() {
 					realname: data1.players[0].realname,
 					avatar: data1.players[0].avatarfull,
 					createdAt: data1.players[0].timecreated,
-					CommunityBanned: data2.players[0].CommunityBanned,
-					VACBanned: data2.players[0].VACBanned,
-					NumberOfVACBans: data2.players[0].NumberOfVACBans,
-					DaysSinceLastBan: data2.players[0].DaysSinceLastBan,
-					NumberOfGameBans: data2.players[0].NumberOfGameBans,
+					bans: {
+						CommunityBanned: data2.players[0].CommunityBanned,
+						VACBanned: data2.players[0].VACBanned,
+						NumberOfVACBans: data2.players[0].NumberOfVACBans,
+						DaysSinceLastBan: data2.players[0].DaysSinceLastBan,
+						NumberOfGameBans: data2.players[0].NumberOfGameBans,
+					},
+					status: ['Offline', 'Online', 'Busy', 'Away', 'Snooze', 'Looking to trade', 'Looking to play'][data1.players[0].personastate],
+					countryCode: data1.players[0].loccountrycode,
 				};
 				SteamHandler._addData({ id: username, data: data });
 			} catch (err: any) {
