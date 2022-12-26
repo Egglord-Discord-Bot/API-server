@@ -1,10 +1,10 @@
 import { Router } from 'express';
 const router = Router();
 import axios from 'axios';
-import R6API from '../../helpers/R6API';
+// import R6API from '../../helpers/R6API';
 import { status } from 'minecraft-server-util';
 import Error from '../../utils/Errors';
-const R6Handler = new R6API({ email: process.env.R6Email, password: process.env.R6Password });
+// const R6Handler = new R6API({ email: process.env.R6Email, password: process.env.R6Password });
 
 export default function() {
 	/**
@@ -95,8 +95,9 @@ export default function() {
 	 *         required: true
 	 *         type: string
 	*/
-	router.get('/r6', async () => {
-		console.log(await R6Handler.findByUsername('5172a557-50b5-4665-b7db-e3f2e8c5041d', 'ThatGingerGuy02'));
+	router.get('/r6', async (_req, res) => {
+		// console.log(await R6Handler.findByUsername('5172a557-50b5-4665-b7db-e3f2e8c5041d', 'ThatGingerGuy02'));
+		res.json({ error: 'Coming soon' });
 	});
 
 	return router;
