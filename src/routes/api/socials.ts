@@ -132,7 +132,16 @@ export default function() {
 
 				// Fetch if their streaming + following count
 				const [res2, followerCount] = await Promise.all([TwitchCacheHandler.getStreamByUsername(username), TwitchCacheHandler.getFollowersFromId(res1.id)]);
-				const data = Object.assign(res1, res2, { followers: followerCount });
+
+				const data = Object.assign(res1,
+					{ followers: followerCount },
+					{ steaming: res2?.viewer_count ? {
+						title: res2.title,
+						game: res2.game_name,
+						started_at: res2.started_at,
+						viewer_count: res2.viewer_count,
+						is_mature: res2.is_mature,
+					} : null });
 
 				TwitchCacheHandler._addData({ id: username, data: data });
 				sentData = data;
