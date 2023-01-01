@@ -51,7 +51,7 @@ export default class RateLimit {
 			if (isGloballyRateLimited) return this._sendRateLimitMessage(res, { global: true }, user.id);
 
 			// Now check if user is rate limited by endpoint
-			const isRateLimitedByEndpoint = this.checkEndpointUsage(user.id, req.originalUrl.split('?')[0]);
+			const isRateLimitedByEndpoint = await this.checkEndpointUsage(user.id, req.originalUrl.split('?')[0]);
 			if (isRateLimitedByEndpoint.isRateLimted) return this._sendRateLimitMessage(res, { global: false, isEndpoint: isRateLimitedByEndpoint.reason == 2 }, user.id);
 		}
 
@@ -97,7 +97,7 @@ export default class RateLimit {
     * @param {string} endpoint The endpoint name
     * @returns Whether or not they are ratelimited on the endpoint
   */
-	checkEndpointUsage(userID: string, endpoint: string) {
+	async checkEndpointUsage(userID: string, endpoint: string) {
 		let isRateLimted = { isRateLimted: false, reason: 0 };
 		if (this.userRatelimit.get(userID)) {
 			// User has been cached
@@ -114,7 +114,7 @@ export default class RateLimit {
 		}
 
 		// Only save to user's history if not ratelimited
-		if (!isRateLimted.isRateLimted) this.addEndpoint(userID, endpoint);
+		if (!isRateLimted.isRateLimted) await this.addEndpoint(userID, endpoint);
 		return isRateLimted;
 	}
 
@@ -123,7 +123,7 @@ export default class RateLimit {
     * @param {string} userId The ID of the user getting checked
     * @param {string} endpoint The endpoint name
   */
-	addEndpoint(userId: string, endpoint: string) {
+	async addEndpoint(userId: string, endpoint: string) {
 		if (this.userRatelimit.get(userId)) {
 			const user = this.userRatelimit.get(userId);
 			if (user?.endpoints.find(e => e.name == endpoint)) {
@@ -136,7 +136,7 @@ export default class RateLimit {
 		}
 
 		// Save to users' history
-		createEndpoint({ id: userId, endpoint: endpoint });
+		await createEndpoint({ id: userId, endpoint: endpoint });
 	}
 
 	/**
