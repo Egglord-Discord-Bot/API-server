@@ -53,6 +53,8 @@ export default class RateLimit {
 			// Now check if user is rate limited by endpoint
 			const isRateLimitedByEndpoint = await this.checkEndpointUsage(user.id, req.originalUrl.split('?')[0]);
 			if (isRateLimitedByEndpoint.isRateLimted) return this._sendRateLimitMessage(res, { global: false, isEndpoint: isRateLimitedByEndpoint.reason == 2 }, user.id);
+		} else {
+			await createEndpoint({ id: user.id, endpoint: req.originalUrl.split('?')[0] });
 		}
 
 		// User is logged in and not ratelimited at all
