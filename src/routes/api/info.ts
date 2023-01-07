@@ -229,5 +229,9 @@ export default function() {
 		res.json({ data: sentData });
 	});
 
+	router.get('/validate', (_req, res)=> {
+		res.json({ data: 'Correct API token' });
+	});
+
 	return router;
 }
