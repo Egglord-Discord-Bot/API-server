@@ -1,10 +1,10 @@
 import { Router } from 'express';
 const router = Router();
 import axios from 'axios';
-// import R6API from '../../helpers/R6API';
+import R6API from 'r6api.js';
 import { status } from 'minecraft-server-util';
 import Error from '../../utils/Errors';
-// const R6Handler = new R6API({ email: process.env.R6Email, password: process.env.R6Password });
+const { findByUsername, getRanks, getStats, getProgression } = new R6API({ email: process.env.R6Email, password: process.env.R6Password });
 
 export default function() {
 	/**
@@ -95,9 +95,51 @@ export default function() {
 	 *         required: true
 	 *         type: string
 	*/
-	router.get('/r6', async (_req, res) => {
-		// console.log(await R6Handler.findByUsername('5172a557-50b5-4665-b7db-e3f2e8c5041d', 'ThatGingerGuy02'));
-		res.json({ error: 'Coming soon' });
+	router.get('/r6', async (req, res) => {
+		const username = req.query.username as string;
+		if (!username) return Error.MissingQuery(res, 'username');
+
+		const platform = req.query.platform as string;
+		if (!platform) return Error.MissingQuery(res, 'platform');
+
+		const region = req.query.region as string;
+		if (!region) return Error.MissingQuery(res, 'region');
+
+		// Make sure type is from set
+		type platformType = 'uplay' | 'psn' | 'xbl'
+		const platformAllowedTypes = ['uplay', 'psn', 'xbl'];
+		if (!platformAllowedTypes.includes(platform)) return Error.InvalidValue(res, 'type', platformAllowedTypes);
+
+		// Make sure type is from set
+		type regionType = 'apac' | 'emea' | 'ncsa'
+		const regionAllowedTypes = ['uplay', 'psn', 'xbl'];
+		if (!regionAllowedTypes.includes(platform)) return Error.InvalidValue(res, 'type', regionAllowedTypes);
+
+		const { 0: player } = await findByUsername(platform as platformType, username);
+		if (!player) return res.json({ error: 'sdfdsdfs' });
+
+		const [{ 0: playerRank }, { 0: playerStats }, { 0: playerGame }] = await Promise.all([getRanks(platform as platformType, player.id), getStats(platform as platformType, player.id), getProgression(platform as platformType, player.id)]);
+
+		const { current, max } = playerRank.seasons[27].regions[region as regionType].boards.pvp_ranked;
+		const { pvp, pve } = playerStats;
+		const { level, xp } = playerGame;
+		res.json({ data: {
+			id: player.userId,
+			username: player.username,
+			platform: player.platform,
+			profileURL: player.avatar[500],
+			rank: {
+				current: {
+					name: current.name,
+					mmr: current.mmr,
+				},
+				max: {
+					name: max.name,
+					mmr: max.mmr,
+				},
+			},
+			pvp: pvp.general, pve: pve.general, level, xp,
+		} });
 	});
 
 	return router;
