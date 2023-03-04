@@ -30,8 +30,7 @@ function getParameters(comment: string[]): Array<ParamAPIEndpoint> {
 	if (comment.indexOf('parameters:') != -1) {
 		const firstValue = comment.indexOf('parameters:');
 		const lastValue = comment.indexOf('responses:');
-		const parameters: Array<string> = comment.slice(firstValue + 1, lastValue);
-
+		const parameters: Array<string> = comment.slice(firstValue + 1, lastValue == -1 ? comment.length : lastValue);
 		finalParams = parameters.reduce((resultArray: Array<any>, item, index) => {
 			const chunkIndex = Math.floor(index / 4);
 
