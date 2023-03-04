@@ -21,7 +21,9 @@ export default function() {
 		const image = req.query.image1;
 		try {
 			const img = await Image.affect(image as string);
-			res.json({ data: img.toString() });
+			res.set('Content-Disposition', 'inline; filename=affect.png');
+			res.setHeader('content-type', 'image/png');
+			res.send(img);
 		} catch (err: any) {
 			console.log(err);
 			Error.GenericError(res, err.message);
@@ -44,7 +46,9 @@ export default function() {
 		const image = req.query.image1;
 		try {
 			const img = await Image.beautiful(image as string);
-			res.json({ data: img.toString() });
+			res.set('Content-Disposition', 'inline; filename=beautiful.png');
+			res.setHeader('content-type', 'image/png');
+			res.send(img);
 		} catch (err: any) {
 			console.log(err);
 			Error.GenericError(res, err.message);
@@ -72,7 +76,9 @@ export default function() {
 		const image2 = req.query.image2;
 		try {
 			const img = await Image.bed(image as string, image2 as string);
-			res.json({ data: img.toString() });
+			res.set('Content-Disposition', 'inline; filename=bed.png');
+			res.setHeader('content-type', 'image/png');
+			res.send(img);
 		} catch (err: any) {
 			console.log(err);
 			Error.GenericError(res, err.message);
@@ -95,7 +101,9 @@ export default function() {
 		const image = req.query.image1;
 		try {
 			const img = await Image.blur(image as string);
-			res.json({ data: img.toString() });
+			res.set('Content-Disposition', 'inline; filename=blur.png');
+			res.setHeader('content-type', 'image/png');
+			res.send(img);
 		} catch (err: any) {
 			console.log(err);
 			Error.GenericError(res, err.message);
@@ -120,7 +128,9 @@ export default function() {
 
 		try {
 			const img = await Image.changemymind(text as string);
-			res.json({ data: img.toString() });
+			res.set('Content-Disposition', 'inline; filename=changemymind.png');
+			res.setHeader('content-type', 'image/png');
+			res.send(img);
 		} catch (err: any) {
 			console.log(err);
 			Error.GenericError(res, err.message);
@@ -143,7 +153,9 @@ export default function() {
 		const image = req.query.image1;
 		try {
 			const img = await Image.circle(image as string);
-			res.json({ data: img.toString() });
+			res.set('Content-Disposition', 'inline; filename=circle.png');
+			res.setHeader('content-type', 'image/png');
+			res.send(img);
 		} catch (err: any) {
 			console.log(err);
 			Error.GenericError(res, err.message);
@@ -168,7 +180,9 @@ export default function() {
 		const image3 = req.query.image3;
 		try {
 			const img = await Image.distracted(image1 as string, image2 as string, image3 as string);
-			res.json({ data: img.toString() });
+			res.set('Content-Disposition', 'inline; filename=distracted.png');
+			res.setHeader('content-type', 'image/png');
+			res.send(img);
 		} catch (err: any) {
 			console.log(err);
 			Error.GenericError(res, err.message);
@@ -191,7 +205,9 @@ export default function() {
 		const image = req.query.image1;
 		try {
 			const img = await Image.facepalm(image as string);
-			res.json({ data: img.toString() });
+			res.set('Content-Disposition', 'inline; filename=facepalm.png');
+			res.setHeader('content-type', 'image/png');
+			res.send(img);
 		} catch (err: any) {
 			console.log(err);
 			Error.GenericError(res, err.message);
@@ -214,7 +230,9 @@ export default function() {
 		const image = req.query.image1;
 		try {
 			const img = await Image.invert(image as string);
-			res.json({ data: img.toString() });
+			res.set('Content-Disposition', 'inline; filename=invert.png');
+			res.setHeader('content-type', 'image/png');
+			res.send(img);
 		} catch (err: any) {
 			console.log(err);
 			Error.GenericError(res, err.message);
@@ -237,7 +255,9 @@ export default function() {
 		const image = req.query.image1;
 		try {
 			const img = await Image.jokeOverHead(image as string);
-			res.json({ data: img.toString() });
+			res.set('Content-Disposition', 'inline; filename=joke-over-head.png');
+			res.setHeader('content-type', 'image/png');
+			res.send(img);
 		} catch (err: any) {
 			console.log(err);
 			Error.GenericError(res, err.message);
@@ -265,7 +285,9 @@ export default function() {
 		const image2 = req.query.image2;
 		try {
 			const img = await Image.kiss(image1 as string, image2 as string);
-			res.json({ data: img.toString() });
+			res.set('Content-Disposition', 'inline; filename=kiss.png');
+			res.setHeader('content-type', 'image/png');
+			res.send(img);
 		} catch (err: any) {
 			console.log(err);
 			Error.GenericError(res, err.message);
@@ -290,7 +312,9 @@ export default function() {
 
 		try {
 			const img = await Image.ohno(text as string);
-			res.json({ data: img.toString() });
+			res.set('Content-Disposition', 'inline; filename=ohno.png');
+			res.setHeader('content-type', 'image/png');
+			res.send(img);
 		} catch (err: any) {
 			console.log(err);
 			Error.GenericError(res, err.message);
@@ -313,7 +337,9 @@ export default function() {
 		const image = req.query.image1;
 		try {
 			const img = await Image.rip(image as string);
-			res.json({ data: img.toString() });
+			res.set('Content-Disposition', 'inline; filename=rip.png');
+			res.setHeader('content-type', 'image/png');
+			res.send(img);
 		} catch (err: any) {
 			console.log(err);
 			Error.GenericError(res, err.message);
@@ -337,7 +363,9 @@ export default function() {
 		const image2 = req.query.image2;
 		try {
 			const img = await Image.slap(image1 as string, image2 as string);
-			res.json({ data: img.toString() });
+			res.set('Content-Disposition', 'inline; filename=slap.png');
+			res.setHeader('content-type', 'image/png');
+			res.send(img);
 		} catch (err: any) {
 			console.log(err);
 			Error.GenericError(res, err.message);
@@ -365,7 +393,9 @@ export default function() {
 		const image2 = req.query.image2;
 		try {
 			const img = await Image.spank(image1 as string, image2 as string);
-			res.json({ data: img.toString() });
+			res.set('Content-Disposition', 'inline; filename=spank.png');
+			res.setHeader('content-type', 'image/png');
+			res.send(img);
 		} catch (err: any) {
 			console.log(err);
 			Error.GenericError(res, err.message);
@@ -388,7 +418,9 @@ export default function() {
 		const image = req.query.image1;
 		try {
 			const img = await Image.trigger(image as string);
-			res.json({ data: img.toString() });
+			res.set('Content-Disposition', 'inline; filename=trigger.png');
+			res.setHeader('content-type', 'image/png');
+			res.send(img);
 		} catch (err: any) {
 			console.log(err);
 			Error.GenericError(res, err.message);
