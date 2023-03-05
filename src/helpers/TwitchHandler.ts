@@ -1,4 +1,5 @@
 import CacheHandler from './CacheHandler';
+import type { TwitchRequest } from '../utils/types';
 import axios from 'axios';
 
 export default class TwitchHandler extends CacheHandler {
@@ -13,7 +14,7 @@ export default class TwitchHandler extends CacheHandler {
 	 * @param {interaction} login The username to search
 	*/
 	async getUserByUsername(login: string) {
-		return this.request('/users', { login }).then((u: any) => u && u.data[0]);
+		return this.request('/users', { login }).then((u) => u && u.data[0]);
 	}
 
 	/**
@@ -21,7 +22,7 @@ export default class TwitchHandler extends CacheHandler {
 	 * @param {interaction} username The username to search
 	*/
 	async getStreamByUsername(username: string) {
-		return this.request('/streams', { user_login: username }).then((s: any) => s && s.data[0]);
+		return this.request('/streams', { user_login: username }).then((s) => s && s.data[0]);
 	}
 
 	/**
@@ -29,10 +30,8 @@ export default class TwitchHandler extends CacheHandler {
 	 * @param {string} endpoint the endpoint of the twitch API to request
 	 * @param {object} queryParams The query sent to twitch API
 	*/
-	// @ts-ignore
-	async request(endpoint: string, queryParams = {}) {
+	async request(endpoint: string, queryParams = {}): Promise<TwitchRequest | undefined> {
 		const qParams = new URLSearchParams(queryParams);
-
 		try {
 			const { data } = await axios.get(`https://api.twitch.tv/helix${endpoint}?${qParams.toString()}`, {
 				headers: {
@@ -45,8 +44,8 @@ export default class TwitchHandler extends CacheHandler {
 				return this.refreshTokens()
 					.then(() => this.request(endpoint, queryParams));
 			}
-
-			return data;
+			console.log('data', data);
+			return data as TwitchRequest;
 		} catch (err: any) {
 			switch (err.response.data.error) {
 				case 'Bad Request':
@@ -64,7 +63,7 @@ export default class TwitchHandler extends CacheHandler {
 	 * @param {string} id the ID of the user
 	*/
 	async getFollowersFromId(id: string) {
-		return this.request('/users/follows', { to_id: id }).then((u: any) => u && u.total);
+		return this.request('/users/follows', { to_id: id }).then(u => u && u.total);
 	}
 
 	/**
