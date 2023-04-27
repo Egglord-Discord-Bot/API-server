@@ -22,7 +22,7 @@ export default class Image {
 
 	static async beautiful(image: imageParam) {
 		const img = await Canvas.loadImage(image);
-		const base = await Canvas.loadImage(Image._getImage('BEAUTIFUL'));
+		const base = await Canvas.loadImage(Image._getImage('beautiful'));
 
 		const canvas = Canvas.createCanvas(376, 400);
 		const ctx = canvas.getContext('2d');
@@ -39,7 +39,7 @@ export default class Image {
 	static async bed(image1: imageParam, image2: imageParam) {
 		const avatar = await Canvas.loadImage(image1);
 		const avatar1 = await Canvas.loadImage(image2);
-		const background = await Canvas.loadImage(Image._getImage('BED'));
+		const background = await Canvas.loadImage(Image._getImage('bed'));
 
 		const canvas = Canvas.createCanvas(background.width, background.height);
 		const ctx = canvas.getContext('2d');
@@ -72,7 +72,7 @@ export default class Image {
 	}
 
 	static async changemymind(text: string) {
-		const base = await Canvas.loadImage(Image._getImage('CHANGEMYMIND'));
+		const base = await Canvas.loadImage(Image._getImage('changemymind'));
 		const canvas = Canvas.createCanvas(base.width, base.height);
 		const ctx = canvas.getContext('2d');
 		ctx.drawImage(base, 0, 0, canvas.width, canvas.height);
@@ -133,7 +133,7 @@ export default class Image {
 	}
 
 	static async clyde(text: string) {
-		const background = await Canvas.loadImage(Image._getImage('CLYDE'));
+		const background = await Canvas.loadImage(Image._getImage('clyde'));
 		const canvas = Canvas.createCanvas(background.width, background.height);
 		const ctx = canvas.getContext('2d');
 		ctx.drawImage(background, 0, 0, canvas.width, canvas.height);
@@ -149,7 +149,7 @@ export default class Image {
 	}
 
 	static async distracted(image1: imageParam, image2: imageParam, image3 = '') {
-		const background = await Canvas.loadImage(Image._getImage('DISTRACTED'));
+		const background = await Canvas.loadImage(Image._getImage('distracted'));
 		const avatar1 = await Canvas.loadImage(await Image.circle(image1));
 		const avatar2 = await Canvas.loadImage(await Image.circle(image2));
 		const avatar3 = image3 ? await Canvas.loadImage(await Image.circle(image3)) : null;
@@ -168,7 +168,7 @@ export default class Image {
 	}
 
 	static async facepalm(image: imageParam) {
-		const layer = await Canvas.loadImage(Image._getImage('FACEPALM'));
+		const layer = await Canvas.loadImage(Image._getImage('facepalm'));
 		const canvas = Canvas.createCanvas(632, 357);
 		const ctx = canvas.getContext('2d');
 		ctx.fillStyle = 'black';
@@ -205,7 +205,7 @@ export default class Image {
 	}
 
 	static async jokeOverHead(image: imageParam) {
-		const layer = await Canvas.loadImage(Image._getImage('JOKEOVERHEAD'));
+		const layer = await Canvas.loadImage(Image._getImage('jokeoverhead'));
 		const img = await Canvas.loadImage(image);
 		const canvas = Canvas.createCanvas(425, 404);
 		const ctx = canvas.getContext('2d');
@@ -222,7 +222,7 @@ export default class Image {
 	static async kiss(image1: imageParam, image2: imageParam) {
 		const canvas = Canvas.createCanvas(768, 574);
 		const ctx = canvas.getContext('2d');
-		const background = await Canvas.loadImage(Image._getImage('KISS'));
+		const background = await Canvas.loadImage(Image._getImage('kiss'));
 		ctx.drawImage(background, 0, 0, canvas.width, canvas.height);
 		const avatar = await Canvas.loadImage(image1);
 		const avatar1 = await Canvas.loadImage(image2);
@@ -235,7 +235,7 @@ export default class Image {
 	}
 
 	static async ohno(message: string) {
-		const bg = await Canvas.loadImage(Image._getImage('OHNO'));
+		const bg = await Canvas.loadImage(Image._getImage('ohno'));
 		const canvas = Canvas.createCanvas(1000, 1000);
 		const ctx = canvas.getContext('2d');
 
@@ -267,7 +267,7 @@ export default class Image {
 	static async slap(image1: imageParam, image2: imageParam) {
 		const canvas = Canvas.createCanvas(1000, 500);
 		const ctx = canvas.getContext('2d');
-		const background = await Canvas.loadImage(Image._getImage('BATSLAP'));
+		const background = await Canvas.loadImage(Image._getImage('batslap'));
 		ctx.drawImage(background, 0, 0, canvas.width, canvas.height);
 		const avatar = await Canvas.loadImage(image1);
 		const avatar1 = await Canvas.loadImage(image2);
@@ -282,7 +282,7 @@ export default class Image {
 	static async spank(image1: imageParam, image2: imageParam) {
 		const canvas = Canvas.createCanvas(500, 500);
 		const ctx = canvas.getContext('2d');
-		const background = await Canvas.loadImage(Image._getImage('SPANK'));
+		const background = await Canvas.loadImage(Image._getImage('spank'));
 		ctx.drawImage(background, 0, 0, canvas.width, canvas.height);
 		const avatar = await Canvas.loadImage(image1);
 		const avatar1 = await Canvas.loadImage(image2);
@@ -295,7 +295,7 @@ export default class Image {
 	}
 
 	static async trigger(image: imageParam) {
-		const base = await Canvas.loadImage(Image._getImage('TRIGGERED'));
+		const base = await Canvas.loadImage(Image._getImage('triggered'));
 		const img = await Canvas.loadImage(image);
 		const GIF = new GifEncoder(256, 310);
 		const stream = GIF.createReadStream();
