@@ -1,5 +1,5 @@
 import CacheHandler from './CacheHandler';
-import type { TwitchRequest } from '../utils/types';
+import type { TwitchRequest, TwitchLivestreamData, TwitchLivestreamRequest, TwitchData, TwitchFollowersRequest } from '../utils/types';
 import axios from 'axios';
 
 export default class TwitchHandler extends CacheHandler {
@@ -11,18 +11,20 @@ export default class TwitchHandler extends CacheHandler {
 
 	/**
 	 * Function for fetching basic information on user
-	 * @param {interaction} login The username to search
+	 * @param {string} login The username to search
 	*/
-	async getUserByUsername(login: string) {
-		return this.request('/users', { login }).then((u) => u && u.data[0]);
+	async getUserByUsername(login: string): Promise<TwitchData> {
+		const user = await this.request('/users', { login }) as TwitchRequest;
+		return user.data[0];
 	}
 
 	/**
 	 * Function for checking if user is streaming
-	 * @param {interaction} username The username to search
+	 * @param {string} username The username to search
 	*/
-	async getStreamByUsername(username: string) {
-		return this.request('/streams', { user_login: username }).then((s) => s && s.data[0]);
+	async getStreamByUsername(username: string): Promise<TwitchLivestreamData> {
+		const stream = await this.request('/streams', { user_login: username }) as TwitchLivestreamRequest;
+		return stream.data[0];
 	}
 
 	/**
@@ -30,7 +32,7 @@ export default class TwitchHandler extends CacheHandler {
 	 * @param {string} endpoint the endpoint of the twitch API to request
 	 * @param {object} queryParams The query sent to twitch API
 	*/
-	async request(endpoint: string, queryParams = {}): Promise<TwitchRequest | undefined> {
+	async request(endpoint: string, queryParams = {}): Promise<TwitchRequest | TwitchLivestreamRequest | TwitchFollowersRequest | undefined> {
 		const qParams = new URLSearchParams(queryParams);
 		try {
 			const { data } = await axios.get(`https://api.twitch.tv/helix${endpoint}?${qParams.toString()}`, {
@@ -44,7 +46,6 @@ export default class TwitchHandler extends CacheHandler {
 				return this.refreshTokens()
 					.then(() => this.request(endpoint, queryParams));
 			}
-			console.log('data', data);
 			return data as TwitchRequest;
 		} catch (err: any) {
 			switch (err.response.data.error) {
@@ -62,8 +63,9 @@ export default class TwitchHandler extends CacheHandler {
 	 * Function for fetching follower data from user
 	 * @param {string} id the ID of the user
 	*/
-	async getFollowersFromId(id: string) {
-		return this.request('/users/follows', { to_id: id }).then(u => u && u.total);
+	async getFollowersFromId(id: string): Promise<number> {
+		const followers = await this.request('/users/follows', { to_id: id }) as TwitchFollowersRequest;
+		return followers.total;
 	}
 
 	/**

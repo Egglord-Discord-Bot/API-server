@@ -63,7 +63,7 @@ export interface RedditPost {
 	},
 }
 
-export interface TwitchData {
+export type TwitchData = {
 	id: string,
 	login: string,
 	display_name: string,
@@ -95,4 +95,41 @@ export type APIEndpointData = {
 	tag: string
 	responses: Array<string>
 	parameters?: Array<ParamAPIEndpoint>
+}
+
+export interface TwitchLivestreamRequest {
+	data: Array<TwitchLivestreamData>
+}
+
+export type TwitchLivestreamData = {
+	id: string,
+	user_id: string
+	user_login: string
+	user_name: string
+	game_id: string
+	game_name: string
+	type: string
+	title: string
+	viewer_count: number
+	started_at: Date
+	language: string
+	thumbnail_url: string
+	tag_ids: Array<string>
+	tags: Array<string>
+	is_mature: boolean
+}
+
+export interface TwitchFollowersRequest {
+	total: number
+	data: Array<TwitchFollowersData>
+}
+
+export type TwitchFollowersData = {
+	from_id: string,
+	from_login: string,
+	from_name: string,
+	to_id: string,
+	to_login: string,
+	to_name: string,
+	followed_at: Date
 }

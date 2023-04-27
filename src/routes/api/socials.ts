@@ -19,10 +19,6 @@ export default function() {
    *     description: Get information on a steam account
    *     tags: socials
    *			parameters:
-   *       - name: platform
-   *         description: The platform, the user uses
-   *         required: true
-   *         type: string
    *       - name: username
    *         description: The username of the player
    *         required: true
@@ -118,6 +114,7 @@ export default function() {
    *         required: true
    *         type: string
   */
+
 	router.get('/twitch', async (req, res) => {
 		const username = req.query.username as string;
 		if (!username) return Error.MissingQuery(res, 'username');
@@ -127,13 +124,12 @@ export default function() {
 			sentData = TwitchCacheHandler.data.get(username) as object;
 		} else {
 			try {
-				const res1 = await TwitchCacheHandler.getUserByUsername(username);
-				if (res1.error) return Error.GenericError(res, 'Incorrect Username.');
+				const twitchData = await TwitchCacheHandler.getUserByUsername(username);
+				if (twitchData == undefined) return Error.GenericError(res, 'Incorrect Username.');
 
 				// Fetch if their streaming + following count
-				const [res2, followerCount] = await Promise.all([TwitchCacheHandler.getStreamByUsername(username), TwitchCacheHandler.getFollowersFromId(res1.id)]);
-
-				const data = Object.assign(res1,
+				const [res2, followerCount] = await Promise.all([TwitchCacheHandler.getStreamByUsername(username), TwitchCacheHandler.getFollowersFromId(twitchData.id)]);
+				const data = Object.assign(twitchData,
 					{ followers: followerCount },
 					{ steaming: res2?.viewer_count ? {
 						title: res2.title,
