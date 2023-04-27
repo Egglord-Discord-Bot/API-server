@@ -59,7 +59,7 @@ export default function() {
 	 * @API
 	 * /image/bed:
 	 *   get:
-	 *     description: Create an affect image
+	 *     description: Create an bed image
 	 *     tags: image
 	 *			parameters:
 	 *       - name: image1
@@ -89,7 +89,7 @@ export default function() {
 	 * @API
 	 * /image/blur:
 	 *   get:
-	 *     description: Create an affect image
+	 *     description: Create an blur image
 	 *     tags: image
 	 *			parameters:
 	 *       - name: image1
@@ -114,7 +114,7 @@ export default function() {
 	 * @API
 	 * /image/changemymind:
 	 *   get:
-	 *     description: Create an affect image
+	 *     description: Create an changemymind image
 	 *     tags: image
 	 *			parameters:
 	 *       - name: text
@@ -141,7 +141,7 @@ export default function() {
 	 * @API
 	 * /image/circle:
 	 *   get:
-	 *     description: Create an affect image
+	 *     description: Create an circle image
 	 *     tags: image
 	 *			parameters:
 	 *       - name: image1
@@ -164,9 +164,36 @@ export default function() {
 
 	/**
 	 * @API
+	 * /image/clyde:
+	 *   get:
+	 *     description: Create an clyde image
+	 *     tags: image
+	 *			parameters:
+	 *       - name: text
+	 *         description: The text for clyde to show
+	 *         required: true
+	 *         type: string
+	 */
+	router.get('/clyde', async (req, res) => {
+		const text = req.query.text as string;
+		if (text == undefined) return Error.MissingQuery(res, 'text');
+
+		try {
+			const img = await Image.clyde(text);
+			res.set('Content-Disposition', 'inline; filename=clyde.png');
+			res.setHeader('content-type', 'image/png');
+			res.send(img);
+		} catch (err: any) {
+			console.log(err);
+			Error.GenericError(res, err.message);
+		}
+	});
+
+	/**
+	 * @API
 	 * /image/distracted:
 	 *   get:
-	 *     description: Create an affect image
+	 *     description: Create an distracted image
 	 *     tags: image
 	 *			parameters:
 	 *       - name: image1
@@ -193,7 +220,7 @@ export default function() {
 	 * @API
 	 * /image/facepalm:
 	 *   get:
-	 *     description: Create an affect image
+	 *     description: Create an facepalm image
 	 *     tags: image
 	 *			parameters:
 	 *       - name: image1
@@ -218,7 +245,7 @@ export default function() {
 	 * @API
 	 * /image/invert:
 	 *   get:
-	 *     description: Create an affect image
+	 *     description: Create an invert image
 	 *     tags: image
 	 *			parameters:
 	 *       - name: image1
@@ -243,7 +270,7 @@ export default function() {
 	 * @API
 	 * /image/joke-over-head:
 	 *   get:
-	 *     description: Create an affect image
+	 *     description: Create an joke over head image
 	 *     tags: image
 	 *			parameters:
 	 *       - name: image1
@@ -268,7 +295,7 @@ export default function() {
 	 * @API
 	 * /image/kiss:
 	 *   get:
-	 *     description: Create an affect image
+	 *     description: Create an kiss image
 	 *     tags: image
 	 *			parameters:
 	 *       - name: image1
@@ -298,7 +325,7 @@ export default function() {
 	 * @API
 	 * /image/ohno:
 	 *   get:
-	 *     description: Create an affect image
+	 *     description: Create an ohno image
 	 *     tags: image
 	 *			parameters:
 	 *       - name: text
@@ -325,7 +352,7 @@ export default function() {
 	 * @API
 	 * /image/rip:
 	 *   get:
-	 *     description: Create an affect image
+	 *     description: Create an rip image
 	 *     tags: image
 	 *			parameters:
 	 *       - name: image1
@@ -350,7 +377,7 @@ export default function() {
 	 * @API
 	 * /image/slap:
 	 *   get:
-	 *     description: Create an affect image
+	 *     description: Create an slap image
 	 *     tags: image
 	 *			parameters:
 	 *       - name: image1
@@ -376,7 +403,7 @@ export default function() {
 	 * @API
 	 * /image/spank:
 	 *   get:
-	 *     description: Create an affect image
+	 *     description: Create an spank image
 	 *     tags: image
 	 *			parameters:
 	 *       - name: image1
@@ -406,7 +433,7 @@ export default function() {
 	 * @API
 	 * /image/trigger:
 	 *   get:
-	 *     description: Create an affect image
+	 *     description: Create an trigger image
 	 *     tags: image
 	 *			parameters:
 	 *       - name: image1

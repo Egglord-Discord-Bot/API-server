@@ -132,6 +132,22 @@ export default class Image {
 		return result;
 	}
 
+	static async clyde(text: string) {
+		const background = await Canvas.loadImage(Image._getImage('CLYDE'));
+		const canvas = Canvas.createCanvas(background.width, background.height);
+		const ctx = canvas.getContext('2d');
+		ctx.drawImage(background, 0, 0, canvas.width, canvas.height);
+
+		// Draw text to image
+		ctx.fillStyle = 'white';
+		ctx.font = '15px Georgia';
+		ctx.fillText(text.substring(0, 66), 75, 50);
+
+		const result = await canvas.encode('png');
+		this.generateImage(result, 'clyde');
+		return result;
+	}
+
 	static async distracted(image1: imageParam, image2: imageParam, image3 = '') {
 		const background = await Canvas.loadImage(Image._getImage('DISTRACTED'));
 		const avatar1 = await Canvas.loadImage(await Image.circle(image1));
