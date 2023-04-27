@@ -1,4 +1,4 @@
-import Canvas, { createCanvas } from '@napi-rs/canvas';
+import Canvas, { createCanvas, GlobalFonts } from '@napi-rs/canvas';
 import fs from 'node:fs';
 import { GifEncoder } from '@skyra/gifenc';
 import type { SKRSContext2D } from '@napi-rs/canvas';
@@ -139,6 +139,7 @@ export default class Image {
 		ctx.drawImage(background, 0, 0, canvas.width, canvas.height);
 
 		// Draw text to image
+		GlobalFonts.registerFromPath(`${process.cwd()}/src/assets/fonts/Georgia.ttf`, 'Georgia');
 		ctx.fillStyle = 'white';
 		ctx.font = '15px Georgia';
 		ctx.fillText(text.substring(0, 66), 75, 50);
