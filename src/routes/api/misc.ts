@@ -6,6 +6,8 @@ import Tesseract from 'tesseract.js';
 import axios from 'axios';
 import Error from '../../utils/Errors';
 import * as fs from 'fs';
+import { image_search } from 'duckduckgo-images-api';
+import validAnimals from '../../assets/JSON/animals.json';
 
 export default function() {
 	/**
@@ -139,6 +141,26 @@ export default function() {
 
 			res.json({ data: facts[num] });
 		});
+	});
+
+	router.get('/animal', async (req, res) => {
+		let name = req.query.name as string;
+
+		// IF no animal was mentioned then do a random animal
+		if (!name) {
+			name = validAnimals[Math.floor(Math.random() * validAnimals.length)];
+		} else if (!validAnimals.includes(name)) {
+			// Make sure the animal specifed is valid
+			return Error.InvalidValue(res, 'name', validAnimals);
+		}
+
+		// Search for animal picture
+		const results = await image_search({
+			query: name, moderate: true,
+			iterations: 2, retries: 2,
+		});
+
+		res.json({ url: results[Math.floor(Math.random() * results.length)].image });
 	});
 
 	return router;
