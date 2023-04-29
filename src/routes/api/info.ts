@@ -273,7 +273,7 @@ export default function() {
 						current: result.weatherdata.weather[0].current[0].$,
 						forecast: result.weatherdata.weather[0].forecast.map((d: any) => d.$),
 					};
-					WeatherHandler._addData({ id: location, data: resp });
+					WeatherHandler._addData({ id: `${location}_${tempType}`, data: resp });
 					sentData = resp;
 				});
 			} catch (err: any) {
