@@ -96,6 +96,10 @@ export default function() {
 	 *         type: string
 	*/
 	router.get('/r6', async (req, res) => {
+		// Make sure the API admin has added the r6 credentials
+		if (process.env.R6Email?.length == 0 || process.env.R6Password?.length == 0) return Error.DisabledEndpoint(res);
+
+		// Get the username, platform and region of the player
 		const username = req.query.username as string;
 		if (!username) return Error.MissingQuery(res, 'username');
 

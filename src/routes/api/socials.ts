@@ -25,6 +25,9 @@ export default function() {
    *         type: string
   */
 	router.get('/steam', async (req, res) => {
+		// Make sure the API admin has added the steam credentials
+		if (process.env.steam?.length == 0) return Error.DisabledEndpoint(res);
+
 		const username = req.query.username as string;
 		if (!username) return Error.MissingQuery(res, 'username');
 
@@ -116,6 +119,9 @@ export default function() {
   */
 
 	router.get('/twitch', async (req, res) => {
+		// Make sure the API admin has added the twitch credentials
+		if (process.env.twitchId?.length == 0 || process.env.twitchSecret?.length == 0) return Error.DisabledEndpoint(res);
+
 		const username = req.query.username as string;
 		if (!username) return Error.MissingQuery(res, 'username');
 

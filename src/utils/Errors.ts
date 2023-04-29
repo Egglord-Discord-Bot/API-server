@@ -36,4 +36,10 @@ export default class Error {
 			.status(404)
 			.json({ error: `${endpoint} is not a valid endpoint.` });
 	}
+
+	public static DisabledEndpoint(res: Response) {
+		return res
+			.status(506)
+			.json({ error: 'This endpoint is currently disabled.' });
+	}
 }
