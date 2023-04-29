@@ -159,7 +159,7 @@ export default function() {
 	 *         description: The language to translate to (Default: English)
 	 *         required: false
 	 *         type: string
-	 */
+	*/
 	type stuff = 'English' | 'Afrikaans'
 	router.get('/translate', async (req, res) => {
 		// Get text to translate
@@ -177,14 +177,45 @@ export default function() {
 		}
 	});
 
+	/**
+	 * @API
+	 * /info/lyrics:
+	 *   get:
+	 *     description: Get lyrics of a song
+	 *     tags: info
+	 *			parameters:
+	 *       - name: title
+	 *         description: The title of the song
+	 *         required: true
+	 *         type: string
+	*/
 	router.get('/lyrics', async (req, res) => {
 		// Get text to translate
 		const title = req.query.title;
 		if (!title) return Error.MissingQuery(res, 'title');
-
-		res.json({ error: 'Coming soon' });
+		/*
+		const info = await getSong({
+			apiKey: bot.config.api_keys.genius,
+			title: title,
+			artist: '‎',
+			optimizeQuery: true,
+		});
+		*/
+		res.json({ data: 'Coming soon' });
 	});
 
+	/**
+ * @API
+ * /info/urban-dictionary:
+ *   get:
+ *     description: Translate a message
+ *     tags: info
+ *			parameters:
+ *       - name: phrase
+ *         description: The text to translate
+ *         required: true
+ *         type: string
+*/
 	router.get('/urban-dictionary', async (req, res) => {
 		// Get text to translate
 		const phrase = req.query.phrase as string;
@@ -198,17 +229,41 @@ export default function() {
 		}
 	});
 
+	/**
+ * @API
+ * /info/weather:
+ *   get:
+ *     description: Get the weather of a location
+ *     tags: info
+ *			parameters:
+ *       - name: location
+ *         description: The location
+ *         required: true
+ *         type: string
+ *       - name: tempType
+ *         description: Either C or F (Celsuis or Fahrenheit)
+ *         required: false
+ *         type: string
+*/
 	router.get('/weather', async (req, res) => {
 		// Get location to get weather from
 		const location = encodeURIComponent(req.query.location as string);
 		if (!location) return Error.MissingQuery(res, 'location');
 
+		// Optional query param (temperature type Fahrenheit or Celsuis)
+		let tempType = req.query.type as string;
+		if (tempType) {
+			if (!['C', 'F'].includes(tempType)) return Error.InvalidValue(res, tempType, ['C', 'F']);
+		} else {
+			tempType = 'C';
+		}
+
 		let sentData = {};
-		if (WeatherHandler.data.get(location)) {
-			sentData = WeatherHandler.data.get(location) as object;
+		if (WeatherHandler.data.get(`${location}_${tempType}`)) {
+			sentData = WeatherHandler.data.get(`${location}_${tempType}`) as object;
 		} else {
 			try {
-				const { data } = await axios.get(`http://weather.service.msn.com/find.aspx?src=outlook&weadegreetype=C&culture=en-US&weasearchstr=${location}`);
+				const { data } = await axios.get(`http://weather.service.msn.com/find.aspx?src=outlook&weadegreetype=${tempType}&culture=en-US&weasearchstr=${location}`);
 
 				parseString(data, function(err, result) {
 					if (err) return Error.GenericError(res, err.message);
