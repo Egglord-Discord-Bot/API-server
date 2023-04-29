@@ -160,7 +160,12 @@ export default function() {
 			iterations: 2, retries: 2,
 		});
 
-		res.json({ url: results[Math.floor(Math.random() * results.length)].image });
+		res.json({ data: results[Math.floor(Math.random() * results.length)].image });
+	});
+
+	router.get('/animal/raw', (_req, res) => {
+		// Just return the array of all valid animals
+		res.json({ data: validAnimals });
 	});
 
 	return router;
