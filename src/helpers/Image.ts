@@ -3,6 +3,7 @@ import fs from 'node:fs';
 import { GifEncoder } from '@skyra/gifenc';
 import type { SKRSContext2D } from '@napi-rs/canvas';
 import type { imageParam, getLines } from '../utils/types';
+GlobalFonts.registerFromPath(`${process.cwd()}/src/assets/fonts/Georgia.ttf`, 'Georgia');
 
 export default class Image {
 	static async affect(image: imageParam) {
@@ -105,7 +106,7 @@ export default class Image {
 			fontSize = 7;
 			ctx.translate(310, 335);
 		}
-		ctx.font = `${fontSize}px ROBOTO_REGULAR,NOTO_COLOR_EMOJI`;
+		ctx.font = `${fontSize}px Georgia`;
 		ctx.rotate(-0.39575);
 
 		const lines = Image.getLines({ text, ctx, maxWidth: 345 });
@@ -139,7 +140,7 @@ export default class Image {
 		ctx.drawImage(background, 0, 0, canvas.width, canvas.height);
 
 		// Draw text to image
-		GlobalFonts.registerFromPath(`${process.cwd()}/src/assets/fonts/Georgia.ttf`, 'Georgia');
+
 		ctx.fillStyle = 'white';
 		ctx.font = '15px Georgia';
 		ctx.fillText(text.substring(0, 66), 75, 50);
