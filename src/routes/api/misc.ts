@@ -8,6 +8,8 @@ import Error from '../../utils/Errors';
 import * as fs from 'fs';
 import { image_search } from 'duckduckgo-images-api';
 import validAnimals from '../../assets/JSON/animals.json';
+import QRcode from 'qrcode';
+import { PassThrough } from 'stream';
 
 export default function() {
 	/**
@@ -166,6 +168,21 @@ export default function() {
 	router.get('/animal/raw', (_req, res) => {
 		// Just return the array of all valid animals
 		res.json({ data: validAnimals });
+	});
+
+	router.get('/qrcode', async (req, res) => {
+		const url = req.query.url as string;
+		if (!url) return Error.MissingQuery(res, 'url');
+
+		const qrStream = new PassThrough();
+		await QRcode.toFileStream(qrStream, url, {
+			type: 'png',
+			width: 250,
+			errorCorrectionLevel: 'H',
+		});
+		res.set('Content-Disposition', 'inline; filename=qrcode.png');
+		res.setHeader('content-type', 'image/png');
+		qrStream.pipe(res);
 	});
 
 	return router;
