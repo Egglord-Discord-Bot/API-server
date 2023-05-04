@@ -8,6 +8,7 @@ import Error from '../../utils/Errors';
 import * as fs from 'fs';
 import { image_search } from 'duckduckgo-images-api';
 import validAnimals from '../../assets/JSON/animals.json';
+import adviceList from '../../assets/JSON/advice.json';
 import QRcode from 'qrcode';
 import { PassThrough } from 'stream';
 
@@ -21,8 +22,8 @@ export default function() {
 	*/
 	router.get('/advice', async (_req, res) => {
 		try {
-			const advice = await axios.get('https://api.adviceslip.com/advice');
-			res.json({ data: advice.data.slip.advice });
+			const advice = adviceList[Math.floor((Math.random() * adviceList.length))]
+			res.json({ data: advice });
 		} catch (err: any) {
 			Error.GenericError(res, err.message);
 		}
