@@ -1,7 +1,6 @@
 node_modules
-src/assets/nsfw
 *.traineddata
-/dist
+/backend/dist
 prisma/migrations
-src/utils/logs
+/backend/src/utils/logs
 .env
