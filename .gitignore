@@ -4,3 +4,4 @@ node_modules
 prisma/migrations
 /backend/src/utils/logs
 .env
+/frontend/.next
