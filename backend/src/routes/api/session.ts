@@ -19,24 +19,29 @@ export default function() {
 		}
 
 		// Fetch / create user
-		let user = await fetchUser(userId);
-		if (user == null) {
-			user = await createUser({ id: userId,
-				token: new TokenGenerator({ bitSize: 512, baseEncoding: TokenBase.BASE62 }).generate(),
-				avatar: image_url,
-				discriminator, locale, email,
-			});
-		}
+		try {
+			let user = await fetchUser(userId);
+			if (user == null) {
+				user = await createUser({ id: userId,
+					token: new TokenGenerator({ bitSize: 512, baseEncoding: TokenBase.BASE62 }).generate(),
+					avatar: image_url,
+					discriminator, locale, email,
+				});
+			}
 
-		// Send updated profile back to user
-		res.json({
-			id: userId,
-			isBlocked: user.isBlocked,
-			isPremium: user.isPremium,
-			isAdmin: user.isAdmin,
-			avatar: image_url,
-			discriminator, username, email,
-		});
+			// Send updated profile back to user
+			res.json({
+				id: userId,
+				isBlocked: user.isBlocked,
+				isPremium: user.isPremium,
+				isAdmin: user.isAdmin,
+				avatar: image_url,
+				discriminator, username, email,
+			});
+		} catch (err) {
+			console.log(err);
+			res.json();
+		}
 	});
 
 	router.get('/history', async (req, res) => {

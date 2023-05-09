@@ -1,5 +1,5 @@
 export type Endpoint = {
-  name: number
+  name: string
   cooldown: number
   maxRequests: number
   maxRequestper: number

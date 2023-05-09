@@ -4,7 +4,7 @@ import { fetchEndpointData } from '../database/endpointData';
 import { createEndpoint } from '../database/userHistory';
 import { Utils } from '../utils/Utils';
 import Error from '../utils/Errors';
-import type { User } from '@prisma/client';
+import type { User, Endpoint } from '@prisma/client';
 
 type endpointUsage = {
   name: string
@@ -16,12 +16,6 @@ type RateLimitType = {
 	isLoggedIn?: boolean
 	isEndpoint?: boolean
 }
-type endpointDataFromDB = {
-  name: string
-  cooldown: number
-  maxRequests: number
-  maxRequestper: number
-}
 
 interface endpointData {
   endpoints: endpointUsage[]
@@ -30,7 +24,7 @@ interface endpointData {
 export default class RateLimit {
 	userRatelimit: Map<string, endpointData>;
 	lastChecked: number;
-	endpointData: Array<endpointDataFromDB>;
+	endpointData: Array<Endpoint>;
 	constructor() {
 		this.endpointData = [];
 		this.userRatelimit = new Map();
@@ -44,6 +38,9 @@ export default class RateLimit {
 		// Get the userID from the request
 		const user = await this._extractUserId(req);
 		if (user === null) return this._sendRateLimitMessage(res, { isLoggedIn: false });
+
+		// Check if endpoint is blocked
+		if (this.endpointData.find(i => i.name == req.originalUrl.split('?')[0])?.isBlocked) return Error.DisabledEndpoint(res);
 
 		// Bypass ratelimit if user is an Admin
 		if (!(user as User).isAdmin) {
@@ -170,8 +167,7 @@ export default class RateLimit {
 	}
 
 	async _fetchEndpointData() {
-		this.endpointData = await fetchEndpointData();
-		return this.endpointData;
+		setInterval(async () => this.endpointData = await fetchEndpointData(), 10_000);
 	}
 
 	_sweep() {

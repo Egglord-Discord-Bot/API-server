@@ -5,6 +5,7 @@ import { useSession } from 'next-auth/react';
 import type { User } from '../../types/next-auth';
 import type { Endpoint, UserHistory } from '../../types/types';
 import type { GetServerSidePropsContext } from 'next';
+import type { SyntheticEvent } from 'react';
 
 interface Props {
   endpointData: Array<Endpoint>
@@ -15,8 +16,26 @@ export default function AdminEndpoints({ endpointData, history }: Props) {
 	const { data: session, status } = useSession();
 	if (status == 'loading') return null;
 
-	function updateEndpoint() {
-		alert('coming soon');
+	async function updateEndpoint(e: SyntheticEvent) {
+		const target = e.target as HTMLInputElement;
+
+		// Fetch endpoint data
+		await fetch('/api/admin/endpoint', {
+			method: 'PATCH',
+			headers: {
+				'Accept': 'application/json',
+				'Content-Type': 'application/json',
+			},
+			body: JSON.stringify({
+				name: target.id.split('_')[0],
+				isBlocked: target.checked,
+			}),
+		});
+
+		// Update screen
+		target.checked = !!target.checked;
+		const el = document.getElementById(target.id.split('_')[0]);
+		if (el) el.innerHTML = target.checked ? 'Yes' : 'No';
 	}
 
 	return (
@@ -59,7 +78,8 @@ export default function AdminEndpoints({ endpointData, history }: Props) {
 															<td>{e.maxRequests}</td>
 															<td>{e.maxRequestper}</td>
 															<td>
-																<input className="form-check-input" type="checkbox" onChange={() => updateEndpoint()} checked={e.isBlocked} />{e.isBlocked ? 'Yes' : 'No'}
+																<input className="form-check-input" type="checkbox" onClick={updateEndpoint} defaultChecked={e.isBlocked} id={`${e.name}_input`}/>
+																<span id={e.name}>{e.isBlocked ? 'Yes' : 'No'}</span>
 															</td>
 														</tr>
 													))}
