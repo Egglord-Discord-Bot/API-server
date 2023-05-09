@@ -1,6 +1,5 @@
 import type { Request, Response, NextFunction } from 'express';
-import type { User } from '@prisma/client';
-import { fetchUser } from '../database/User';
+import { Utils } from '../utils/Utils';
 import Error from '../utils/Errors';
 
 /**
@@ -20,13 +19,18 @@ export function checkImage(NumberofImages: number) {
 	};
 }
 
+/**
+	* Check if a user is logged in and is an admin
+	* @param {Request} req endpoint the user is trying to access
+	* @param {Response} res endpoint the user is trying to access
+	* @param {NextFunction} next endpoint the user is trying to access
+	* @returns Whether or not the request is an admin
+*/
+export async function isAdmin(req: Request, res: Response, next: NextFunction) {
+	// Check if user is logged in and is admin
+	const ses = await Utils.getSession(req);
+	if (ses?.user.isAdmin) return next();
 
-export async function checkAdmin(req: Request, res: Response, next: NextFunction) {
-	// Make sure user is logged in and isAdmin
-	if (req.isAuthenticated()) {
-		const user = await fetchUser((req.user as User).id);
-		if (user?.isAdmin) return next();
-	}
-
-	return res.redirect('/login');
+	// If not they are logged in or an admin
+	return Error.MissingAccess(res);
 }

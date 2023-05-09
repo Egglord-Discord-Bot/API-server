@@ -42,4 +42,10 @@ export default class Error {
 			.status(506)
 			.json({ error: 'This endpoint is currently disabled.' });
 	}
+
+	public static MissingAccess(res: Response) {
+		return 	res
+			.status(403)
+			.json({ error: 'You are not authorised to use this endpoint' });
+	}
 }

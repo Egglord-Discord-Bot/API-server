@@ -46,7 +46,7 @@ dotenv.config();
 		})
 		.use((req: Request, res: Response, next: NextFunction) => {
 			// Handle custom rate limits
-			if (req.originalUrl.startsWith('/api/') && !req.originalUrl.startsWith('/api/admin')) return RateLimiterHandler.checkRateLimit(req, res, next);
+			if (req.originalUrl.startsWith('/api/') && !(req.originalUrl.startsWith('/api/admin') || req.originalUrl.startsWith('/api/session') || req.originalUrl.startsWith('/api/stats'))) return RateLimiterHandler.checkRateLimit(req, res, next);
 			next();
 		});
 

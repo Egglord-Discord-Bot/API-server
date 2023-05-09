@@ -1,8 +1,9 @@
 import type { Request, Response, NextFunction } from 'express';
-import type { Profile } from 'passport-discord';
 import { fetchUserByToken } from '../database/User';
 import { fetchEndpointData } from '../database/endpointData';
 import { createEndpoint } from '../database/userHistory';
+import { Utils } from '../utils/Utils';
+import Error from '../utils/Errors';
 import type { User } from '@prisma/client';
 
 type endpointUsage = {
@@ -68,7 +69,8 @@ export default class RateLimit {
   */
 	async _extractUserId(req: Request) {
 		// If they are on browser see if they are logged in
-		if (req.isAuthenticated()) return (req.user as Profile);
+		const possibleUser = await Utils.getSession(req);
+		if (possibleUser != null) return possibleUser.user as User;
 
 		// They might be trying to connect via their token
 		if (req.headers.authorization || req.query.token) {
@@ -163,9 +165,7 @@ export default class RateLimit {
 				.status(429)
 				.json({ error: `You are being ratelimited ${type.global ? 'globally' : 'on this endpoint'}, Please try again later!` });
 		} else {
-			res
-				.status(403)
-				.json({ error:'You are not authorised to use this endpoint' });
+			return Error.MissingAccess(res);
 		}
 	}
 
