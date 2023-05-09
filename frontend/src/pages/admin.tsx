@@ -2,12 +2,13 @@ import Header from '../components/header';
 import Sidebar from '../components/navbar/sidebar';
 import AdminNavbar from '../components/navbar/admin';
 import { nFormatter } from '../utils/functions';
-import { Pie } from 'react-chartjs-2';
+import { Pie, Line } from 'react-chartjs-2';
 import { useSession } from 'next-auth/react';
 import type { User } from '../types/next-auth';
 import type { GetServerSidePropsContext } from 'next';
-import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
+import { Chart as ChartJS, ArcElement, Tooltip, Legend,	CategoryScale, LinearScale, PointElement, LineElement, Title } from 'chart.js';
 ChartJS.register(ArcElement, Tooltip, Legend);
+ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
 
 type history = {
 	id: number,
@@ -26,8 +27,23 @@ export default function Admin(data: Props) {
 	const { data: session, status } = useSession();
 	if (status == 'loading') return null;
 
+	const labels = { 'January': 0, 'February': 0, 'March': 0, 'April': 0, 'May': 0, 'June': 0, 'July': 0, 'August': 0, 'September': 0, 'October': 0, 'November': 0, 'Decemeber': 0 };
+	// @ts-ignore
+	data.totalHistory.forEach((x) => labels[Object.keys(labels).at(new Date(x.createdAt).getMonth())] += 1);
+	const historyAccessed = {
+		labels: Object.keys(labels),
+		datasets: [
+			{
+				label: 'Accessed',
+				data: Object.values(labels),
+				borderColor: 'rgb(255, 99, 132)',
+				backgroundColor: 'rgba(255, 99, 132, 0.5)',
+			},
+		],
+	};
+
 	// Create the data object for "Most accessed endpoints"
-	const counts = {} as countEnum;
+	const counts: countEnum = {};
 	data.totalHistory.forEach((x) => counts[x.endpoint] = (counts[x.endpoint] || 0) + 1);
 	const mostAccessEndp = {
 		labels: Object.keys(counts).slice(0, 10).map(i => i.split('/').at(-1)),
@@ -158,9 +174,7 @@ export default function Admin(data: Props) {
 											</div>
 										</div>
 										<div className="card-body">
-											<div className="chart-area">
-												<canvas id="myAreaChart"></canvas>
-											</div>
+											<Line data={historyAccessed} />
 										</div>
 									</div>
 									<div className="card shadow mb-4">
