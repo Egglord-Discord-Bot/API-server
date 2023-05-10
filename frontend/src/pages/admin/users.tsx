@@ -8,14 +8,38 @@ import type { GetServerSidePropsContext } from 'next';
 interface Props {
 	users: Array<User>
 }
+type userUpdateEnum = 'block' | 'premium' | 'admin'
+
 
 export default function AdminUsers({ users }: Props) {
 	const { data: session, status } = useSession();
 	if (status == 'loading') return null;
 
-	function updateUser(type: string, id: string) {
-		console.log(type, id);
-		alert('coming soon');
+	async function updateUser(type: userUpdateEnum, userId: string) {
+		// Get the type and what value it should be
+		const el = document.getElementById(`${userId}_${type}`) as HTMLInputElement | null;
+		if (el) {
+			const value = el.checked;
+			// Fetch endpoint data
+			await fetch('/api/admin/user', {
+				method: 'PATCH',
+				headers: {
+					'Accept': 'application/json',
+					'Content-Type': 'application/json',
+				},
+				body: JSON.stringify({
+					userId: userId,
+					isAdmin: (type == 'admin' ? value : undefined),
+					isBlocked: (type == 'block' ? value : undefined),
+					isPremium: (type == 'premium' ? value : undefined),
+				}),
+			});
+
+			// Update DOM
+			el.checked = !!value;
+			const text = document.getElementById(`${userId}_${type}_text`);
+			if (text) text.innerHTML = value ? 'Yes' : 'No';
+		}
 	}
 
 	return (
@@ -120,13 +144,16 @@ export default function AdminUsers({ users }: Props) {
 													<th scope="row">{u.id}</th>
 													<th>{u.discriminator}</th>
 													<td>
-														<input className="form-check-input" type="checkbox" onChange={() => updateUser('block', u.id)} id={`${u.id}_block`} checked={u.isBlocked} />{u.isBlocked ? 'Yes' : 'No'}
+														<input className="form-check-input" type="checkbox" onChange={() => updateUser('block', u.id)} id={`${u.id}_block`} defaultChecked={u.isBlocked} />
+														<span id={`${u.id}_block_text`}>{u.isBlocked ? 'Yes' : 'No'}</span>
 													</td>
 													<td>
-														<input className="form-check-input" type="checkbox" onChange={() => updateUser('premium', u.id)} id={`${u.id}_premium`} checked={u.isPremium} />{u.isPremium ? 'Yes' : 'No'}
+														<input className="form-check-input" type="checkbox" onChange={() => updateUser('premium', u.id)} id={`${u.id}_premium`} defaultChecked={u.isPremium} />
+														<span id={`${u.id}_premium_text`}>{u.isPremium ? 'Yes' : 'No'}</span>
 													</td>
 													<td>
-														<input className="form-check-input" type="checkbox" onChange={() => updateUser('admin', u.id)} id={`${u.id}_admin`} checked={u.isAdmin} />{u.isAdmin ? 'Yes' : 'No'}
+														<input className="form-check-input" type="checkbox" onChange={() => updateUser('admin', u.id)} id={`${u.id}_admin`} defaultChecked={u.isAdmin} />
+														<span id={`${u.id}_admin_text`}>{u.isAdmin ? 'Yes' : 'No'}</span>
 													</td>
 												</tr>
 											))}
