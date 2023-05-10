@@ -51,3 +51,11 @@ export async function fetchEndpointUsagesPerUser(id: string) {
 export async function fetchAllEndpointUsage() {
 	return client.userHistory.findMany();
 }
+
+export async function deleteEndpoint(id: number) {
+	return client.userHistory.delete({
+		where: {
+			id,
+		},
+	});
+}

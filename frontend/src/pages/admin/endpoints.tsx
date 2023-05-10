@@ -38,6 +38,19 @@ export default function AdminEndpoints({ endpointData, history }: Props) {
 		if (el) el.innerHTML = target.checked ? 'Yes' : 'No';
 	}
 
+	async function deleteEndpoint(id: string) {
+		await fetch('/api/admin/history', {
+			method: 'DELETE',
+			headers: {
+				'Accept': 'application/json',
+				'Content-Type': 'application/json',
+			},
+			body: JSON.stringify({
+				id,
+			}),
+		});
+	}
+
 	return (
 		<>
 			<Header />
@@ -110,7 +123,7 @@ export default function AdminEndpoints({ endpointData, history }: Props) {
 															<td>{h.endpoint}</td>
 															<td>{new Date(h.createdAt).toDateString()} {new Date(h.createdAt).toLocaleTimeString('en-US')}</td>
 															<td>
-																<input className="form-check-input" type="checkbox" id="flexCheckChecked" />
+																<input className="form-check-input" type="checkbox" id="flexCheckChecked" onClick={() => deleteEndpoint(h.id)} />
 															</td>
 														</tr>
 													))}
