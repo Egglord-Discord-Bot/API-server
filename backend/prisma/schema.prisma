@@ -13,7 +13,8 @@ datasource db {
 model User {
   id            String        @id
   token         String        @unique
-  avatar        String?    
+  avatar        String?
+  username      String?
   discriminator String?
   locale        String?
   email         String?
@@ -25,11 +26,13 @@ model User {
 }
 
 model UserHistory {
-  id          Int     @id   @default(autoincrement())
-  user        User    @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId      String
-  endpoint    String
-  createdAt   DateTime @default(now())
+  id            Int     @id   @default(autoincrement())
+  user          User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId        String
+  endpoint      String
+  responseCode  Int @default(200)
+  responseTime  Int @default(5)
+  createdAt     DateTime @default(now())
 }
 
 model Endpoint {

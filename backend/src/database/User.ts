@@ -16,6 +16,7 @@ export async function fetchUsers() {
 type createUser = {
 	id: string
 	token: string
+	username?: string
 	discriminator?: string
 	avatar?: string
 	locale?: string
@@ -27,6 +28,7 @@ export async function createUser(data: createUser) {
 		data: {
 			id: data.id,
 			token: data.token,
+			username: data.username,
 			discriminator: data.discriminator,
 			avatar: data.avatar,
 			locale: data.locale,
@@ -47,6 +49,8 @@ export async function deleteUser(id: string) {
 type updateUser = {
 	id: string
 	newToken?: string
+	username?: string
+	discriminator?: string
 	isAdmin?: boolean
 	isBlocked?: boolean
 	isPremium?: boolean
@@ -63,6 +67,8 @@ export async function updateUser(data: updateUser) {
 			isAdmin: data.isAdmin != null ? data.isAdmin : undefined,
 			isBlocked: data.isBlocked != null ? data.isBlocked : undefined,
 			isPremium: data.isPremium != null ? data.isPremium : undefined,
+			username: data.username != null ? data.username : undefined,
+			discriminator: data.discriminator != null ? data.discriminator : undefined,
 		},
 	});
 }

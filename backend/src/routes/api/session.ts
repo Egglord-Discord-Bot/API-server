@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { fetchUser, createUser } from '../../database/User';
+import { fetchUser, createUser, updateUser } from '../../database/User';
 import { fetchEndpointUsagesPerUser } from '../../database/userHistory';
 import { TokenGenerator, TokenBase } from 'ts-token-generator';
 import { Utils } from '../../utils/Utils';
@@ -25,7 +25,7 @@ export default function() {
 				user = await createUser({ id: userId,
 					token: new TokenGenerator({ bitSize: 512, baseEncoding: TokenBase.BASE62 }).generate(),
 					avatar: image_url,
-					discriminator, locale, email,
+					discriminator, locale, email, username,
 				});
 			}
 
@@ -38,6 +38,9 @@ export default function() {
 				avatar: image_url,
 				discriminator, username, email,
 			});
+
+			// Update the database if username/discriminator change
+			if (username != user.username || discriminator != user.discriminator) await updateUser({ id: userId, username, discriminator });
 		} catch (err) {
 			console.log(err);
 			res.json();
