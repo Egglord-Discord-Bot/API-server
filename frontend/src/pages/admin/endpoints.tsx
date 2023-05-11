@@ -6,6 +6,7 @@ import type { User } from '../../types/next-auth';
 import type { Endpoint, UserHistory } from '../../types/types';
 import type { GetServerSidePropsContext } from 'next';
 import type { SyntheticEvent } from 'react';
+import { useState, useEffect } from 'react';
 
 interface Props {
   endpointData: Array<Endpoint>
@@ -14,7 +15,18 @@ interface Props {
 
 export default function AdminEndpoints({ endpointData, history }: Props) {
 	const { data: session, status } = useSession();
+	const [his, setHis] = useState<Array<UserHistory>>([]);
+	useEffect(() => setHis(history), []);
+
 	if (status == 'loading') return null;
+
+	function updateDOM(e: SyntheticEvent) {
+		const el = e.target as HTMLInputElement;
+		if (el) {
+			setHis(history.filter(i => i.endpoint.startsWith(el.value)));
+		}
+	}
+
 
 	async function updateEndpoint(e: SyntheticEvent) {
 		const target = e.target as HTMLInputElement;
@@ -67,7 +79,7 @@ export default function AdminEndpoints({ endpointData, history }: Props) {
 								</a>
 							</div>
 							<div className="row">
-								<div className="col-xl-6 col-lg-6">
+								<div className="col-xl-6 col-lg-12">
 									<div className="card shadow mb-4">
 										<div className="card-header py-3 d-flex flex-row align-items-center justify-content-between">
 											<h6 className="m-0 font-weight-bold text-primary">Total endpoints ({endpointData.length}):</h6>
@@ -87,12 +99,28 @@ export default function AdminEndpoints({ endpointData, history }: Props) {
 													{endpointData.map(e => (
 														<tr key={e.name}>
 															<th scope="row" className="text-truncate">{e.name}</th>
-															<td>{e.cooldown}</td>
-															<td>{e.maxRequests}</td>
-															<td>{e.maxRequestper}</td>
 															<td>
-																<input className="form-check-input" type="checkbox" onClick={updateEndpoint} defaultChecked={e.isBlocked} id={`${e.name}_input`}/>
-																<span id={e.name}>{e.isBlocked ? 'Yes' : 'No'}</span>
+																<div className="form-outline" style={{ width: '100%' }}>
+																	<input min="500" max="60000" step={500} defaultValue={e.cooldown} type="number" id="typeNumber" className="form-control" />
+																</div>
+															</td>
+															<td>
+																<div className="form-outline" style={{ width: '100%' }}>
+																	<input min="1" max="60" step={1} defaultValue={e.maxRequests} type="number" id="typeNumber" className="form-control" />
+																</div>
+															</td>
+															<td>
+																<div className="form-outline" style={{ width: '100%' }}>
+																	<input min="30000" max="180000" step={500} defaultValue={e.maxRequestper} type="number" id="typeNumber" className="form-control" />
+																</div>
+															</td>
+															<td>
+																<div className="form-check">
+																	<input className="form-check-input" type="checkbox" onClick={updateEndpoint} defaultChecked={e.isBlocked} id={`${e.name}_input`} />
+																	<label className="form-check-label" htmlFor="flexCheckDefault" id={e.name}>
+																		{e.isBlocked ? 'Yes' : 'No'}
+																	</label>
+																</div>
 															</td>
 														</tr>
 													))}
@@ -107,6 +135,10 @@ export default function AdminEndpoints({ endpointData, history }: Props) {
 											<h6 className="m-0 font-weight-bold text-primary">Total API usage ({history.length}):</h6>
 										</div>
 										<div className="card-body">
+											<div className="input-group mb-3">
+												<input type="text" className="form-control" placeholder="Endpoint" aria-label="Endpoint" aria-describedby="basic-addon2" onChange={updateDOM}/>
+												<span className="input-group-text" id="basic-addon2"><i className="fas fa-search fa-sm"></i></span>
+											</div>
 											<table className="table">
 												<thead>
 													<tr>
@@ -117,7 +149,7 @@ export default function AdminEndpoints({ endpointData, history }: Props) {
 													</tr>
 												</thead>
 												<tbody >
-													{history.map(h => (
+													{his.map(h => (
 														<tr key={h.id}>
 															<th scope="row">{h.userId}</th>
 															<td>{h.endpoint}</td>
@@ -129,6 +161,21 @@ export default function AdminEndpoints({ endpointData, history }: Props) {
 													))}
 												</tbody>
 											</table>
+											<nav aria-label="Page navigation example">
+												<p style={{ display: 'inline' }}>Showing results {his.length < 10 ? his.length : 10} of {his.length}</p>
+												{/* NONE FUNCTION CURRENTLY */}
+												<ul className="pagination justify-content-center">
+													<li className="page-item">
+														<a className="page-link" href="#">1</a>
+													</li>
+													<li className="page-item">
+														<a className="page-link" href="#">2</a>
+													</li>
+													<li className="page-item">
+														<a className="page-link" href="#">3</a>
+													</li>
+												</ul>
+											</nav>
 										</div>
 									</div>
 								</div>
