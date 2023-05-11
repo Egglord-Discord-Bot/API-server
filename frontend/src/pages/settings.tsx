@@ -81,7 +81,7 @@ export default function Settings({ history, error }: Props) {
 				<form className="form-inline">
 					<h5>Your token:</h5>
 					<div className="form-group mb-2">
-						<input className="form-control mb-2 mr-sm-2" type="password" value={'<%= user.token%>'} id="myInput" readOnly />
+						<input className="form-control mb-2 mr-sm-2" type="password" value={session?.user.token} id="myInput" readOnly />
 					</div>
 					<input type="checkbox" onClick={() => ToggleTokenVisibility()} />Show Token
 					<button className="btn btn-primary mb-2" onClick={() => copyUserToken()}>Copy text</button>

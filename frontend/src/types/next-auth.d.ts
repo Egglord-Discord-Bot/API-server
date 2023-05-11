@@ -7,6 +7,7 @@ export interface User {
   isAdmin: boolean
   isBlocked: boolean
   isPremium: boolean
+  token: string
 }
 
 declare module 'next-auth' {

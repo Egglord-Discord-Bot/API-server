@@ -36,6 +36,7 @@ export default function() {
 				isPremium: user.isPremium,
 				isAdmin: user.isAdmin,
 				avatar: image_url,
+				token: user.token,
 				discriminator, username, email,
 			});
 
