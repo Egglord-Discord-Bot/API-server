@@ -1,17 +1,19 @@
 import Header from '../../components/header';
 import Sidebar from '../../components/navbar/sidebar';
 import AdminNavbar from '../../components/navbar/admin';
+import Error from '../../components/error';
 import { useSession } from 'next-auth/react';
 import type { User } from '../../types/next-auth';
 import type { GetServerSidePropsContext } from 'next';
 
 interface Props {
 	users: Array<User>
+	error?: string
 }
 type userUpdateEnum = 'block' | 'premium' | 'admin'
 
 
-export default function AdminUsers({ users }: Props) {
+export default function AdminUsers({ users, error }: Props) {
 	const { data: session, status } = useSession();
 	if (status == 'loading') return null;
 
@@ -51,6 +53,9 @@ export default function AdminUsers({ users }: Props) {
 					<div id="content">
 						<AdminNavbar user={session?.user as User}/>
 						<div className="container-fluid">
+							{error && (
+								<Error text={error} />
+							)}
 							<div className="d-sm-flex align-items-center justify-content-between mb-4">
 								<h1 className="h3 mb-0 text-gray-800">Users Dashboard</h1>
 								<a href="#" className="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm">
@@ -128,7 +133,17 @@ export default function AdminUsers({ users }: Props) {
 									<h6 className="m-0 font-weight-bold text-primary">Users</h6>
 								</div>
 								<div className="card-body">
-									<table className="table">
+									<form	className="d-none d-sm-inline-block form-inline mr-auto ml-md-3 my-2 my-md-0 mw-100">
+										<div className="input-group">
+											<input type="text" className="form-control bg-light border-0 small" placeholder="Search for..." aria-label="Search" aria-describedby="basic-addon2" />
+											<div className="input-group-append">
+												<button className="btn btn-primary" type="button">
+													<i className="fas fa-search fa-sm"></i>
+												</button>
+											</div>
+										</div>
+									</form>
+									<table className="table" style={{ paddingTop: '10px' }}>
 										<thead>
 											<tr>
 												<th scope="col">ID</th>
@@ -142,7 +157,7 @@ export default function AdminUsers({ users }: Props) {
 											{users.map(u => (
 												<tr key={u.id}>
 													<th scope="row">{u.id}</th>
-													<th>{u.discriminator}</th>
+													<th>{u.username}#{u.discriminator}</th>
 													<td>
 														<input className="form-check-input" type="checkbox" onChange={() => updateUser('block', u.id)} id={`${u.id}_block`} defaultChecked={u.isBlocked} />
 														<span id={`${u.id}_block_text`}>{u.isBlocked ? 'Yes' : 'No'}</span>
@@ -171,13 +186,17 @@ export default function AdminUsers({ users }: Props) {
 
 // Fetch basic API usage
 export async function getServerSideProps(ctx: GetServerSidePropsContext) {
-	const res = await fetch(`${process.env.BACKEND_URL}api/stats/users`, {
-		method: 'get',
-		headers: {
-			'cookie': ctx.req.headers.cookie as string,
-		},
-	});
+	try {
+		const res = await fetch(`${process.env.BACKEND_URL}api/stats/users`, {
+			method: 'get',
+			headers: {
+				'cookie': ctx.req.headers.cookie as string,
+			},
+		});
 
-	const data = await res.json();
-	return { props: { users: data.users } };
+		const data = await res.json();
+		return { props: { users: data.users } };
+	} catch (err) {
+		return { props: { users: [], error: 'API server currently unavailable' } };
+	}
 }

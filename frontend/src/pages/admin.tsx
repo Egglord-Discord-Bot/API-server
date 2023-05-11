@@ -1,6 +1,7 @@
 import Header from '../components/header';
 import Sidebar from '../components/navbar/sidebar';
 import AdminNavbar from '../components/navbar/admin';
+import Error from '../components/error';
 import { nFormatter } from '../utils/functions';
 import { Pie, Line } from 'react-chartjs-2';
 import { useSession } from 'next-auth/react';
@@ -21,6 +22,7 @@ interface Props {
 	totalAPIUsage: number
 	userCount: number
 	totalHistory: Array<history>
+	error?: string
 }
 
 export default function Admin(data: Props) {
@@ -64,6 +66,7 @@ export default function Admin(data: Props) {
 			},
 		],
 	};
+	// TODO: 	ADD CODE THAT CATEGORISES RESPONSE CODES
 
 	return (
 		<>
@@ -74,6 +77,9 @@ export default function Admin(data: Props) {
 					<div id="content">
 						<AdminNavbar user={session?.user as User}/>
 						<div className="container-fluid">
+							{data.error && (
+								<Error text={data.error} />
+							)}
 							<div className="d-sm-flex align-items-center justify-content-between mb-4">
 								<h1 className="h3 mb-0 text-gray-800">Dashboard</h1>
 								<a href="#" className="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm">
@@ -246,21 +252,25 @@ export default function Admin(data: Props) {
 
 // Fetch admin API usage
 export async function getServerSideProps(ctx: GetServerSidePropsContext) {
-	const res1 = await fetch(`${process.env.BACKEND_URL}api/stats/history`, {
-		method: 'get',
-		headers: {
-			'cookie': ctx.req.headers.cookie as string,
-		},
-	});
-	const { history } = await res1.json();
+	try {
+		const res1 = await fetch(`${process.env.BACKEND_URL}api/stats/history`, {
+			method: 'get',
+			headers: {
+				'cookie': ctx.req.headers.cookie as string,
+			},
+		});
+		const { history } = await res1.json();
 
-	const res2 = await fetch(`${process.env.BACKEND_URL}api/stats/users`, {
-		method: 'get',
-		headers: {
-			'cookie': ctx.req.headers.cookie as string,
-		},
-	});
-	const { users } = await res2.json();
+		const res2 = await fetch(`${process.env.BACKEND_URL}api/stats/users`, {
+			method: 'get',
+			headers: {
+				'cookie': ctx.req.headers.cookie as string,
+			},
+		});
+		const { users } = await res2.json();
 
-	return { props: { totalAPIUsage: history.length, userCount: users.length, totalHistory: history } };
+		return { props: { totalAPIUsage: history.length, userCount: users.length, totalHistory: history } };
+	} catch (err) {
+		return { props: { totalAPIUsage: 0, userCount: 0, totalHistory: [], error: 'API server currently unavailable' } };
+	}
 }

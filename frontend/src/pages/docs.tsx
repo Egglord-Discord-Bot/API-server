@@ -36,7 +36,7 @@ export default function Docs({ endpoints }: Props) {
 														<h1>Introduction</h1>
 														<hr />
 														<h5>How do I get access?</h5>
-														<p> Just login <a href="/login">here</a> and then navigate to your settings to get your API token.</p>
+														<p> Just login <Link href="/signIn">here</Link> and then navigate to your settings to get your API token.</p>
 													</div>
 													<div className="tab-pane fade" id="v-pills-profile" role="tabpanel" aria-labelledby="v-pills-profile-tab">
 														<h1>Authentication</h1>
@@ -44,7 +44,7 @@ export default function Docs({ endpoints }: Props) {
 														<p>If you don’t already have an API Key, you can get one by simply by going to your <Link href="/settings">settings</Link> page.</p>
 														<h5>How to access the API:</h5>
 														<ol>
-															<li>On your browser, just <Link href="/login">login in</Link> and then access an <Link href="/random">API endpoint</Link>.</li>
+															<li>On your browser, just <Link href="/signIn">login in</Link> and then access an <Link href="/random">API endpoint</Link>.</li>
 															<li>Set your API Key as the Authorization header on every request:</li>
 															<ul>
 																<li>

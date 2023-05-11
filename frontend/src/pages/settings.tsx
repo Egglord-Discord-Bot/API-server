@@ -1,5 +1,6 @@
 import Header from '../components/header';
 import Navbar from '../components/navbar/main';
+import Error from '../components/error';
 import type { GetServerSidePropsContext } from 'next';
 import { useSession } from 'next-auth/react';
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
@@ -15,9 +16,10 @@ type history = {
 type countEnum = { [key: string]: number }
 interface Props {
 	history: Array<history>
+	error?: string
 }
 
-export default function Settings({ history }: Props) {
+export default function Settings({ history, error }: Props) {
 	const { data: session, status } = useSession();
 	if (status == 'loading') return null;
 
@@ -73,6 +75,9 @@ export default function Settings({ history }: Props) {
 			<Header />
 			<Navbar user={session?.user}/>
 			<div className="container-fluid" style={{ padding:'1%' }}>
+				{error && (
+					<Error text={error} />
+				)}
 				<form className="form-inline">
 					<h5>Your token:</h5>
 					<div className="form-group mb-2">
@@ -114,13 +119,18 @@ export default function Settings({ history }: Props) {
 
 // Fetch basic API usage
 export async function getServerSideProps(ctx: GetServerSidePropsContext) {
-	const resp = await fetch(`${process.env.BACKEND_URL}api/session/history`, {
-		method: 'get',
-		headers: {
-			'cookie': ctx.req.headers.cookie as string,
-		},
-	});
+	try {
+		const resp = await fetch(`${process.env.BACKEND_URL}api/session/history`, {
+			method: 'get',
+			headers: {
+				'cookie': ctx.req.headers.cookie as string,
+			},
+		});
 
-	const history = await resp.json();
-	return { props: { history } };
+		const history = await resp.json();
+		return { props: { history } };
+	} catch (err) {
+		return { props: { history: [], error: 'API server currently unavailable' } };
+	}
+
 }

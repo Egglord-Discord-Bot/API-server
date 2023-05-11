@@ -1,6 +1,7 @@
 import Header from '../../components/header';
 import Sidebar from '../../components/navbar/sidebar';
 import AdminNavbar from '../../components/navbar/admin';
+import Error from '../../components/error';
 import { useSession } from 'next-auth/react';
 import type { User } from '../../types/next-auth';
 import type { Endpoint, UserHistory } from '../../types/types';
@@ -11,9 +12,10 @@ import { useState, useEffect } from 'react';
 interface Props {
   endpointData: Array<Endpoint>
   history: Array<UserHistory>
+  error?: string
 }
 
-export default function AdminEndpoints({ endpointData, history }: Props) {
+export default function AdminEndpoints({ endpointData, history, error }: Props) {
 	const { data: session, status } = useSession();
 	const [his, setHis] = useState<Array<UserHistory>>([]);
 	useEffect(() => setHis(history), []);
@@ -72,6 +74,9 @@ export default function AdminEndpoints({ endpointData, history }: Props) {
 					<div id="content">
 						<AdminNavbar user={session?.user as User}/>
 						<div className="container-fluid">
+							{error && (
+								<Error text={error} />
+							)}
 							<div className="d-sm-flex align-items-center justify-content-between mb-4">
 								<h1 className="h3 mb-0 text-gray-800">Endpoint Dashboard</h1>
 								<a href="#" className="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm">
@@ -191,23 +196,27 @@ export default function AdminEndpoints({ endpointData, history }: Props) {
 
 // Fetch endpoints
 export async function getServerSideProps(ctx: GetServerSidePropsContext) {
-	// Fetch endpoint data
-	const res = await fetch(`${process.env.BACKEND_URL}api/stats/endpoints`, {
-		method: 'get',
-		headers: {
-			'cookie': ctx.req.headers.cookie as string,
-		},
-	});
-	const { endpoints: endpointData } = await res.json();
+	try {
+		// Fetch endpoint data
+		const res = await fetch(`${process.env.BACKEND_URL}api/stats/endpoints`, {
+			method: 'get',
+			headers: {
+				'cookie': ctx.req.headers.cookie as string,
+			},
+		});
+		const { endpoints: endpointData } = await res.json();
 
-	// Fetch total history
-	const res1 = await fetch(`${process.env.BACKEND_URL}api/stats/history`, {
-		method: 'get',
-		headers: {
-			'cookie': ctx.req.headers.cookie as string,
-		},
-	});
-	const { history } = await res1.json();
+		// Fetch total history
+		const res1 = await fetch(`${process.env.BACKEND_URL}api/stats/history`, {
+			method: 'get',
+			headers: {
+				'cookie': ctx.req.headers.cookie as string,
+			},
+		});
+		const { history } = await res1.json();
 
-	return { props: { endpointData, history } };
+		return { props: { endpointData, history } };
+	} catch (err) {
+		return { props: { endpointData: [], history: [], error: 'API server currently unavailable' } };
+	}
 }

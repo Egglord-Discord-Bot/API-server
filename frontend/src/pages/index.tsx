@@ -73,14 +73,16 @@ export default function Home({ userCount, endpointCount, totalAPIUsage }: Props)
 
 // Fetch basic API usage
 export async function getServerSideProps(ctx: GetServerSidePropsContext) {
-	const res = await fetch(`${process.env.BACKEND_URL}api/stats/basic`, {
-		method: 'get',
-		headers: {
-			'cookie': ctx.req.headers.cookie as string,
-		},
-	});
-
-	const data = await res.json();
-	console.log('fg', data);
-	return { props: { userCount: data.userCount, endpointCount: data.endpointCount, totalAPIUsage: data.historyCount } };
+	try {
+		const res = await fetch(`${process.env.BACKEND_URL}api/stats/basic`, {
+			method: 'get',
+			headers: {
+				'cookie': ctx.req.headers.cookie as string,
+			},
+		});
+		const data = await res.json();
+		return { props: { userCount: data.userCount, endpointCount: data.endpointCount, totalAPIUsage: data.historyCount } };
+	} catch (err) {
+		return { props: { userCount: 0, endpointCount: 0, totalAPIUsage: 0 } };
+	}
 }
