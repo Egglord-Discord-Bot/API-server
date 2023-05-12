@@ -8,8 +8,7 @@ import { useSession } from 'next-auth/react';
 import type { User } from '../types/next-auth';
 import type { GetServerSidePropsContext } from 'next';
 import { Chart as ChartJS, ArcElement, Tooltip, Legend,	CategoryScale, LinearScale, PointElement, LineElement, Title } from 'chart.js';
-ChartJS.register(ArcElement, Tooltip, Legend);
-ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
+ChartJS.register(ArcElement, Tooltip, Legend, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
 
 type history = {
 	id: number,
@@ -29,9 +28,11 @@ export default function Admin(data: Props) {
 	const { data: session, status } = useSession();
 	if (status == 'loading') return null;
 
-	const labels = { 'January': 0, 'February': 0, 'March': 0, 'April': 0, 'May': 0, 'June': 0, 'July': 0, 'August': 0, 'September': 0, 'October': 0, 'November': 0, 'Decemeber': 0 };
-	// @ts-ignore
-	data.totalHistory.forEach((x) => labels[Object.keys(labels).at(new Date(x.createdAt).getMonth())] += 1);
+	const labels: countEnum = { 'January': 0, 'February': 0, 'March': 0, 'April': 0, 'May': 0, 'June': 0, 'July': 0, 'August': 0, 'September': 0, 'October': 0, 'November': 0, 'Decemeber': 0 };
+	data.totalHistory.forEach((x) => {
+		const y = Object.keys(labels).at(new Date(x.createdAt).getMonth());
+		if (y !== undefined) labels[y] += 1;
+	});
 	const historyAccessed = {
 		labels: Object.keys(labels),
 		datasets: [

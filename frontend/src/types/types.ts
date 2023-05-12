@@ -13,3 +13,17 @@ export type UserHistory = {
   endpoint: string
   createdAt: Date
 }
+
+type EndpointParam = {
+  name: string
+  description: string
+  required: boolean
+  type: string
+}
+
+export type EndpointData = {
+  endpoint: string
+  description: string
+  method: string
+  parameters: Array<EndpointParam>
+}

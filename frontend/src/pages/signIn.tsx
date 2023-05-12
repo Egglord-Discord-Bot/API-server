@@ -12,7 +12,7 @@ export default function Signin() {
 		} else if (status === 'authenticated') {
 			void router.push('/');
 		}
-	}, [status]);
+	}, [router, status]);
 
 	return <div></div>;
 }

@@ -77,10 +77,10 @@ export default function Admin({ user }: Props) {
               Settings
 						</Link>
 						<div className="dropdown-divider"></div>
-						<a className="dropdown-item" onClick={() => signOut()} href="/">
+						<Link className="dropdown-item" onClick={() => signOut()} href="/">
 							<i className="fas fa-sign-out-alt fa-sm fa-fw mr-2 text-gray-400"></i>
               Logout
-						</a>
+						</Link>
 					</div>
 				</li>
 			</ul>

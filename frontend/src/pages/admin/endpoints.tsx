@@ -7,7 +7,7 @@ import type { User } from '../../types/next-auth';
 import type { Endpoint, UserHistory } from '../../types/types';
 import type { GetServerSidePropsContext } from 'next';
 import type { SyntheticEvent } from 'react';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 
 interface Props {
   endpointData: Array<Endpoint>
@@ -17,8 +17,7 @@ interface Props {
 
 export default function AdminEndpoints({ endpointData, history, error }: Props) {
 	const { data: session, status } = useSession();
-	const [his, setHis] = useState<Array<UserHistory>>([]);
-	useEffect(() => setHis(history), []);
+	const [his, setHis] = useState<Array<UserHistory>>(history);
 
 	if (status == 'loading') return null;
 

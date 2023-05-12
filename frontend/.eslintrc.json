@@ -13,9 +13,9 @@
     "@typescript-eslint"
   ],
 	"extends": [
-    "eslint:recommended",
-    "plugin:@typescript-eslint/eslint-recommended",
-    "next/core-web-vitals"
+		"next/core-web-vitals",
+		"plugin:@typescript-eslint/eslint-recommended",
+		"plugin:@typescript-eslint/recommended"
   ],
 	"rules": {
 		"brace-style": ["error", "1tbs", { "allowSingleLine": true }],
