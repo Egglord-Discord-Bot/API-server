@@ -2,10 +2,14 @@ import { Router } from 'express';
 import { fetchUsers } from '../../database/User';
 import { fetchEndpointData } from '../../database/endpointData';
 import { fetchAllEndpointUsage } from '../../database/userHistory';
+import { fetchSystemHistoryData } from '../../database/systemHistory';
 import { isAdmin } from '../../middleware/middleware';
+import SystemManager from '../../helpers/SystemManager';
 const router = Router();
+const systemManager = new SystemManager();
 
 export default function() {
+	systemManager.init();
 
 	router.get('/basic', async (_req, res) => {
 
@@ -56,5 +60,15 @@ export default function() {
 		}
 	});
 
+	router.get('/system', isAdmin, async (_req, res) => {
+		const [systemHis, cpu, disk] = await Promise.all([fetchSystemHistoryData(), systemManager.calculateCPUUsage(), systemManager.calculateDiskUsage()]);
+		const memory = systemManager.calculateMemoryUsage();
+
+		res.json({
+			current: {
+				memory, cpu, disk,
+			},
+			history: systemHis });
+	});
 	return router;
 }

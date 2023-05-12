@@ -12,3 +12,13 @@ export function nFormatter(num: number, digits: number) {
 	const item = lookup.slice().reverse().find((i) => num >= i.value);
 	return item ? (num / item.value).toFixed(digits).replace(rx, '$1') + item.symbol : '0';
 }
+
+export function formatBytes(bytes: number, decimals = 2) {
+	if (bytes <= 0) return '0 Bytes';
+
+	const dm = decimals < 0 ? 0 : decimals;
+	const sizes = ['Bytes', 'KiB', 'MiB', 'GiB', 'TiB', 'PiB', 'EiB', 'ZiB', 'YiB'];
+	const i = Math.floor(Math.log(bytes) / Math.log(1024));
+
+	return `${parseFloat((bytes / Math.pow(1024, i)).toFixed(dm))} ${sizes[i]}`;
+}

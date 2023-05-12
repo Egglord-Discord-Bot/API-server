@@ -1,7 +1,7 @@
 import Link from 'next/link';
 
 interface Props {
-	activeTab: 'dashboard' | 'users' | 'endpoint'
+	activeTab: 'dashboard' | 'users' | 'endpoint' | 'system'
 }
 
 export default function Sidebar({ activeTab }: Props) {
@@ -34,6 +34,12 @@ export default function Sidebar({ activeTab }: Props) {
 				<Link className="nav-link" href="/admin/endpoints">
 					<i className="fas fa-fw fa-chart-area"></i>
 					<span>Endpoints</span>
+				</Link>
+			</li>
+			<li className={`nav-item ${activeTab == 'system' ? 'active' : ''}`}>
+				<Link className="nav-link" href="/admin/system">
+					<i className="fas fa-fw fa-chart-area"></i>
+					<span>System</span>
 				</Link>
 			</li>
 			<li className="nav-item">

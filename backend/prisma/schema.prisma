@@ -42,3 +42,10 @@ model Endpoint {
   maxRequestper Int       @default(60000)
   isBlocked     Boolean   @default(false)
 }
+
+model systemHistory {
+  id            Int         @id     @default(autoincrement())
+  memoryUsage   String
+  cpuUsage      Int
+  createdAt     DateTime      @default(now()) @map("created_at")
+}

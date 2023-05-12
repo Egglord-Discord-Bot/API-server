@@ -1,7 +1,7 @@
 node_modules
 *.traineddata
 /backend/dist
-prisma/migrations
+/backend/prisma/migrations
 /backend/src/utils/logs
 .env
 /frontend/.next

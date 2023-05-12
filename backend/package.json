@@ -70,6 +70,7 @@
     "qrcode": "^1.5.3",
     "r6api.js": "^4.4.1",
     "simple-node-logger": "^21.8.12",
+    "systeminformation": "^5.17.12",
     "tesseract.js": "^4.0.1",
     "ts-token-generator": "^1.0.4",
     "urban-dictionary": "^3.0.2",
