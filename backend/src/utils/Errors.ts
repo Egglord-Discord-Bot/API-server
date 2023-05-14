@@ -44,8 +44,26 @@ export default class Error {
 	}
 
 	public static MissingAccess(res: Response) {
-		return 	res
+		return res
 			.status(403)
 			.json({ error: 'You are not authorised to use this endpoint' });
+	}
+
+	public static Unauthorized(res: Response) {
+		return res
+			.status(401)
+			.json({ error: 'You are unauthorized to access this endpoint' });
+	}
+
+	public static GlobalRateLimit(res: Response) {
+		return res
+			.status(429)
+			.json({ error: 'You are globally rate-limited.' });
+	}
+
+	public static RateLimited(res: Response) {
+		return res
+			.status(429)
+			.json({ error: 'You are rate-limited on this endpoint.' });
 	}
 }
