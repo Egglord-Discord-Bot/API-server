@@ -1,7 +1,7 @@
 import type { SKRSContext2D } from '@napi-rs/canvas';
 
 export type userID = {
-	id: string
+	id: number
 	endpoint: string
 }
 

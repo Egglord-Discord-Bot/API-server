@@ -2,7 +2,7 @@ import chalk from 'chalk';
 import moment from 'moment';
 import { createRollingFileLogger } from 'simple-node-logger';
 import onFinished from 'on-finished';
-import type { loggerTypes } from './types';
+import type { loggerTypes } from '../types';
 import { Utils } from './Utils';
 const log = createRollingFileLogger({
 	logDirectory: './src/utils/logs',

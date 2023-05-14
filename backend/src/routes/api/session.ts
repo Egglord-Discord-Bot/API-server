@@ -7,7 +7,7 @@ const router = Router();
 
 export default function() {
 	router.post('/signIn', async (req, res) => {
-		const userId = req.query.userId as string;
+		const userId = Number(req.query.userId as string);
 		const { discriminator, avatar, locale, email, username } = req.body;
 
 		// Create avatar URL
@@ -20,9 +20,9 @@ export default function() {
 
 		// Fetch / create user
 		try {
-			let user = await fetchUser(userId);
+			let user = await fetchUser(BigInt(userId));
 			if (user == null) {
-				user = await createUser({ id: userId,
+				user = await createUser({ id: BigInt(userId),
 					token: new TokenGenerator({ bitSize: 512, baseEncoding: TokenBase.BASE62 }).generate(),
 					avatar: image_url,
 					discriminator, locale, email, username,
@@ -52,7 +52,7 @@ export default function() {
 		const ses = await Utils.getSession(req);
 
 		if (ses?.user) {
-			const history = await fetchEndpointUsagesPerUser(ses.user.id);
+			const history = await fetchEndpointUsagesPerUser(Number(ses.user.id));
 			res.json(history);
 		} else {
 			res.json({});

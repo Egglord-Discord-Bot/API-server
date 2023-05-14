@@ -1,7 +1,7 @@
 import client from './client';
 
 // Fetch a user
-export async function fetchUser(id: string) {
+export async function fetchUser(id: bigint) {
 	return client.user.findUnique({
 		where: {
 			id: id,
@@ -9,12 +9,23 @@ export async function fetchUser(id: string) {
 	});
 }
 
-export async function fetchUsers() {
-	return client.user.findMany();
+type fetchUsers = {
+	page: number
+}
+export async function fetchUsers({ page }: fetchUsers) {
+	return client.user.findMany({
+		skip: page * 10,
+		take: 10,
+	});
+}
+
+
+export async function fetchUserCount() {
+	return client.user.count();
 }
 
 type createUser = {
-	id: string
+	id: bigint
 	token: string
 	username?: string
 	discriminator?: string
@@ -22,6 +33,7 @@ type createUser = {
 	locale?: string
 	email?: string
 }
+
 // Create a user with token
 export async function createUser(data: createUser) {
 	return client.user.create({
@@ -38,7 +50,7 @@ export async function createUser(data: createUser) {
 }
 
 // Delete a user
-export async function deleteUser(id: string) {
+export async function deleteUser(id: number) {
 	return client.user.delete({
 		where: {
 			id: id,
@@ -47,7 +59,7 @@ export async function deleteUser(id: string) {
 }
 
 type updateUser = {
-	id: string
+	id: number
 	newToken?: string
 	username?: string
 	discriminator?: string

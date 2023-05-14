@@ -1,7 +1,7 @@
 import { Router } from 'express';
-import { fetchUsers } from '../../database/User';
+import { fetchUsers, fetchUserCount } from '../../database/User';
 import { fetchEndpointData } from '../../database/endpointData';
-import { fetchAllEndpointUsage } from '../../database/userHistory';
+import { fetchEndpointTotal, fetchAllEndpointUsage } from '../../database/userHistory';
 import { fetchSystemHistoryData } from '../../database/systemHistory';
 import { isAdmin } from '../../middleware/middleware';
 import SystemManager from '../../helpers/SystemManager';
@@ -9,16 +9,16 @@ const router = Router();
 const systemManager = new SystemManager();
 
 export default function() {
-	systemManager.init();
+	// systemManager.init();
 
 	router.get('/basic', async (_req, res) => {
 
 		try {
-			const [users, endpoints, endpointUsage] = await Promise.all([fetchUsers(), fetchEndpointData(), fetchAllEndpointUsage()]);
+			const [users, endpoints, endpointUsage] = await Promise.all([fetchUserCount(), fetchEndpointData(), fetchEndpointTotal()]);
 			res.json({
-				userCount: users.length,
+				userCount: users,
 				endpointCount: endpoints.length,
-				historyCount: endpointUsage.length,
+				historyCount: endpointUsage,
 			});
 		} catch (err) {
 			console.log(err);
@@ -30,10 +30,11 @@ export default function() {
 		}
 	});
 
-	router.get('/users', isAdmin, async (_req, res) => {
+	router.get('/users', isAdmin, async (req, res) => {
+		const page = req.query.page;
 		try {
-			const users = await fetchUsers();
-			res.json({ users: users });
+			const users = await fetchUsers({ page: (page && !Number.isNaN(page)) ? Number(page) : 0 });
+			res.json({ users: users.map(i => ({ ...i, id: i.id.toString() })) });
 		} catch (err) {
 			console.log(err);
 			res.json({ users: [] });
@@ -52,7 +53,7 @@ export default function() {
 
 	router.get('/history', isAdmin, async (_req, res) => {
 		try {
-			const history = await fetchAllEndpointUsage();
+			const history = await fetchAllEndpointUsage(1);
 			res.json({ history: history });
 		} catch (err) {
 			console.log(err);

@@ -2,7 +2,7 @@ import fs from 'node:fs';
 import doctrine from 'doctrine';
 import { Utils } from '../utils/Utils';
 import { join } from 'path';
-import type { APIEndpointData, ParamAPIEndpoint } from '../utils/types';
+import type { APIEndpointData, ParamAPIEndpoint } from '../types';
 
 type encoding = 'utf8' | undefined
 

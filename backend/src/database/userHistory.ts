@@ -1,5 +1,5 @@
 import client from './client';
-import type { userID } from '../utils/types';
+import type { userID } from '../types';
 
 /**
 	* Create a record of user accessing the endpoint
@@ -40,7 +40,7 @@ export async function fetchEndpointUsagePerUser({ id, endpoint }: userID) {
 	* @param id The endpoint the user is trying to access
 	* @returns Whether or not they are being ratelimited
 */
-export async function fetchEndpointUsagesPerUser(id: string) {
+export async function fetchEndpointUsagesPerUser(id: number) {
 	return client.userHistory.findMany({
 		where: {
 			userId: id,
@@ -48,8 +48,11 @@ export async function fetchEndpointUsagesPerUser(id: string) {
 	});
 }
 
-export async function fetchAllEndpointUsage() {
-	return client.userHistory.findMany();
+export async function fetchAllEndpointUsage(page: number) {
+	return client.userHistory.findMany({
+		skip: page * 10,
+		take: 10,
+	});
 }
 
 export async function deleteEndpoint(id: number) {
@@ -58,4 +61,8 @@ export async function deleteEndpoint(id: number) {
 			id,
 		},
 	});
+}
+
+export async function fetchEndpointTotal() {
+	return client.userHistory.count();
 }

@@ -11,7 +11,7 @@ datasource db {
 }
 
 model User {
-  id            String        @id
+  id            BigInt        @id
   token         String        @unique
   avatar        String?
   username      String?
@@ -28,7 +28,7 @@ model User {
 model UserHistory {
   id            Int     @id   @default(autoincrement())
   user          User    @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId        String
+  userId        BigInt
   endpoint      String
   responseCode  Int @default(200)
   responseTime  Int @default(5)
@@ -41,6 +41,7 @@ model Endpoint {
   maxRequests   Int       @default(5)
   maxRequestper Int       @default(60000)
   isBlocked     Boolean   @default(false)
+  premiumOnly   Boolean   @default(false)
 }
 
 model systemHistory {

@@ -20,7 +20,7 @@ client.$use(async (params, next) => {
 });
 
 client.$on('info', (data) => {
-	Logger.log(data.message, 'log');
+	Logger.log(data.message);
 });
 
 client.$on('warn', (data) => {

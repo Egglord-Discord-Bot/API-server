@@ -3,7 +3,7 @@ const router = Router();
 import CacheHandler from '../../helpers/CacheHandler';
 import axios from 'axios';
 import { Utils } from '../../utils/Utils';
-import { RedditPost } from '../../utils/types';
+import { RedditPost } from '../../types';
 import type { Covid } from '../../utils/responses';
 import { translate } from '@vitalets/google-translate-api';
 import languages from '../../assets/JSON/languages.json';
