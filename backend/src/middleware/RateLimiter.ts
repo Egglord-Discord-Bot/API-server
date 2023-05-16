@@ -1,7 +1,9 @@
 import type { Request, Response, NextFunction } from 'express';
-import { fetchUserByToken } from '../database/User';
-import { fetchEndpointData } from '../database/endpointData';
-import { createEndpoint } from '../database/userHistory';
+import type Client from '../helpers/Client';
+
+// import { fetchUserByToken } from '../database/User';
+// import { fetchEndpointData } from '../database/endpointData';
+// import { createEndpoint } from '../database/userHistory';
 import { Utils } from '../utils/Utils';
 import Error from '../utils/Errors';
 import type { User, Endpoint } from '@prisma/client';
@@ -16,14 +18,15 @@ interface endpointData {
 }
 
 export default class RateLimit {
-	userRatelimit: Map<number, endpointData>;
+	userRatelimit: Map<bigint, endpointData>;
 	lastChecked: number;
 	endpointData: Array<Endpoint>;
-	constructor() {
+	client: Client;
+	constructor(client: Client) {
 		this.endpointData = [];
 		this.userRatelimit = new Map();
 		this.lastChecked = new Date().getTime();
-
+		this.client = client;
 		this._sweep();
 		this._fetchEndpointData();
 	}
@@ -33,7 +36,6 @@ export default class RateLimit {
 		const user = await this._extractUser(req);
 		if (user === null) return Error.Unauthorized(res);
 
-		console.log(res.writableEnded);
 		// Check that the endpoint is valid
 		const endpoint = this.endpointData.find(i => i.name == req.originalUrl.split('?')[0]);
 		if (endpoint == undefined) return Error.MissingEndpoint(res, req.originalUrl.split('?')[0]);
@@ -47,14 +49,14 @@ export default class RateLimit {
 		// Bypass ratelimit if user is an Admin
 		if (!user.isAdmin) {
 			// Now check if user is rate limited by global rate Limit
-			const isGloballyRateLimited = this._checkGlobalCooldown(Number(user.id));
+			const isGloballyRateLimited = this._checkGlobalCooldown(user.id);
 			if (isGloballyRateLimited) return Error.GlobalRateLimit(res);
 
 			// Now check if user is rate limited by endpoint
-			const isRateLimitedByEndpoint = await this.checkEndpointUsage(Number(user.id), endpoint.name);
+			const isRateLimitedByEndpoint = await this.checkEndpointUsage(user.id, endpoint.name);
 			if (isRateLimitedByEndpoint.isRateLimted) return Error.RateLimited(res);
 		} else {
-			await createEndpoint({ id: Number(user.id), endpoint: endpoint.name });
+			await this.client.UserHistoryManager.create({ id: user.id, endpoint: endpoint.name });
 		}
 
 		// User is logged in and not ratelimited at all
@@ -72,7 +74,7 @@ export default class RateLimit {
 		if (possibleUser != null) return possibleUser.user as User;
 
 		// They might be trying to connect via their token
-		if (req.headers.authorization || req.query.token) return await fetchUserByToken((req.headers.authorization || req.query.token) as string);
+		if (req.headers.authorization || req.query.token) return await this.client.UserManager.fetchByParam({ token: (req.headers.authorization || req.query.token) as string });
 
 		// They are not logged in at all
 		return null;
@@ -83,7 +85,7 @@ export default class RateLimit {
   	* @param {string} userID The ID of the user getting checked
   	* @returns Whether or not they are globally ratelimited
   */
-	private _checkGlobalCooldown(userID: number) {
+	private _checkGlobalCooldown(userID: bigint) {
 		if (this.userRatelimit.get(userID)) {
 			const data = this.userRatelimit.get(userID)?.endpoints.reduce((a, b) => b.lastAccess.length + a, 0) ?? 0;
 			return (data >= 100);
@@ -98,7 +100,7 @@ export default class RateLimit {
     * @param {string} endpoint The endpoint name
     * @returns Whether or not they are ratelimited on the endpoint
   */
-	async checkEndpointUsage(userID: number, endpoint: string) {
+	async checkEndpointUsage(userID: bigint, endpoint: string) {
 		let isRateLimted = { isRateLimted: false, reason: 0 };
 		if (this.userRatelimit.get(userID)) {
 			// User has been cached
@@ -124,7 +126,7 @@ export default class RateLimit {
     * @param {string} userId The ID of the user getting checked
     * @param {string} endpoint The endpoint name
   */
-	async addEndpoint(userId: number, endpoint: string) {
+	async addEndpoint(userId: bigint, endpoint: string) {
 		if (this.userRatelimit.get(userId)) {
 			const user = this.userRatelimit.get(userId);
 			if (user?.endpoints.find(e => e.name == endpoint)) {
@@ -137,11 +139,11 @@ export default class RateLimit {
 		}
 
 		// Save to users' history
-		await createEndpoint({ id: userId, endpoint: endpoint });
+		await this.client.UserHistoryManager.create({ id: userId, endpoint: endpoint });
 	}
 
 	private async _fetchEndpointData() {
-		setInterval(async () => this.endpointData = await fetchEndpointData(), 60_000);
+		setInterval(async () => this.endpointData = await this.client.EndpointManager.fetchEndpointData(), 60_000);
 	}
 
 	private _sweep() {

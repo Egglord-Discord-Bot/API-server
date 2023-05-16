@@ -20,7 +20,7 @@ type redditData = {
 	children: redditChild[]
 }
 
-export default function() {
+export function run() {
 	const CovidHandler = new CacheHandler();
 	const RedditHandler = new CacheHandler();
 	const NPMHandler = new CacheHandler();

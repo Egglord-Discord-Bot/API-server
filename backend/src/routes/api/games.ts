@@ -6,7 +6,7 @@ import { status } from 'minecraft-server-util';
 import Error from '../../utils/Errors';
 const { findByUsername, getRanks, getStats, getProgression } = new R6API({ email: process.env.R6Email, password: process.env.R6Password });
 
-export default function() {
+export function run() {
 	/**
 	 * @API
 	 * /games/fortnite:

@@ -6,7 +6,7 @@ import Error from '../../utils/Errors';
 import axios from 'axios';
 const router = Router();
 
-export default function() {
+export function run() {
 	const SteamHandler = new CacheHandler();
 	const GithubHandler = new CacheHandler();
 	const TwitchCacheHandler = new TwitchHandler();

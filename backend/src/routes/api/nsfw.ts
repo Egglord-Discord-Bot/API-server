@@ -6,7 +6,7 @@ import * as nsfwjs from 'nsfwjs';
 import type { Tensor3D } from '@tensorflow/tfjs-node';
 import Error from '../../utils/Errors';
 
-export default function() {
+export function run() {
 	/**
 	  * @API
 	  * /nsfw/image:

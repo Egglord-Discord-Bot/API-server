@@ -12,7 +12,7 @@ import adviceList from '../../assets/JSON/advice.json';
 import QRcode from 'qrcode';
 import { PassThrough } from 'stream';
 
-export default function() {
+export function run() {
 	/**
 	 * @API
 	 * /misc/advice:
@@ -22,7 +22,7 @@ export default function() {
 	*/
 	router.get('/advice', async (_req, res) => {
 		try {
-			const advice = adviceList[Math.floor((Math.random() * adviceList.length))]
+			const advice = adviceList[Math.floor((Math.random() * adviceList.length))];
 			res.json({ data: advice });
 		} catch (err: any) {
 			Error.GenericError(res, err.message);

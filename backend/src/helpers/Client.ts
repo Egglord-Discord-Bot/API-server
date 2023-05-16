@@ -1,18 +1,22 @@
 import type CacheHandler from './CacheHandler';
-import RateLimiter from '../middleware/RateLimiter';
-import type { User } from '@prisma/client';
-
+import UserManager from '../database/User';
+import UserHistoryManager from '../database/userHistory';
+import SystemHistoryManager from '../database/systemHistory';
+import EndpointManager from '../database/endpointData';
 
 type CacheNames = 'Twitch' | 'Twitter' | 'R6'
+
 export default class Client {
 	CacheHandler: Map<CacheNames, CacheHandler>;
-	RateLimiter: RateLimiter;
-	Endpoints: string;
-	users: Map<string, User>;
+	UserManager: UserManager;
+	UserHistoryManager: UserHistoryManager;
+	SystemHistoryManager: SystemHistoryManager;
+	EndpointManager: EndpointManager;
 	constructor() {
 		this.CacheHandler = new Map();
-		this.RateLimiter = new RateLimiter();
-		this.users = new Map();
-		this.Endpoints = '';
+		this.UserManager = new UserManager();
+		this.UserHistoryManager = new UserHistoryManager();
+		this.SystemHistoryManager = new SystemHistoryManager();
+		this.EndpointManager = new EndpointManager();
 	}
 }

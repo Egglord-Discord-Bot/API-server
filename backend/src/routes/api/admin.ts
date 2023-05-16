@@ -1,16 +1,14 @@
 import { Router } from 'express';
-import { updateEndpointData } from '../../database/endpointData';
-import { updateUser } from '../../database/User';
-import { deleteEndpoint } from '../../database/userHistory';
+import type Client from '../../helpers/Client';
 const router = Router();
 
-export default function() {
+export function run(client: Client) {
 
 	router.patch('/endpoint', async (req, res) => {
 		const { name, isBlocked } = req.body;
 
 		try {
-			await updateEndpointData({ name, isBlocked });
+			await client.EndpointManager.update({ name, isBlocked });
 			res.json({ success: `Successfully updated endpoint: ${name}` });
 		} catch (err) {
 			console.log(err);
@@ -22,7 +20,7 @@ export default function() {
 		const { id } = req.body;
 
 		try {
-			await deleteEndpoint(id);
+			await client.UserHistoryManager.delete(id);
 			res.json({ success: `Successfully deleted user history: ${id}` });
 		} catch (err) {
 			console.log(err);
@@ -35,7 +33,7 @@ export default function() {
 		const { userId, isAdmin, isBlocked, isPremium } = req.body;
 
 		try {
-			await updateUser({ id: userId, isAdmin, isPremium, isBlocked });
+			await client.UserManager.update({ id: userId, isAdmin, isPremium, isBlocked });
 			res.json({ success: `Successfully updated user: ${userId}` });
 		} catch (err) {
 			console.log(err);

@@ -1,13 +1,12 @@
 import { Router } from 'express';
-import { fetchUser, createUser, updateUser } from '../../database/User';
-import { fetchEndpointUsagesPerUser } from '../../database/userHistory';
+import type Client from '../../helpers/Client';
 import { TokenGenerator, TokenBase } from 'ts-token-generator';
 import { Utils } from '../../utils/Utils';
 const router = Router();
 
-export default function() {
+export function run(client: Client) {
 	router.post('/signIn', async (req, res) => {
-		const userId = Number(req.query.userId as string);
+		const userId = BigInt(req.query.userId as string);
 		const { discriminator, avatar, locale, email, username } = req.body;
 
 		// Create avatar URL
@@ -20,9 +19,9 @@ export default function() {
 
 		// Fetch / create user
 		try {
-			let user = await fetchUser(BigInt(userId));
+			let user = await client.UserManager.fetchByParam({ id: BigInt(userId) });
 			if (user == null) {
-				user = await createUser({ id: BigInt(userId),
+				user = await client.UserManager.create({ id: userId,
 					token: new TokenGenerator({ bitSize: 512, baseEncoding: TokenBase.BASE62 }).generate(),
 					avatar: image_url,
 					discriminator, locale, email, username,
@@ -31,7 +30,7 @@ export default function() {
 
 			// Send updated profile back to user
 			res.json({
-				id: userId,
+				id: `${userId}`,
 				isBlocked: user.isBlocked,
 				isPremium: user.isPremium,
 				isAdmin: user.isAdmin,
@@ -40,8 +39,8 @@ export default function() {
 				discriminator, username, email,
 			});
 
-			// Update the database if username/discriminator change
-			if (username != user.username || discriminator != user.discriminator) await updateUser({ id: userId, username, discriminator });
+			// Update the database if any changes are found
+			if (username != user.username || discriminator != user.discriminator || image_url != user.avatar) await client.UserManager.update({ id: userId, username, discriminator, avatar: image_url });
 		} catch (err) {
 			console.log(err);
 			res.json();
@@ -52,7 +51,7 @@ export default function() {
 		const ses = await Utils.getSession(req);
 
 		if (ses?.user) {
-			const history = await fetchEndpointUsagesPerUser(Number(ses.user.id));
+			const history = await client.UserHistoryManager.fetchEndpointUsagesPerUser(Number(ses.user.id));
 			res.json(history);
 		} else {
 			res.json({});

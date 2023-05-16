@@ -1,6 +1,6 @@
 import os from 'os';
 import si from 'systeminformation';
-import { createSystemHistory } from '../database/systemHistory';
+import type Client from './Client';
 import util from 'node:util';
 import { exec } from 'node:child_process';
 const cmd = util.promisify(exec);
@@ -8,11 +8,11 @@ const cmd = util.promisify(exec);
 export default class SystemManager {
 	used_bytes: number;
 	bandwidth: number;
-	constructor() {
+	client: Client;
+	constructor(client: Client) {
 		this.used_bytes = 0,
 		this.bandwidth = 0;
-
-		this.saveSystemHistory();
+		this.client = client;
 	}
 
 	async calculateNetworkUsage() {
@@ -63,10 +63,10 @@ export default class SystemManager {
 		const mem = this.calculateMemoryUsage();
 		const cpu = await this.calculateCPUUsage();
 
-		await createSystemHistory({ memoryUsage: `${mem.USAGE}`, cpuUsage: cpu });
+		await this.client.SystemHistoryManager.create({ memoryUsage: `${mem.USAGE}`, cpuUsage: cpu });
 	}
 
 	init() {
-		setInterval(async () => await this.saveSystemHistory(), 15_000);
+		setInterval(async () => await this.saveSystemHistory(), 60_000);
 	}
 }

@@ -12,13 +12,16 @@ import RateLimter from './middleware/RateLimiter';
 import bodyParser from 'body-parser';
 import Error from './utils/Errors';
 import * as dotenv from 'dotenv';
+import Client from './helpers/Client';
 dotenv.config();
+
 
 (async () => {
 	// Load passport and endpoint data
-	await (await import('./helpers/EndpointData')).default();
+	const client = new Client();
+	await (await import('./helpers/EndpointData')).default(client);
 	const endpoints = Utils.generateRoutes(join(__dirname, './', 'routes')).filter(e => e.route !== '/index');
-	const RateLimiterHandler = new RateLimter();
+	const RateLimiterHandler = new RateLimter(client);
 
 	// The web server
 	app.use(helmet({
@@ -53,7 +56,8 @@ dotenv.config();
 	// Dynamically load all endpoints
 	for (const endpoint of endpoints) {
 		Logger.debug(`Loading: ${endpoint.route} endpoint.`);
-		app.use(endpoint.route, (await import(endpoint.path)).default());
+		const file = await import(endpoint.path);
+		app.use(endpoint.route, file.run(client));
 	}
 
 	// Run the server on port

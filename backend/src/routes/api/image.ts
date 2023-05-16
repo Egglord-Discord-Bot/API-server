@@ -4,7 +4,7 @@ import { checkImage } from '../../middleware/middleware';
 import Error from '../../utils/Errors';
 import Image from '../../helpers/Image';
 
-export default function() {
+export function run() {
 	/**
 	 * @API
 	 * /image/affect:

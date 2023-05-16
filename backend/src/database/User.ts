@@ -1,95 +1,102 @@
+import { CONSTANTS } from '../utils/CONSTANTS';
+import type { User } from '@prisma/client';
+import type { updateUser, createUser, pagination, userUnqiueParam } from '../types/database';
 import client from './client';
 
-// Fetch a user
-export async function fetchUser(id: bigint) {
-	return client.user.findUnique({
-		where: {
-			id: id,
-		},
-	});
-}
+export default class UserManager {
+	size: number;
+	cachedUsers: Array<User>;
+	constructor() {
+		this.size = 0;
+		this.cachedUsers = [];
 
-type fetchUsers = {
-	page: number
-}
-export async function fetchUsers({ page }: fetchUsers) {
-	return client.user.findMany({
-		skip: page * 10,
-		take: 10,
-	});
-}
+		// Fetch total count on start up
+		this.fetchCount();
+	}
 
+	/**
+		* Creates a new user
+		* @param {createUser} data The user class
+		* @returns The new user
+	*/
+	async create(data: createUser) {
+		this.size++;
+		return client.user.create({
+			data: {
+				id: data.id,
+				token: data.token,
+				username: data.username,
+				discriminator: data.discriminator,
+				avatar: data.avatar,
+				locale: data.locale,
+				email: data.email,
+			},
+		});
+	}
 
-export async function fetchUserCount() {
-	return client.user.count();
-}
+	/**
+		* Delete an existing user
+		* @param {number} id The ID of the user
+		* @returns The deleted user
+	*/
+	async delete(id: number) {
+		this.size--;
+		return client.user.delete({
+			where: { id },
+		});
+	}
 
-type createUser = {
-	id: bigint
-	token: string
-	username?: string
-	discriminator?: string
-	avatar?: string
-	locale?: string
-	email?: string
-}
+	/**
+		* Updated an existing user
+		* @param {updateUser} data The data for updating user
+		* @returns The new user
+	*/
+	async update(data: updateUser) {
+		return client.user.update({
+			where: {
+				id: data.id,
+			},
+			data: {
+				token: data.newToken != null ? data.newToken : undefined,
+				isAdmin: data.isAdmin != null ? data.isAdmin : undefined,
+				isBlocked: data.isBlocked != null ? data.isBlocked : undefined,
+				isPremium: data.isPremium != null ? data.isPremium : undefined,
+				username: data.username != null ? data.username : undefined,
+				discriminator: data.discriminator != null ? data.discriminator : undefined,
+				avatar: data.avatar != null ? data.avatar : undefined,
+			},
+		});
+	}
 
-// Create a user with token
-export async function createUser(data: createUser) {
-	return client.user.create({
-		data: {
-			id: data.id,
-			token: data.token,
-			username: data.username,
-			discriminator: data.discriminator,
-			avatar: data.avatar,
-			locale: data.locale,
-			email: data.email,
-		},
-	});
-}
+	/**
+		* Returns the total number of entries
+		* @returns The total number of entries
+	*/
+	async fetchCount() {
+		if (this.size == 0) this.size = await client.user.count();
+		return this.size;
+	}
 
-// Delete a user
-export async function deleteUser(id: number) {
-	return client.user.delete({
-		where: {
-			id: id,
-		},
-	});
-}
+	/**
+    * Fetch a user based on their ID
+    * @param {Param} id The ID of the user
+    * @returns A user
+  */
+	async fetchByParam({ id, token }: userUnqiueParam) {
+		return client.user.findUnique({
+			where: { id: id, token: token },
+		});
+	}
 
-type updateUser = {
-	id: number
-	newToken?: string
-	username?: string
-	discriminator?: string
-	isAdmin?: boolean
-	isBlocked?: boolean
-	isPremium?: boolean
-}
-
-// Update a user
-export async function updateUser(data: updateUser) {
-	return client.user.update({
-		where: {
-			id: data.id,
-		},
-		data: {
-			token: data.newToken != null ? data.newToken : undefined,
-			isAdmin: data.isAdmin != null ? data.isAdmin : undefined,
-			isBlocked: data.isBlocked != null ? data.isBlocked : undefined,
-			isPremium: data.isPremium != null ? data.isPremium : undefined,
-			username: data.username != null ? data.username : undefined,
-			discriminator: data.discriminator != null ? data.discriminator : undefined,
-		},
-	});
-}
-
-
-export async function fetchUserByToken(token: string) {
-	return client.user.findUnique({
-		where: {
-			token: token,
-		},
-	});
+	/**
+    * Extract the user from the request (if any)
+    * @param {pagination} page The ID of the user
+    * @returns An array of users
+  */
+	async fetchUsers({ page }: pagination) {
+		return client.user.findMany({
+			skip: page * CONSTANTS.DbPerPage,
+			take: CONSTANTS.DbPerPage,
+		});
+	}
 }

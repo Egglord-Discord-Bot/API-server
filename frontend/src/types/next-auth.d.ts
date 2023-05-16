@@ -4,10 +4,11 @@ export interface User {
   username: string
   email: string
   avatar: string
+  token: string
+  createdAt: Date
   isAdmin: boolean
   isBlocked: boolean
   isPremium: boolean
-  token: string
 }
 
 declare module 'next-auth/jwt' {

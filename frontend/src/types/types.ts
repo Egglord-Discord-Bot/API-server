@@ -7,7 +7,7 @@ export type Endpoint = {
 }
 
 export type UserHistory = {
-  id: string
+  id: number
   user: string
   userId: string
   endpoint: string
