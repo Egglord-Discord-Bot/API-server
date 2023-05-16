@@ -6,6 +6,7 @@ export default class EndpointManager {
 	constructor() {
 		this.size = 0;
 
+		// Fetch total count on start up
 		this.fetchCount();
 	}
 

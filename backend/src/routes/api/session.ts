@@ -49,10 +49,11 @@ export function run(client: Client) {
 
 	router.get('/history', async (req, res) => {
 		const ses = await Utils.getSession(req);
+		const page = req.query.page;
 
 		if (ses?.user) {
-			const history = await client.UserHistoryManager.fetchEndpointUsagesPerUser(Number(ses.user.id));
-			res.json(history);
+			const history = await client.UserHistoryManager.fetchEndpointUsagesPerUser({ userId: ses.user.id, page: (page && !Number.isNaN(page)) ? Number(page) : 0 });
+			res.json({ history: history });
 		} else {
 			res.json({});
 		}

@@ -84,7 +84,7 @@ export default class UserManager {
   */
 	async fetchByParam({ id, token }: userUnqiueParam) {
 		return client.user.findUnique({
-			where: { id: id, token: token },
+			where: { id, token },
 		});
 	}
 

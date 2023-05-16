@@ -17,7 +17,6 @@ export function run(client: Client) {
 				historyCount: endpointUsage,
 			});
 		} catch (err) {
-			console.log(err);
 			res.json({
 				userCount: 0,
 				endpointCount: 0,
@@ -47,9 +46,10 @@ export function run(client: Client) {
 		}
 	});
 
-	router.get('/history', isAdmin, async (_req, res) => {
+	router.get('/history', isAdmin, async (req, res) => {
+		const page = req.query.page;
 		try {
-			const history = await client.UserHistoryManager.fetchAllEndpointUsage(1);
+			const history = await client.UserHistoryManager.fetchAllEndpointUsage({ page: (page && !Number.isNaN(page)) ? Number(page) : 0 });
 			res.json({ history: history });
 		} catch (err) {
 			console.log(err);
@@ -63,7 +63,8 @@ export function run(client: Client) {
 
 		res.json({
 			current: { memory, cpu, disk },
-			history: systemHis });
+			history: systemHis,
+		});
 	});
 	return router;
 }

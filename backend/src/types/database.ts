@@ -31,6 +31,10 @@ export type endpointUserParam = {
 	endpoint: string
 }
 
+export type endpointUserUnique = {
+	userId: bigint
+}
+
 /* ENDPOINT DATA TYPES */
 export type createEndpointData = {
 	name: string

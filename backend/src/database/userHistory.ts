@@ -1,5 +1,5 @@
 import { CONSTANTS } from '../utils/CONSTANTS';
-import type { endpointUserParam } from '../types/database';
+import type { endpointUserParam, endpointUserUnique, pagination } from '../types/database';
 import client from './client';
 
 export default class userHistoryManager {
@@ -7,6 +7,7 @@ export default class userHistoryManager {
 	constructor() {
 		this.size = 0;
 
+		// Fetch total count on start up
 		this.fetchCount();
 	}
 
@@ -19,11 +20,9 @@ export default class userHistoryManager {
 		this.size++;
 		return client.userHistory.create({
 			data: {
-				endpoint: endpoint,
+				endpoint,
 				user: {
-					connect: {
-						id: id,
-					},
+					connect: { id	},
 				},
 			},
 		});
@@ -37,9 +36,7 @@ export default class userHistoryManager {
 	async delete(id: number) {
 		this.size--;
 		return client.userHistory.delete({
-			where: {
-				id,
-			},
+			where: { id },
 		});
 	}
 
@@ -49,11 +46,13 @@ export default class userHistoryManager {
 		* @param {string} data.endpoint The endpoint
 		* @returns Record of user used the endpoint
 	*/
-	async fetchEndpointUsagePerUser({ id: userId, endpoint }: endpointUserParam) {
+	async fetchEndpointUsagePerUser({ id: userId, endpoint, page }: endpointUserParam & pagination) {
 		return client.userHistory.findMany({
 			where: {
 				endpoint, userId,
 			},
+			skip: page * CONSTANTS.DbPerPage,
+			take: CONSTANTS.DbPerPage,
 		});
 	}
 
@@ -62,15 +61,22 @@ export default class userHistoryManager {
 		* @param {number} userId The endpoint the user is trying to access
 		* @returns Whether or not they are being ratelimited
 	*/
-	async fetchEndpointUsagesPerUser(userId: number) {
+	async fetchEndpointUsagesPerUser({ userId, page }: endpointUserUnique & pagination) {
 		return client.userHistory.findMany({
 			where: {
 				userId,
 			},
+			skip: page * CONSTANTS.DbPerPage,
+			take: CONSTANTS.DbPerPage,
 		});
 	}
 
-	async fetchAllEndpointUsage(page: number) {
+	/**
+		* Fetch all history
+		* @param {pagination} page The page number to fetch
+		* @returns Array of user history entries
+	*/
+	async fetchAllEndpointUsage({ page }: pagination) {
 		return client.userHistory.findMany({
 			skip: page * CONSTANTS.DbPerPage,
 			take: CONSTANTS.DbPerPage,
