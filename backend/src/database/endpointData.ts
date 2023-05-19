@@ -1,13 +1,14 @@
 import client from './client';
+import type { Endpoint } from '@prisma/client';
 import type { createEndpointData, updateEndpointData } from '../types/database';
 
 export default class EndpointManager {
-	size: number;
+	size: Array<Endpoint>;
 	constructor() {
-		this.size = 0;
+		this.size = [];
 
 		// Fetch total count on start up
-		this.fetchCount();
+		this.fetchEndpointData();
 	}
 
 	/**
@@ -52,7 +53,8 @@ export default class EndpointManager {
 		* @returns An array of endpoint data entries
 	*/
 	async fetchEndpointData() {
-		return client.endpoint.findMany();
+		if (this.size.length == 0) this.size = await client.endpoint.findMany();
+		return this.size;
 	}
 
 	/**
@@ -60,7 +62,6 @@ export default class EndpointManager {
 		* @returns The total number of entries
 	*/
 	async fetchCount() {
-		if (this.size == 0) this.size = await client.endpoint.count();
-		return this.size;
+		return this.size.length;
 	}
 }

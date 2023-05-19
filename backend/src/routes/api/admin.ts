@@ -33,7 +33,7 @@ export function run(client: Client) {
 		const { userId, isAdmin, isBlocked, isPremium } = req.body;
 
 		try {
-			await client.UserManager.update({ id: userId, isAdmin, isPremium, isBlocked });
+			await client.UserManager.update({ id: BigInt(userId), isAdmin, isPremium, isBlocked });
 			res.json({ success: `Successfully updated user: ${userId}` });
 		} catch (err) {
 			console.log(err);
