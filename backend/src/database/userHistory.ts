@@ -1,5 +1,5 @@
 import { CONSTANTS } from '../utils/CONSTANTS';
-import type { endpointUserParam, endpointUserUnique, pagination } from '../types/database';
+import type { UserHistoryCreateParam, endpointUserUnique, pagination } from '../types/database';
 import client from './client';
 
 export default class userHistoryManager {
@@ -16,16 +16,31 @@ export default class userHistoryManager {
 		* @param {endpointUserParam} data The endpoint data
 		* @returns The new endpoint history
 	*/
-	async create({ id, endpoint }: endpointUserParam) {
+	async create(data: UserHistoryCreateParam) {
 		this.size++;
-		return client.userHistory.create({
-			data: {
-				endpoint,
-				user: {
-					connect: { id	},
+
+		if (data.id == null) {
+			return client.userHistory.create({
+				data: {
+					endpoint: data.endpoint,
+					responseCode: data.responseCode,
+					responseTime: data.responseTime,
 				},
-			},
-		});
+			});
+		} else {
+			return client.userHistory.create({
+				data: {
+					endpoint: data.endpoint,
+					responseCode: data.responseCode,
+					responseTime: data.responseTime,
+					user: {
+						connect: { id: data.id 	},
+					},
+				},
+			});
+		}
+
+
 	}
 
 	/**
@@ -46,7 +61,7 @@ export default class userHistoryManager {
 		* @param {string} data.endpoint The endpoint
 		* @returns Record of user used the endpoint
 	*/
-	async fetchEndpointUsagePerUser({ id: userId, endpoint, page }: endpointUserParam & pagination) {
+	async fetchEndpointUsagePerUser({ id: userId, endpoint, page }: UserHistoryCreateParam & pagination) {
 		return client.userHistory.findMany({
 			where: {
 				endpoint, userId,

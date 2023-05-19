@@ -78,15 +78,15 @@ export default function Settings({ history, error }: Props) {
 				{error && (
 					<Error text={error} />
 				)}
-				<form className="form-inline">
-					<h5>Your token:</h5>
-					<div className="form-group mb-2">
-						<input className="form-control mb-2 mr-sm-2" type="password" value={session?.user.token} id="myInput" readOnly />
-					</div>
-					<input type="checkbox" onClick={() => ToggleTokenVisibility()} />Show Token
-					<button className="btn btn-primary mb-2" onClick={() => copyUserToken()}>Copy text</button>
-				</form>
 				<div className="row">
+					<form className="form-inline">
+						<h5>Your token:</h5>
+						<div className="form-group mb-2">
+							<input className="form-control mb-2 mr-sm-2" type="password" value={session?.user.token} id="myInput" readOnly />
+						</div>
+						<input type="checkbox" onClick={() => ToggleTokenVisibility()} />Show Token
+						<button className="btn btn-primary mb-2" onClick={() => copyUserToken()}>Copy text</button>
+					</form>
 					<div className="col-lg-6">
 						<Pie data={data} />
 					</div>
@@ -127,7 +127,7 @@ export async function getServerSideProps(ctx: GetServerSidePropsContext) {
 			},
 		});
 
-		const history = await resp.json();
+		const { history } = await resp.json();
 		return { props: { history } };
 	} catch (err) {
 		return { props: { history: [], error: 'API server currently unavailable' } };

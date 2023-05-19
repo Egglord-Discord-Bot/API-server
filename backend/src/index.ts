@@ -13,6 +13,7 @@ import bodyParser from 'body-parser';
 import Error from './utils/Errors';
 import * as dotenv from 'dotenv';
 import Client from './helpers/Client';
+import type { time } from './types';
 dotenv.config();
 
 
@@ -33,6 +34,7 @@ dotenv.config();
 			},
 		},
 	}))
+		.set('trust proxy', true)
 		.use(cors({
 			origin: '*',
 			credentials: true,
@@ -42,14 +44,22 @@ dotenv.config();
 		}))
 		.use(compression())
 		.use(bodyParser.json())
-		// Initializes passport and session.
-		.use((req, res, next) => {
-			if (req.originalUrl !== '/favicon.ico') Logger.connection(req, res);
-			next();
-		})
 		.use((req: Request, res: Response, next: NextFunction) => {
 			// Handle custom rate limits
-			if (req.originalUrl.startsWith('/api/') && !(req.originalUrl.startsWith('/api/admin') || req.originalUrl.startsWith('/api/session') || req.originalUrl.startsWith('/api/stats'))) return RateLimiterHandler.checkRateLimit(req, res, next);
+			const newReq = req as Request & time;
+			const newRes = res as Response & time;
+
+			// Add time to request
+			newReq._startTime = new Date().getTime();
+			newReq._endTime = 0;
+
+			// Add time to response
+			newRes._startTime = new Date().getTime();
+			newRes._endTime = 0;
+
+			// Run logger & RateLimter
+			if (req.originalUrl !== '/favicon.ico') Logger.connection(newReq, newRes);
+			if (req.originalUrl.startsWith('/api/') && 	!['/api/admin', '/api/session', '/api/stats'].some(i => req.originalUrl.startsWith(i))) return RateLimiterHandler.checkRateLimit(newReq, newRes, next);
 			next();
 		});
 

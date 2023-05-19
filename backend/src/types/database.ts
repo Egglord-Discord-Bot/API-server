@@ -26,9 +26,11 @@ export type userUnqiueParam = {
 }
 
 /* USER HISTORY TYPES */
-export type endpointUserParam = {
-	id: bigint
+export type UserHistoryCreateParam = {
+	id: bigint | null
 	endpoint: string
+	responseCode: number
+	responseTime: number
 }
 
 export type endpointUserUnique = {

@@ -1,16 +1,22 @@
 import type { Request, Response, NextFunction } from 'express';
 import type Client from '../helpers/Client';
-
-// import { fetchUserByToken } from '../database/User';
-// import { fetchEndpointData } from '../database/endpointData';
-// import { createEndpoint } from '../database/userHistory';
+import type { time } from '../types';
 import { Utils } from '../utils/Utils';
 import Error from '../utils/Errors';
 import type { User, Endpoint } from '@prisma/client';
+import onFinished from 'on-finished';
 
 type endpointUsage = {
   name: string
   lastAccess: Array<Date>
+}
+
+type sendResponseParam = {
+  req: Request & time
+  res: Response & time
+  userId: null | bigint
+  endpoint: string
+  response: any | null
 }
 
 interface endpointData {
@@ -23,45 +29,70 @@ export default class RateLimit {
 	endpointData: Array<Endpoint>;
 	client: Client;
 	constructor(client: Client) {
-		this.endpointData = [];
+		this.endpointData = client.EndpointManager.size;
 		this.userRatelimit = new Map();
 		this.lastChecked = new Date().getTime();
 		this.client = client;
 		this._sweep();
-		this._fetchEndpointData();
 	}
 
-	async checkRateLimit(req: Request, res: Response, next: NextFunction) {
+	async checkRateLimit(req: Request & time, res: Response & time, next: NextFunction) {
 		// Get the user from the request
 		const user = await this._extractUser(req);
-		if (user === null) return Error.Unauthorized(res);
+		if (user === null) return this.sendResponse({ req, res, userId: null, endpoint: req.originalUrl.split('?')[0], response: Error.Unauthorized });
 
 		// Check that the endpoint is valid
 		const endpoint = this.endpointData.find(i => i.name == req.originalUrl.split('?')[0]);
-		if (endpoint == undefined) return Error.MissingEndpoint(res, req.originalUrl.split('?')[0]);
+		if (endpoint == undefined) return this.sendResponse({ req, res, userId: user.id, endpoint: req.originalUrl.split('?')[0], response: Error.MissingEndpoint });
 
 		// Check if endpoint is blocked
-		if (endpoint.isBlocked) return Error.DisabledEndpoint(res);
+		if (endpoint.isBlocked) return this.sendResponse({ req, res, userId: user.id, endpoint: endpoint.name, response: Error.DisabledEndpoint });
 
 		// Check if endpoint is premium only or not
-		if (endpoint.premiumOnly && !user.isPremium) return Error.Unauthorized(res);
+		if (endpoint.premiumOnly && !user.isPremium) return this.sendResponse({ req, res, userId: user.id, endpoint: endpoint.name, response: Error.Unauthorized });
 
 		// Bypass ratelimit if user is an Admin
 		if (!user.isAdmin) {
+			console.log('user is admin');
 			// Now check if user is rate limited by global rate Limit
 			const isGloballyRateLimited = this._checkGlobalCooldown(user.id);
-			if (isGloballyRateLimited) return Error.GlobalRateLimit(res);
+			if (isGloballyRateLimited) return this.sendResponse({ req, res, userId: user.id, endpoint: endpoint.name, response: Error.GlobalRateLimit });
 
 			// Now check if user is rate limited by endpoint
 			const isRateLimitedByEndpoint = await this.checkEndpointUsage(user.id, endpoint.name);
-			if (isRateLimitedByEndpoint.isRateLimted) return Error.RateLimited(res);
+			if (isRateLimitedByEndpoint) return this.sendResponse({ req, res, userId: user.id, endpoint: endpoint.name, response: Error.RateLimited });
 		} else {
-			await this.client.UserHistoryManager.create({ id: user.id, endpoint: endpoint.name });
+			// Success
+			this.addEndpoint(user.id, endpoint.name);
+			this.sendResponse({ req, res, userId: user.id, endpoint: endpoint.name, response: null });
 		}
 
 		// User is logged in and not ratelimited at all
 		next();
 	}
+
+	private sendResponse({ req, res, userId, endpoint, response }: sendResponseParam) {
+		onFinished(req, () => {
+			req._endTime = new Date().getTime();
+			onFinished(res, async () => {
+				res._endTime = new Date().getTime();
+
+				// Get additional information
+
+				const status = res.statusCode;
+
+				// How long did it take for the page to load
+				let response_time = 0;
+				if (res._endTime && req._endTime) response_time = (res._endTime + req._endTime) - (res._startTime + req._startTime);
+
+
+				// Save to users' history
+				await this.client.UserHistoryManager.create({ id: userId == null ? null : BigInt(userId), endpoint, responseCode: status, responseTime: response_time });
+			});
+		});
+		if (response != null) response(res);
+	}
+
 
 	/**
     * Extract the user from the request (if any)
@@ -96,54 +127,44 @@ export default class RateLimit {
 
 	/**
     * Check if the user is ratelimited on the endpoint
-    * @param {string} userID The ID of the user getting checked
+    * @param {bigint} userID The ID of the user getting checked
     * @param {string} endpoint The endpoint name
     * @returns Whether or not they are ratelimited on the endpoint
   */
 	async checkEndpointUsage(userID: bigint, endpoint: string) {
-		let isRateLimted = { isRateLimted: false, reason: 0 };
+		let isRateLimted = false;
 		if (this.userRatelimit.get(userID)) {
 			// User has been cached
 			const end = this.userRatelimit.get(userID)?.endpoints.find(e => e.name == endpoint);
 			if (end != undefined) {
 				// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-				if (end.lastAccess.length >= this.endpointData.find(e => e.name == endpoint)!.maxRequests) return { isRateLimted: true, reason: 1 };
+				if (end.lastAccess.length >= this.endpointData.find(e => e.name == endpoint)!.maxRequests) return true;
 
-				isRateLimted = {
-					// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-					isRateLimted: (end.lastAccess.sort((a, b) => b.getTime() - a.getTime())[0]?.getTime() ?? 0) >= new Date().getTime() - (this.endpointData.find(e => e.name == endpoint)?.cooldown ?? 2000),
-					reason: 2 };
+				isRateLimted = (end.lastAccess.sort((a, b) => b.getTime() - a.getTime())[0]?.getTime() ?? 0) >= new Date().getTime() - (this.endpointData.find(e => e.name == endpoint)?.cooldown ?? 2000);
 			}
 		}
 
 		// Only save to user's history if not ratelimited
-		if (!isRateLimted.isRateLimted) await this.addEndpoint(userID, endpoint);
+		if (!isRateLimted) await this.addEndpoint(userID, endpoint);
 		return isRateLimted;
 	}
 
 	/**
     * Adds endpoint to user's history
-    * @param {string} userId The ID of the user getting checked
+    * @param {bigint} userId The ID of the user getting checked
     * @param {string} endpoint The endpoint name
   */
 	async addEndpoint(userId: bigint, endpoint: string) {
-		if (this.userRatelimit.get(userId)) {
-			const user = this.userRatelimit.get(userId);
-			if (user?.endpoints.find(e => e.name == endpoint)) {
-				this.userRatelimit.get(userId)?.endpoints.find(e => e.name == endpoint)?.lastAccess.push(new Date());
+		const user = this.userRatelimit.get(userId);
+		if (user != undefined) {
+			if (user.endpoints.find(e => e.name == endpoint)) {
+				user.endpoints.find(e => e.name == endpoint)?.lastAccess.push(new Date());
 			} else {
-				this.userRatelimit.get(userId)?.endpoints.push({ name: endpoint, lastAccess: [new Date()] });
+				user.endpoints.push({ name: endpoint, lastAccess: [new Date()] });
 			}
 		} else {
 			this.userRatelimit.set(userId, { endpoints: [{ name: endpoint, lastAccess: [new Date()] }] });
 		}
-
-		// Save to users' history
-		await this.client.UserHistoryManager.create({ id: userId, endpoint: endpoint });
-	}
-
-	private async _fetchEndpointData() {
-		setInterval(async () => this.endpointData = await this.client.EndpointManager.fetchEndpointData(), 60_000);
 	}
 
 	private _sweep() {

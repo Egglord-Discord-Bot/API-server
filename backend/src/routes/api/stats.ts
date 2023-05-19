@@ -50,7 +50,7 @@ export function run(client: Client) {
 		const page = req.query.page;
 		try {
 			const history = await client.UserHistoryManager.fetchAllEndpointUsage({ page: (page && !Number.isNaN(page)) ? Number(page) : 0 });
-			res.json({ history: history });
+			res.json({ history: history.map(h => ({ ...h, userId: `${h.userId}` })) });
 		} catch (err) {
 			console.log(err);
 			res.json({ history: [] });

@@ -5,6 +5,11 @@ export type userID = {
 	endpoint: string
 }
 
+export type time = {
+	_startTime: number
+	_endTime: number
+}
+
 export type loggerTypes = 'log' | 'warn' | 'error' | 'debug' | 'ready'
 
 export type imageParam = Buffer | string

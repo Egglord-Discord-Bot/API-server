@@ -2,7 +2,8 @@ import chalk from 'chalk';
 import moment from 'moment';
 import { createRollingFileLogger } from 'simple-node-logger';
 import onFinished from 'on-finished';
-import type { loggerTypes } from '../types';
+import type { loggerTypes, time } from '../types';
+import type { Request, Response } from 'express';
 import { Utils } from './Utils';
 const log = createRollingFileLogger({
 	logDirectory: './src/utils/logs',
@@ -54,14 +55,7 @@ export class Logger {
 		this.log(content, 'debug');
 	}
 
-	public static connection(req: any, res: any) {
-		req._startTime = new Date().getTime();
-		req._endTime = undefined;
-
-		// response data
-		res._startTime = new Date().getTime();
-		res._endTime = undefined;
-
+	public static connection(req: Request & time, res: Response & time) {
 		onFinished(req, function() {
 			req._endTime = new Date().getTime();
 			onFinished(res, function() {

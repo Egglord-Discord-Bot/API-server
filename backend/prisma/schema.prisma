@@ -27,8 +27,8 @@ model User {
 
 model UserHistory {
   id            Int     @id   @default(autoincrement())
-  user          User    @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId        BigInt
+  user          User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId        BigInt?
   endpoint      String
   responseCode  Int @default(200)
   responseTime  Int @default(5)

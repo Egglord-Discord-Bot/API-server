@@ -15,7 +15,10 @@ type history = {
   userId: string,
   endpoint: string,
   createdAt: Date
+	responseCode: number
+	responseTime: number
 }
+
 type countEnum = { [key: string]: number }
 interface Props {
 	totalAPIUsage: number
@@ -28,6 +31,7 @@ export default function Admin(data: Props) {
 	const { data: session, status } = useSession();
 	if (status == 'loading') return null;
 
+	console.log(data.totalHistory);
 	const labels: countEnum = { 'January': 0, 'February': 0, 'March': 0, 'April': 0, 'May': 0, 'June': 0, 'July': 0, 'August': 0, 'September': 0, 'October': 0, 'November': 0, 'Decemeber': 0 };
 	data.totalHistory.forEach((x) => {
 		const y = Object.keys(labels).at(new Date(x.createdAt).getMonth());
@@ -67,7 +71,10 @@ export default function Admin(data: Props) {
 			},
 		],
 	};
-	// TODO: 	ADD CODE THAT CATEGORISES RESPONSE CODES
+
+	// Categorise all the endpoints by their responseCode
+	const ApiReponses: countEnum = { 200: 0, 401:0, 403:0, 404:0, 412:0, 429:0 };
+	data.totalHistory.forEach((x) => ApiReponses[x.responseCode] = (ApiReponses[x.responseCode] || 0) + 1);
 
 	return (
 		<>
@@ -189,27 +196,14 @@ export default function Admin(data: Props) {
 											<h6 className="m-0 font-weight-bold text-primary">API responses code</h6>
 										</div>
 										<div className="card-body">
-											<h4 className="small font-weight-bold">200 <span className="float-right">100%</span></h4>
-											<div className="progress mb-4">
-												<div className="progress-bar bg-success" role="progressbar" style={{ width: '100%' }}	aria-valuenow={100} aria-valuemin={0} aria-valuemax={data.totalAPIUsage}>1000</div>
-											</div>
-											<h4 className="small font-weight-bold">429 <span
-												className="float-right">20%</span></h4>
-											<div className="progress mb-4">
-												<div className="progress-bar bg-danger" role="progressbar" style={{ width: '20%' }}	aria-valuenow={20} aria-valuemin={0} aria-valuemax={data.totalAPIUsage}>852</div>
-											</div>
-											<h4 className="small font-weight-bold">404 <span className="float-right">40%</span></h4>
-											<div className="progress mb-4">
-												<div className="progress-bar bg-warning" role="progressbar"style={{ width: '40%' }}	aria-valuenow={40} aria-valuemin={0} aria-valuemax={data.totalAPIUsage}>100</div>
-											</div>
-											<h4 className="small font-weight-bold">401 <span className="float-right">60%</span></h4>
-											<div className="progress mb-4">
-												<div className="progress-bar" role="progressbar" style={{ width: '60%' }}	aria-valuenow={60} aria-valuemin={0} aria-valuemax={data.totalAPIUsage}>20</div>
-											</div>
-											<h4 className="small font-weight-bold">403 <span className="float-right">80%</span></h4>
-											<div className="progress mb-4">
-												<div className="progress-bar bg-info" role="progressbar" style={{ width: '80%' }}	aria-valuenow={80} aria-valuemin={0} aria-valuemax={data.totalAPIUsage}>5</div>
-											</div>
+											{Object.keys(ApiReponses).map(e => (
+												<>
+													<h4 className="small font-weight-bold">{e} <span className="float-right">{Math.round((ApiReponses[e] / data.totalHistory.length) * 100)}%</span></h4>
+													<div className="progress mb-4">
+														<div className="progress-bar bg-success" role="progressbar" style={{ width: `${(ApiReponses[e] / data.totalHistory.length) * 100}%` }}	aria-valuenow={ApiReponses[e]} aria-valuemin={0} aria-valuemax={data.totalHistory.length}>{ApiReponses[e]}</div>
+													</div>
+												</>
+											))}
 										</div>
 									</div>
 								</div>

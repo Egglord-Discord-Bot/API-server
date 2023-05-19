@@ -52,10 +52,10 @@ export function run(client: Client) {
 		const page = req.query.page;
 
 		if (ses?.user) {
-			const history = await client.UserHistoryManager.fetchEndpointUsagesPerUser({ userId: ses.user.id, page: (page && !Number.isNaN(page)) ? Number(page) : 0 });
-			res.json({ history: history });
+			const history = await client.UserHistoryManager.fetchEndpointUsagesPerUser({ userId: BigInt(ses.user.id), page: (page && !Number.isNaN(page)) ? Number(page) : 0 });
+			res.json({ history: history.map(h => ({ ...h, userId: '' })) });
 		} else {
-			res.json({});
+			res.json({ history: [] });
 		}
 	});
 

@@ -28,7 +28,6 @@ export default function AdminEndpoints({ endpointData, history, error }: Props) 
 		}
 	}
 
-
 	async function updateEndpoint(e: SyntheticEvent) {
 		const target = e.target as HTMLInputElement;
 
@@ -51,7 +50,7 @@ export default function AdminEndpoints({ endpointData, history, error }: Props) 
 		if (el) el.innerHTML = target.checked ? 'Yes' : 'No';
 	}
 
-	async function deleteEndpoint(id: string) {
+	async function deleteEndpoint(id: number) {
 		await fetch('/api/admin/history', {
 			method: 'DELETE',
 			headers: {
@@ -170,13 +169,17 @@ export default function AdminEndpoints({ endpointData, history, error }: Props) 
 												{/* NONE FUNCTION CURRENTLY */}
 												<ul className="pagination justify-content-center">
 													<li className="page-item">
+														<a className="page-link" href="#">
+															<i className="fa-solid fa-angles-left"></i>
+														</a>
+													</li>
+													<li className="page-item">
 														<a className="page-link" href="#">1</a>
 													</li>
 													<li className="page-item">
-														<a className="page-link" href="#">2</a>
-													</li>
-													<li className="page-item">
-														<a className="page-link" href="#">3</a>
+														<a className="page-link" href="#">
+															<i className="fa-solid fa-angles-right"></i>
+														</a>
 													</li>
 												</ul>
 											</nav>
