@@ -8,13 +8,12 @@ import Error from '../../utils/Errors';
 
 export function run() {
 	/**
-	  * @API
-	  * /nsfw/image:
-	  *   get:
-	  *     description: Get a link to a NSFW image
-	  *     tags: nsfw
-	  *			parameters:
-	  *       - name: type
+		* @openapi
+		* /nsfw/image:
+		*  get:
+		*    description: Get a link to a NSFW image
+		*    parameters:
+		*       - name: type
 	  *         description: Type of image
 	  *         required: true
 	  *         type: string
@@ -36,13 +35,12 @@ export function run() {
 	});
 
 	/**
-	  * @API
-	  * /nsfw/check:
-	  *   get:
-	  *     description: Check if an image is NSFW or not
-	  *     tags: nsfw
-	  *			parameters:
-	  *       - name: type
+		* @openapi
+		* /nsfw/check:
+		*  get:
+		*    description: Check if an image is NSFW or not
+		*    parameters:
+		*       - name: type
 	  *         description: The url of the image.
 	  *         required: true
 	  *         type: string

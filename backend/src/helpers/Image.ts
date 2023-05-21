@@ -3,7 +3,7 @@ import Canvas, { createCanvas, GlobalFonts } from '@napi-rs/canvas';
 import fs from 'node:fs';
 import { GifEncoder } from '@skyra/gifenc';
 import type { SKRSContext2D } from '@napi-rs/canvas';
-import type { imageParam, getLines } from '../utils/types';
+import type { imageParam, getLines } from '../types';
 GlobalFonts.registerFromPath(`${process.cwd()}/src/assets/fonts/Georgia.ttf`, 'Georgia');
 
 export default class Image {

@@ -27,3 +27,7 @@ export type EndpointData = {
   method: string
   parameters: Array<EndpointParam>
 }
+
+export interface EndpointExtra extends Endpoint {
+  data?: EndpointData
+}

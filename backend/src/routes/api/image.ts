@@ -6,17 +6,16 @@ import Image from '../../helpers/Image';
 
 export function run() {
 	/**
-	 * @API
-	 * /image/affect:
-	 *   get:
-	 *     description: Create an affect image
-	 *     tags: image
-	 *			parameters:
-	 *       - name: image1
-	 *         description: The URL of the message
-	 *         required: true
-	 *         type: string
-	 */
+	  * @openapi
+	  * /image/affect:
+	  *  get:
+	  *    description: Create an affect image
+	  *    parameters:
+	  *       - name: image1
+	  *         description: The URL of the message
+	  *         required: true
+	  *         type: string
+	*/
 	router.get('/affect', checkImage(1), async (req, res) => {
 		const image = req.query.image1;
 		try {
@@ -31,17 +30,16 @@ export function run() {
 	});
 
 	/**
-	 * @API
-	 * /image/beautiful:
-	 *   get:
-	 *     description: Create a beautiful image
-	 *     tags: image
-	 *			parameters:
-	 *       - name: image1
-	 *         description: The URL of the message
-	 *         required: true
-	 *         type: string
-	 */
+	  * @openapi
+	  * /image/beautiful:
+	  *  get:
+	  *    description: Create an affect image
+	  *    parameters:
+	  *       - name: image1
+	  *         description: The URL of the message
+	  *         required: true
+	  *         type: string
+	*/
 	router.get('/beautiful', checkImage(1), async (req, res) => {
 		const image = req.query.image1;
 		try {
@@ -56,12 +54,11 @@ export function run() {
 	});
 
 	/**
-	 * @API
+	 * @openapi
 	 * /image/bed:
-	 *   get:
-	 *     description: Create an bed image
-	 *     tags: image
-	 *			parameters:
+	 *  get:
+	 *    description: Create an bed image
+	 *    parameters:
 	 *       - name: image1
 	 *         description: The URL of the message
 	 *         required: true
@@ -86,17 +83,16 @@ export function run() {
 	});
 
 	/**
-	 * @API
-	 * /image/blur:
-	 *   get:
-	 *     description: Create an blur image
-	 *     tags: image
-	 *			parameters:
-	 *       - name: image1
-	 *         description: The URL of the message
-	 *         required: true
-	 *         type: string
-	 */
+	  * @openapi
+	  * /image/blur:
+	  *  get:
+	  *    description: Create an blur image
+	  *    parameters:
+	  *       - name: image1
+	  *         description: The URL of the message
+	  *         required: true
+	  *         type: string
+	*/
 	router.get('/blur', checkImage(1), async (req, res) => {
 		const image = req.query.image1;
 		try {
@@ -111,17 +107,16 @@ export function run() {
 	});
 
 	/**
-	 * @API
-	 * /image/changemymind:
-	 *   get:
-	 *     description: Create an changemymind image
-	 *     tags: image
-	 *			parameters:
-	 *       - name: text
-	 *         description: The text on the board
-	 *         required: true
-	 *         type: string
-	 */
+	  * @openapi
+	  * /image/changemymind:
+	  *  get:
+	  *    description: Create an change my mind image
+	  *    parameters:
+	  *       - name: image1
+	  *         description: The URL of the message
+	  *         required: true
+	  *         type: string
+	*/
 	router.get('/changemymind', async (req, res) => {
 		const text = req.query.text;
 		if (!text) return res.json({ error: 'Missing text in query' });
@@ -138,17 +133,16 @@ export function run() {
 	});
 
 	/**
-	 * @API
-	 * /image/circle:
-	 *   get:
-	 *     description: Create an circle image
-	 *     tags: image
-	 *			parameters:
-	 *       - name: image1
-	 *         description: The URL of the message
-	 *         required: true
-	 *         type: string
-	 */
+	  * @openapi
+	  * /image/circle:
+	  *  get:
+	  *    description: Create an circle image
+	  *    parameters:
+	  *       - name: image1
+	  *         description: The URL of the message
+	  *         required: true
+	  *         type: string
+	*/
 	router.get('/circle', checkImage(1), async (req, res) => {
 		const image = req.query.image1;
 		try {
@@ -163,17 +157,16 @@ export function run() {
 	});
 
 	/**
-	 * @API
-	 * /image/clyde:
-	 *   get:
-	 *     description: Create an clyde image
-	 *     tags: image
-	 *			parameters:
-	 *       - name: text
-	 *         description: The text for clyde to show
-	 *         required: true
-	 *         type: string
-	 */
+	  * @openapi
+	  * /image/clyde:
+	  *  get:
+	  *    description: Create an clyde image
+	  *    parameters:
+		*       - name: text
+ 	 *         description: The text for clyde to show
+ 	 *         required: true
+ 	 *         type: string
+	*/
 	router.get('/clyde', async (req, res) => {
 		const text = req.query.text as string;
 		if (text == undefined) return Error.MissingQuery(res, 'text');
@@ -190,13 +183,17 @@ export function run() {
 	});
 
 	/**
-	 * @API
+	 * @openapi
 	 * /image/distracted:
-	 *   get:
-	 *     description: Create an distracted image
-	 *     tags: image
-	 *			parameters:
+	 *  get:
+	 *    description: Create an distracted image
+	 *    tags: image
+	 *    parameters:
 	 *       - name: image1
+	 *         description: The URL of the message
+	 *         required: true
+	 *         type: string
+	 *       - name: image2
 	 *         description: The URL of the message
 	 *         required: true
 	 *         type: string
@@ -217,17 +214,16 @@ export function run() {
 	});
 
 	/**
-	 * @API
-	 * /image/facepalm:
-	 *   get:
-	 *     description: Create an facepalm image
-	 *     tags: image
-	 *			parameters:
-	 *       - name: image1
-	 *         description: The URL of the message
-	 *         required: true
-	 *         type: string
-	 */
+	  * @openapi
+	  * /image/facepalm:
+	  *  get:
+	  *    description: Create an facepalm image
+	  *    parameters:
+	  *       - name: image1
+	  *         description: The URL of the message
+	  *         required: true
+	  *         type: string
+	*/
 	router.get('/facepalm', checkImage(1), async (req, res) => {
 		const image = req.query.image1;
 		try {
@@ -242,17 +238,16 @@ export function run() {
 	});
 
 	/**
-	 * @API
-	 * /image/invert:
-	 *   get:
-	 *     description: Create an invert image
-	 *     tags: image
-	 *			parameters:
-	 *       - name: image1
-	 *         description: The URL of the message
-	 *         required: true
-	 *         type: string
-	 */
+	  * @openapi
+	  * /image/invert:
+	  *  get:
+	  *    description: Create an invert image
+	  *    parameters:
+	  *       - name: image1
+	  *         description: The URL of the message
+	  *         required: true
+	  *         type: string
+	*/
 	router.get('/invert', checkImage(1), async (req, res) => {
 		const image = req.query.image1;
 		try {
@@ -267,17 +262,16 @@ export function run() {
 	});
 
 	/**
-	 * @API
-	 * /image/joke-over-head:
-	 *   get:
-	 *     description: Create an joke over head image
-	 *     tags: image
-	 *			parameters:
-	 *       - name: image1
-	 *         description: The URL of the message
-	 *         required: true
-	 *         type: string
-	 */
+	  * @openapi
+	  * /image/joke-over-head:
+	  *  get:
+	  *    description: Create an joke over head image
+	  *    parameters:
+	  *       - name: image1
+	  *         description: The URL of the message
+	  *         required: true
+	  *         type: string
+	*/
 	router.get('/joke-over-head', checkImage(1), async (req, res) => {
 		const image = req.query.image1;
 		try {
@@ -292,21 +286,20 @@ export function run() {
 	});
 
 	/**
-	 * @API
-	 * /image/kiss:
-	 *   get:
-	 *     description: Create an kiss image
-	 *     tags: image
-	 *			parameters:
-	 *       - name: image1
-	 *         description: The URL of the message
-	 *         required: true
-	 *         type: string
-	 *       - name: image2
-	 *         description: The URL of the message
-	 *         required: true
-	 *         type: string
-	 */
+	  * @openapi
+	  * /image/kiss:
+	  *  get:
+	  *    description: Create an kiss image
+	  *    parameters:
+	  *       - name: image1
+	  *         description: The URL of the message
+	  *         required: true
+	  *         type: string
+		*       - name: image2
+	  *         description: The URL of the message
+	  *         required: true
+	  *         type: string
+	*/
 	router.get('/kiss', checkImage(2), async (req, res) => {
 		const image1 = req.query.image1;
 		const image2 = req.query.image2;
@@ -322,12 +315,12 @@ export function run() {
 	});
 
 	/**
-	 * @API
+	 * @openapi
 	 * /image/ohno:
-	 *   get:
-	 *     description: Create an ohno image
-	 *     tags: image
-	 *			parameters:
+	 *  get:
+	 *    description: Create an ohno image
+	 *    tags: image
+	 *    parameters:
 	 *       - name: text
 	 *         description: The text to for silly dog.
 	 *         required: true
@@ -349,17 +342,16 @@ export function run() {
 	});
 
 	/**
-	 * @API
-	 * /image/rip:
-	 *   get:
-	 *     description: Create an rip image
-	 *     tags: image
-	 *			parameters:
-	 *       - name: image1
-	 *         description: The URL of the message
-	 *         required: true
-	 *         type: string
-	 */
+	  * @openapi
+	  * /image/rip:
+	  *  get:
+	  *    description: Create an rip image
+	  *    parameters:
+	  *       - name: image1
+	  *         description: The URL of the message
+	  *         required: true
+	  *         type: string
+	*/
 	router.get('/rip', checkImage(1), async (req, res) => {
 		const image = req.query.image1;
 		try {
@@ -374,17 +366,20 @@ export function run() {
 	});
 
 	/**
-	 * @API
-	 * /image/slap:
-	 *   get:
-	 *     description: Create an slap image
-	 *     tags: image
-	 *			parameters:
-	 *       - name: image1
-	 *         description: The URL of the message
-	 *         required: true
-	 *         type: string
-	 */
+	  * @openapi
+	  * /image/slap:
+	  *  get:
+	  *    description: Create an slap image
+	  *    parameters:
+	  *       - name: image1
+	  *         description: The URL of the message
+	  *         required: true
+	  *         type: string
+		*       - name: image2
+	  *         description: The URL of the message
+	  *         required: true
+	  *         type: string
+	*/
 	router.get('/slap', checkImage(2), async (req, res) => {
 		const image1 = req.query.image1;
 		const image2 = req.query.image2;
@@ -400,21 +395,20 @@ export function run() {
 	});
 
 	/**
-	 * @API
-	 * /image/spank:
-	 *   get:
-	 *     description: Create an spank image
-	 *     tags: image
-	 *			parameters:
-	 *       - name: image1
-	 *         description: The URL of the message
-	 *         required: true
-	 *         type: string
-	 *       - name: image2
-	 *         description: The URL of the message
-	 *         required: true
-	 *         type: string
-	 */
+	  * @openapi
+	  * /image/spank:
+	  *  get:
+	  *    description: Create an spank image
+	  *    parameters:
+	  *       - name: image1
+	  *         description: The URL of the message
+	  *         required: true
+	  *         type: string
+		*       - name: image2
+	  *         description: The URL of the message
+	  *         required: true
+	  *         type: string
+	*/
 	router.get('/spank', checkImage(2), async (req, res) => {
 		const image1 = req.query.image1;
 		const image2 = req.query.image2;
@@ -430,17 +424,16 @@ export function run() {
 	});
 
 	/**
-	 * @API
-	 * /image/trigger:
-	 *   get:
-	 *     description: Create an trigger image
-	 *     tags: image
-	 *			parameters:
-	 *       - name: image1
-	 *         description: The URL of the message
-	 *         required: true
-	 *         type: string
-	 */
+	  * @openapi
+	  * /image/trigger:
+	  *  get:
+	  *    description: Create an trigger image
+	  *    parameters:
+	  *       - name: image1
+	  *         description: The URL of the message
+	  *         required: true
+	  *         type: string
+	*/
 	router.get('/trigger', checkImage(1), async (req, res) => {
 		const image = req.query.image1;
 		try {
@@ -454,6 +447,17 @@ export function run() {
 		}
 	});
 
+	/**
+	  * @openapi
+	  * /image/wanted:
+	  *  get:
+	  *    description: Create an wanted image
+	  *    parameters:
+	  *       - name: image1
+	  *         description: The URL of the message
+	  *         required: true
+	  *         type: string
+	*/
 	router.get('/wanted', checkImage(1), async (req, res) => {
 		const image = req.query.image1;
 		try {
@@ -467,6 +471,17 @@ export function run() {
 		}
 	});
 
+	/**
+	  * @openapi
+	  * /image/wasted:
+	  *  get:
+	  *    description: Create an wasted image
+	  *    parameters:
+	  *       - name: image1
+	  *         description: The URL of the message
+	  *         required: true
+	  *         type: string
+	*/
 	router.get('/wasted', checkImage(1), async (req, res) => {
 		const image = req.query.image1;
 		try {
@@ -480,6 +495,21 @@ export function run() {
 		}
 	});
 
+	/**
+	  * @openapi
+	  * /image/whowouldwin:
+	  *  get:
+	  *    description: Create an who would win image
+	  *    parameters:
+	  *       - name: image1
+	  *         description: The URL of the message
+	  *         required: true
+	  *         type: string
+		*       - name: image2
+	  *         description: The URL of the message
+	  *         required: true
+	  *         type: string
+	*/
 	router.get('/whowouldwin', checkImage(2), async (req, res) => {
 		const image = req.query.image1;
 		const image2 = req.query.image2;

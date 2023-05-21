@@ -1,12 +1,22 @@
 import { Router } from 'express';
-import type Client from '../../helpers/Client';
-import { isAdmin } from '../../middleware/middleware';
-import SystemManager from '../../helpers/SystemManager';
+import type Client from '../../../helpers/Client';
+import { isAdmin } from '../../../middleware/middleware';
+import swaggerJsdoc from 'swagger-jsdoc';
 const router = Router();
 
 
 export function run(client: Client) {
-	const systemManager = new SystemManager(client);
+	const options = {
+		failOnErrors: true,
+		definition: {
+			openapi: '3.0.0',
+			info: {
+				title: 'Hello World',
+				version: '1.0.0',
+			},
+		},
+		apis: ['./src/routes/api/*.ts'],
+	};
 
 	router.get('/basic', async (_req, res) => {
 		try {
@@ -29,7 +39,7 @@ export function run(client: Client) {
 		const page = req.query.page;
 		try {
 			const users = await client.UserManager.fetchUsers({ page: (page && !Number.isNaN(page)) ? Number(page) : 0 });
-			res.json({ users: users.map(i => ({ ...i, id: i.id.toString() })) });
+			res.json({ users: users.map(i => ({ ...i, id: `${i.id}` })) });
 		} catch (err) {
 			console.log(err);
 			res.json({ users: [] });
@@ -39,7 +49,12 @@ export function run(client: Client) {
 	router.get('/endpoints', isAdmin, async (_req, res) => {
 		try {
 			const endpoints = await client.EndpointManager.fetchEndpointData();
-			res.json({ endpoints: endpoints });
+			const openapiSpecification = swaggerJsdoc(options);
+			console.log(openapiSpecification);
+			// @ts-ignore
+			const el = endpoints.map(e => ({ ...e, data: openapiSpecification.paths[`${e.name.replace('/api', '')}`]?.get }));
+
+			res.json({ endpoints: el });
 		} catch (err) {
 			console.log(err);
 			res.json({ endpoints: [] });
@@ -49,7 +64,20 @@ export function run(client: Client) {
 	router.get('/history', isAdmin, async (req, res) => {
 		const page = req.query.page;
 		try {
-			const history = await client.UserHistoryManager.fetchAllEndpointUsage({ page: (page && !Number.isNaN(page)) ? Number(page) : 0 });
+			const [history, total] = await Promise.all([await client.UserHistoryManager.fetchAllEndpointUsage({ page: (page && !Number.isNaN(page)) ? Number(page) : 0 }),
+				await client.UserHistoryManager.fetchCount()]);
+
+			res.json({ history: history.map(h => ({ ...h, userId: `${h.userId}` })), total });
+		} catch (err) {
+			console.log(err);
+			res.json({ history: [] });
+		}
+	});
+
+	router.get('/history/autocomplete', isAdmin, async (req, res) => {
+		const text = req.query.text as string;
+		try {
+			const history = await client.UserHistoryManager.fetchEndpointByName(text);
 			res.json({ history: history.map(h => ({ ...h, userId: `${h.userId}` })) });
 		} catch (err) {
 			console.log(err);
@@ -57,9 +85,19 @@ export function run(client: Client) {
 		}
 	});
 
+	router.get('/history/responseCode', isAdmin, async (_req, res) => {
+		try {
+			const history = await client.UserHistoryManager.fetchResponseCodeCounts();
+			res.json({ history: history });
+		} catch (err) {
+			console.log(err);
+			res.json({ history: [] });
+		}
+	});
+
 	router.get('/system', isAdmin, async (_req, res) => {
-		const [systemHis, cpu, disk] = await Promise.all([client.SystemHistoryManager.fetchSystemHistoryData(), systemManager.calculateCPUUsage(), systemManager.calculateDiskUsage()]);
-		const memory = systemManager.calculateMemoryUsage();
+		const [systemHis, cpu, disk] = await Promise.all([client.SystemHistoryManager.fetchSystemHistoryData(), client.SystemHistoryManager.calculateCPUUsage(), client.SystemHistoryManager.calculateDiskUsage()]);
+		const memory = client.SystemHistoryManager.calculateMemoryUsage();
 
 		res.json({
 			current: { memory, cpu, disk },

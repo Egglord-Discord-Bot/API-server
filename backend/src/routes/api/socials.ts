@@ -13,12 +13,12 @@ export function run() {
 	const TwitterCacheHandler = new TwitterHandler();
 
 	/**
-   * @API
+	 * @openapi
    * /socials/steam:
-   *   get:
-   *     description: Get information on a steam account
-   *     tags: socials
-   *			parameters:
+   *  get:
+   *    description: Get information on a steam account
+   *    tags: socials
+   *    parameters:
    *       - name: username
    *         description: The username of the player
    *         required: true
@@ -74,12 +74,12 @@ export function run() {
 	});
 
 	/**
-   * @API
+	 * @openapi
    * /socials/github:
-   *   get:
-   *     description: Get information on a Github repo
-   *     tags: social
-   *			parameters:
+   *  get:
+   *    description: Get information on a Github repo
+   *    tags: social
+   *    parameters:
    *       - name: repo
    *         description: The name of the author and name of repo
    *         required: true
@@ -106,12 +106,12 @@ export function run() {
 	});
 
 	/**
-   * @API
+	 * @openapi
    * /socials/twitch:
-   *   get:
-   *     description: Get information on a twitch username
-   *     tags: social
-   *			parameters:
+   *  get:
+   *    description: Get information on a twitch username
+   *    tags: social
+   *    parameters:
    *       - name: username
    *         description: The username of the twitch account.
    *         required: true
@@ -158,12 +158,12 @@ export function run() {
 	});
 
 	/**
-   * @API
+	 * @openapi
    * /socials/twitter:
-   *   get:
-   *     description: Get information on a twitter username
-   *     tags: social
-   *			parameters:
+   *  get:
+   *    description: Get information on a twitter username
+   *    tags: social
+   *    parameters:
    *       - name: username
    *         description: The username of the twitter account.
    *         required: true

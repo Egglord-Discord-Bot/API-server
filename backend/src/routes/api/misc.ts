@@ -14,11 +14,15 @@ import { PassThrough } from 'stream';
 
 export function run() {
 	/**
-	 * @API
-	 * /misc/advice:
-	 *   get:
-	 *     description: Get some advice
-	 *     tags: misc
+		* @openapi
+		* /misc/advice:
+		*  get:
+		*    description: Get some advice
+		*    parameters:
+		*       - name: image1
+		*         description: The URL of the message
+		*         required: true
+		*         type: string
 	*/
 	router.get('/advice', async (_req, res) => {
 		try {
@@ -30,12 +34,12 @@ export function run() {
 	});
 
 	/**
-	 * @API
+	 * @openapi
 	 * /misc/pokemon:
-	 *   get:
-	 *     description: Get a pokemon's stats
-	 *     tags: misc
-	 *			parameters:
+	 *  get:
+	 *    description: Get a pokemon's stats
+	 *    tags: misc
+	 *    parameters:
 	 *       - name: pokemon
 	 *         description: The pokemon
 	 *         required: true
@@ -74,12 +78,12 @@ export function run() {
 	*/
 
 	/**
-	 * @API
+	 * @openapi
 	 * /misc/colour:
-	 *   get:
-	 *     description: Update a users information
-	 *     tags: misc
-	 *			parameters:
+	 *  get:
+	 *    description: Update a users information
+	 *    tags: misc
+	 *    parameters:
 	 *       - name: colour
 	 *         description: The colour of the square
 	 *         required: true
@@ -99,12 +103,12 @@ export function run() {
 	});
 
 	/**
-	 * @API
+	 * @openapi
 	 * /misc/get-text:
-	 *   get:
-	 *     description: Update a users information
-	 *     tags: misc
-	 *			parameters:
+	 *  get:
+	 *    description: Update a users information
+	 *    tags: misc
+	 *    parameters:
 	 *       - name: url
 	 *         description: The URL of the image to extract text from.
 	 *         required: true
@@ -128,11 +132,11 @@ export function run() {
 	});
 
 	/**
-	 * @API
+	 * @openapi
 	 * /misc/random-fact:
-	 *   get:
-	 *     description: Get a random fact
-	 *     tags: misc
+	 *  get:
+	 *    description: Get a random fact
+	 *    tags: misc
 	 */
 	router.get('/random-fact', async (_req, res) => {
 		fs.readFile('./src/assets/JSON/random-facts.json', async (err, data) => {

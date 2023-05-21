@@ -1,11 +1,13 @@
 import Header from '../components/header';
 import Navbar from '../components/navbar/main';
 import Link from 'next/link';
-import type { EndpointData } from '../types/types';
+import type { EndpointExtra } from '../types/types';
 import { useSession } from 'next-auth/react';
+import Image from 'next/image';
+import type { GetServerSidePropsContext } from 'next';
 
 interface Props {
-  endpoints: Array<EndpointData>
+  endpoints: Array<EndpointExtra>
 }
 
 export default function Docs({ endpoints }: Props) {
@@ -16,7 +18,7 @@ export default function Docs({ endpoints }: Props) {
 		<>
 			<Header />
 			<Navbar user={session?.user}/>
-			<section className="vh-100" style={{ 'backgroundColor': '#eee', maxHeight: '94vh', overflowY: 'hidden' }}>
+			<section className="vh-100" style={{ 'backgroundColor': '#eee', maxHeight: '94vh', overflowY: 'scroll' }}>
 				<div className="container h-100">
 					<div className="row d-flex justify-content-center align-items-center h-100">
 						<div className="col-lg-11 col-xl-11">
@@ -80,21 +82,21 @@ export default function Docs({ endpoints }: Props) {
 															</tbody>
 														</table>
 													</div>
-													<div className="tab-pane fade" id="v-pills-settings" role="tabpanel" aria-labelledby="v-pills-settings-tab" style={{ maxHeight:'100%', overflowY: 'scroll' }}>
+													<div className="tab-pane fade" id="v-pills-settings" role="tabpanel" aria-labelledby="v-pills-settings-tab">
 														<div className="accordion" id="accordionPanelsStayOpenExample">
 															{endpoints?.map(e => (
-																<div className="accordion-item" style={{ minWidth:'100%' }} key={e.description}>
+																<div className="accordion-item" style={{ minWidth:'100%' }} key={e.data?.description}>
 																	<h2 className="accordion-header" id={`panelsStayOpen-heading${endpoints.indexOf(e)}`}>
 																		<button className="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target={`#panelsStayOpen-collapse${endpoints.indexOf(e)}`} aria-expanded="true" aria-controls={`panelsStayOpen-collapse${endpoints.indexOf(e)}`}>
-																			{e.endpoint.split('/').at(-1)}
+																			{e.name}
 																		</button>
 																	</h2>
 																	<div id={`panelsStayOpen-collapse${endpoints.indexOf(e)}`} className="accordion-collapse collapse show" aria-labelledby={`panelsStayOpen-heading${endpoints.indexOf(e)}`}>
 																		<div className="accordion-body">
 																			<div>
-																				<h6>{e.description}. (Method: {e.method})</h6>
+																				<h6>{e.data?.description}. (Method: GET)</h6>
 																				<h5>Parameters:</h5>
-																				{e.parameters.length >= 1 ?
+																				{e.data?.parameters?.length >= 1 ?
 																					<table className="table">
 																						<thead>
 																							<tr>
@@ -105,8 +107,8 @@ export default function Docs({ endpoints }: Props) {
 																							</tr>
 																						</thead>
 																						<tbody>
-																							{e.parameters.map(p => (
-																								<tr key={e.parameters.indexOf(p)}>
+																							{e.data?.parameters.map(p => (
+																								<tr key={e.data?.parameters.indexOf(p)}>
 																									<td>{p.name}</td>
 																									<td>{p.description}</td>
 																									<td>{p.required ? 'Yes' : 'No'}</td>
@@ -118,8 +120,10 @@ export default function Docs({ endpoints }: Props) {
 																					:
 																					<p>No parameters required</p>
 																				}
-																				<h5>Responses</h5>
-																				<p>Coming soon!!</p>
+																				<h5>Response:</h5>
+																				{e.name.split('/')[2] == 'image' && (
+																					<Image src={`/imgs/${e.name.split('/').at(-1)}.png`} alt={e.name.split('/').at(-1) as string} height={300} width={300}/>
+																				)}
 																			</div>
 																		</div>
 																	</div>
@@ -142,31 +146,19 @@ export default function Docs({ endpoints }: Props) {
 }
 
 // Fetch endpoints
-export async function getServerSideProps() {
-	return { props: { endpoints: [
-		{
-			endpoint: '/admin/user',
-			method: 'PATCH',
-			description: 'Update a users information',
-			tag: 'info',
-			responses: [],
-			parameters: [],
-		},
-		{
-			endpoint: '/admin/endpoint',
-			method: 'PATCH',
-			description: 'Update a users information',
-			tag: 'info',
-			responses: [],
-			parameters: [],
-		},
-		{
-			endpoint: '/games/fortnite',
-			method: 'GET',
-			description: 'Get information on a fortnite player',
-			tag: 'games',
-			responses: [],
-			parameters: [],
-		},
-	] } };
+export async function getServerSideProps(ctx: GetServerSidePropsContext) {
+
+	try {
+		const res = await fetch(`${process.env.BACKEND_URL}api/stats/endpoints`, {
+			method: 'get',
+			headers: {
+				'cookie': ctx.req.headers.cookie as string,
+			},
+		});
+		const { endpoints: endpointData } = await res.json();
+		return { props: { endpoints: endpointData.filter((e: EndpointExtra) => e.data != null) } };
+	} catch (err) {
+		console.log(err);
+		return { props: { endpoints: [] } };
+	}
 }

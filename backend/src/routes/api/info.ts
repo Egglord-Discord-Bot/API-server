@@ -26,21 +26,19 @@ export function run() {
 	const NPMHandler = new CacheHandler();
 	const WeatherHandler = new CacheHandler();
 
+
 	/**
-	 * @API
-	 * /info/covid:
-	 *   get:
-	 *     description: Get COVID stats on a country or the world.
-	 *     tags: info
-	 *		 responses:
-	 *			'200':
-	 *					- Schema: Covid
-	 *		 parameters:
-	 *       - name: country
-	 *         description: The country to get COVID stats from
-	 *         required: false
-	 *         type: string
-	 */
+	  * @openapi
+	  * /info/covid:
+	  *  get:
+	  *    description: Get COVID stats on a country or the world.
+	  *    parameters:
+		*       - name: country
+ 	  *         description: The country to get COVID stats from
+ 	  *         required: false
+ 	  *         type: string
+		*         default: all
+	*/
 	router.get('/covid', async (req, res) => {
 		const country = (req.query.country ?? '/all') as string;
 
@@ -67,12 +65,12 @@ export function run() {
 	});
 
 	/**
-	 * @API
+	 * @openapi
 	 * /info/reddit:
-	 *   get:
-	 *     description: Get a post from a subreddit
-	 *     tags: info
-	 *			parameters:
+	 *  get:
+	 *    description: Get a post from a subreddit
+	 *    tags: info
+	 *    parameters:
 	 *       - name: sub
 	 *         description: The subreddit to get the post from.
 	 *         required: true
@@ -108,12 +106,12 @@ export function run() {
 	});
 
 	/**
-	 * @API
+	 * @openapi
 	 * /info/npm:
-	 *   get:
-	 *     description: Get information on a NPM package
-	 *     tags: info
-	 *			parameters:
+	 *  get:
+	 *    description: Get information on a NPM package
+	 *    tags: info
+	 *    parameters:
 	 *       - name: package
 	 *         description: The name of the package
 	 *         required: true
@@ -150,20 +148,21 @@ export function run() {
 	});
 
 	/**
-	 * @API
+	 * @openapi
 	 * /info/translate:
-	 *   get:
-	 *     description: Translate a message
-	 *     tags: info
-	 *			parameters:
+	 *  get:
+	 *    description: Translate a message
+	 *    tags: info
+	 *    parameters:
 	 *       - name: text
 	 *         description: The text to translate
 	 *         required: true
 	 *         type: string
 	 *       - name: lang
-	 *         description: The language to translate to (Default: English)
+	 *         description: The language to translate to
 	 *         required: false
 	 *         type: string
+	 *         default: English
 	*/
 	type stuff = 'English' | 'Afrikaans'
 	router.get('/translate', async (req, res) => {
@@ -183,12 +182,12 @@ export function run() {
 	});
 
 	/**
-	 * @API
+	 * @openapi
 	 * /info/lyrics:
-	 *   get:
-	 *     description: Get lyrics of a song
-	 *     tags: info
-	 *			parameters:
+	 *  get:
+	 *    description: Get lyrics of a song
+	 *    tags: info
+	 *    parameters:
 	 *       - name: title
 	 *         description: The title of the song
 	 *         required: true
@@ -212,10 +211,10 @@ export function run() {
 	/**
  * @API
  * /info/urban-dictionary:
- *   get:
- *     description: Translate a message
- *     tags: info
- *			parameters:
+ *  get:
+ *    description: Translate a message
+ *    tags: info
+ *    parameters:
  *       - name: phrase
  *         description: The text to translate
  *         required: true
@@ -237,18 +236,19 @@ export function run() {
 	/**
  * @API
  * /info/weather:
- *   get:
- *     description: Get the weather of a location
- *     tags: info
- *			parameters:
+ *  get:
+ *    description: Get the weather of a location
+ *    tags: info
+ *    parameters:
  *       - name: location
- *         description: The location
+ *         description: The location for the weather
  *         required: true
  *         type: string
  *       - name: tempType
  *         description: Either C or F (Celsuis or Fahrenheit)
  *         required: false
  *         type: string
+ *         enum: [C, F]
 */
 	router.get('/weather', async (req, res) => {
 		// Get location to get weather from

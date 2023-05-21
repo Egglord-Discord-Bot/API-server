@@ -8,15 +8,11 @@ const { findByUsername, getRanks, getStats, getProgression } = new R6API({ email
 
 export function run() {
 	/**
-	 * @API
+	 * @openapi
 	 * /games/fortnite:
-	 *   get:
-	 *     description: Get information on a fortnite player
-	 *     tags: games
-	 *		 responses:
-	 *				'200':
-	 *					- Schema:	FortnitePlayer
-	 *		 parameters:
+	 *  get:
+	 *   description: Get information on a fortnite player
+	 *   parameters:
 	 *       - name: platform
 	 *         description: The platform, the user uses
 	 *         required: true
@@ -43,12 +39,15 @@ export function run() {
 	});
 
 	/**
-	 * @API
+	 * @openapi
 	 * /games/mc:
-	 *   get:
-	 *     description: Get information on a minecraft server.
-	 *     tags: games
-	 *			parameters:
+	 *  get:
+	 *    description: Get information on a minecraft server.
+	 *    responses:
+   *      '200':
+   *        schema:
+   *          $ref: '#/components/schemas/User'
+	 *    parameters:
 	 *       - name: ip
 	 *         description: The IP/address of the MC server
 	 *         required: true
@@ -56,7 +55,10 @@ export function run() {
 	 *       - name: port
 	 *         description: The port that the server runs on.
 	 *         required: false
-	 *         type: string
+	 *         type: number
+	 *         default: 25565
+ 	 *         minimum: 1
+   *         maximum: 65536
 	*/
 	router.get('/mc', async (req, res) => {
 		// Check query paramters
@@ -83,16 +85,21 @@ export function run() {
 	});
 
 	/**
-	 * @API
+	 * @openapi
 	 * /games/r6:
-	 *   get:
-	 *     description: Get information on a r6 player
-	 *     tags: games
-	 *			parameters:
+	 *  get:
+	 *    description: Get information on a r6 player
+	 *    parameters:
 	 *       - name: platform
 	 *         description: The ID of the user
 	 *         required: true
 	 *         type: string
+	 *         enum: [uplay, psn, xbl]
+	 *       - name: region
+	 *         description: The region of the user
+	 *         required: true
+	 *         type: string
+	 *         enum: [apac, emea, ncsa]
 	 *       - name: username
 	 *         description: The ID of the user
 	 *         required: true
@@ -119,7 +126,7 @@ export function run() {
 
 		// Make sure type is from set
 		type regionType = 'apac' | 'emea' | 'ncsa'
-		const regionAllowedTypes = ['uplay', 'psn', 'xbl'];
+		const regionAllowedTypes = ['apac', 'emea', 'ncsa'];
 		if (!regionAllowedTypes.includes(platform)) return Error.InvalidValue(res, 'type', regionAllowedTypes);
 
 		const { 0: player } = await findByUsername(platform as platformType, username);
@@ -151,3 +158,23 @@ export function run() {
 
 	return router;
 }
+
+/**
+  * @openapi
+  * components:
+  *  schemas:
+  *   Minecraft:
+  *    type: object
+  *    properties:
+  *      version:
+  *        name:
+	*         type: string
+	*        protocol:
+	*         type: number
+  *      players:
+	*        online:
+	*         type: number
+	*        max:
+	*         type: number
+  *
+*/
