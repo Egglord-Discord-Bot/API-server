@@ -122,7 +122,7 @@ export default function Docs({ endpoints }: Props) {
 																				}
 																				<h5>Response:</h5>
 																				{e.name.split('/')[2] == 'image' && (
-																					<Image src={`/imgs/${e.name.split('/').at(-1)}.png`} alt={e.name.split('/').at(-1) as string} height={300} width={300}/>
+																					<Image src={`/imgs/${e.name.split('/').at(-1)}.${e.name.split('/').at(-1) == 'trigger' ? 'gif' : 'png'}`} alt={e.name.split('/').at(-1) as string} height={300} width={300}/>
 																				)}
 																			</div>
 																		</div>
