@@ -21,17 +21,15 @@ type history = {
 
 type countEnum = { [key: string]: number }
 interface Props {
-	totalAPIUsage: number
+	responseCode: countEnum
 	userCount: number
 	totalHistory: Array<history>
+	count: number
 	error?: string
 }
 
 export default function Admin(data: Props) {
 	const { data: session, status } = useSession();
-	if (status == 'loading') return null;
-
-	console.log(data.totalHistory);
 	const labels: countEnum = { 'January': 0, 'February': 0, 'March': 0, 'April': 0, 'May': 0, 'June': 0, 'July': 0, 'August': 0, 'September': 0, 'October': 0, 'November': 0, 'Decemeber': 0 };
 	data.totalHistory.forEach((x) => {
 		const y = Object.keys(labels).at(new Date(x.createdAt).getMonth());
@@ -72,10 +70,6 @@ export default function Admin(data: Props) {
 		],
 	};
 
-	// Categorise all the endpoints by their responseCode
-	const ApiReponses: countEnum = { 200: 0, 401:0, 403:0, 404:0, 412:0, 429:0 };
-	data.totalHistory.forEach((x) => ApiReponses[x.responseCode] = (ApiReponses[x.responseCode] || 0) + 1);
-
 	return (
 		<>
 			<Header />
@@ -102,7 +96,7 @@ export default function Admin(data: Props) {
 												<div className="col mr-2">
 													<div className="text-xs font-weight-bold text-primary text-uppercase mb-1">
 														Total Request</div>
-													<div className="h5 mb-0 font-weight-bold text-gray-800">{nFormatter(data.totalAPIUsage, 2)}</div>
+													<div className="h5 mb-0 font-weight-bold text-gray-800">{nFormatter(data.count, 2)}</div>
 												</div>
 												<div className="col-auto">
 													<i className="fas fa-calendar fa-2x text-gray-300"></i>
@@ -196,11 +190,11 @@ export default function Admin(data: Props) {
 											<h6 className="m-0 font-weight-bold text-primary">API responses code</h6>
 										</div>
 										<div className="card-body">
-											{Object.keys(ApiReponses).map(e => (
+											{Object.keys(data.responseCode).map(e => (
 												<>
-													<h4 className="small font-weight-bold">{e} <span className="float-right">{Math.round((ApiReponses[e] / data.totalHistory.length) * 100)}%</span></h4>
+													<h4 className="small font-weight-bold">{e} <span className="float-right">{Math.round((data.responseCode[e] / data.count) * 100)}%</span></h4>
 													<div className="progress mb-4">
-														<div className="progress-bar bg-success" role="progressbar" style={{ width: `${(ApiReponses[e] / data.totalHistory.length) * 100}%` }}	aria-valuenow={ApiReponses[e]} aria-valuemin={0} aria-valuemax={data.totalHistory.length}>{ApiReponses[e]}</div>
+														<div className="progress-bar bg-success" role="progressbar" style={{ width: `${(data.responseCode[e] / data.count) * 100}%` }}	aria-valuenow={data.responseCode[e]} aria-valuemin={0} aria-valuemax={data.count}>{data.responseCode[e]}</div>
 													</div>
 												</>
 											))}
@@ -248,24 +242,23 @@ export default function Admin(data: Props) {
 // Fetch admin API usage
 export async function getServerSideProps(ctx: GetServerSidePropsContext) {
 	try {
-		const res1 = await fetch(`${process.env.BACKEND_URL}api/stats/history`, {
+		const obj = {
 			method: 'get',
 			headers: {
 				'cookie': ctx.req.headers.cookie as string,
 			},
-		});
-		const { history } = await res1.json();
+		};
+		const [res, res1, res2] = await Promise.all([fetch(`${process.env.BACKEND_URL}api/stats/history/responseCode`, obj),
+			fetch(`${process.env.BACKEND_URL}api/stats/history`, obj),
+			fetch(`${process.env.BACKEND_URL}api/stats/users`, obj),
+		]);
 
-		const res2 = await fetch(`${process.env.BACKEND_URL}api/stats/users`, {
-			method: 'get',
-			headers: {
-				'cookie': ctx.req.headers.cookie as string,
-			},
-		});
+		const { history: h } = await res.json();
+		const { history, total } = await res1.json();
 		const { users } = await res2.json();
 
-		return { props: { totalAPIUsage: history.length, userCount: users.length, totalHistory: history } };
+		return { props: { count: total, responseCode: h, userCount: users.length, totalHistory: history } };
 	} catch (err) {
-		return { props: { totalAPIUsage: 0, userCount: 0, totalHistory: [], error: 'API server currently unavailable' } };
+		return { props: { count: 0, responseCode: { '0': 0 }, userCount: 0, totalHistory: [], error: 'API server currently unavailable' } };
 	}
 }
