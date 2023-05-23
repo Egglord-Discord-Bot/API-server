@@ -18,7 +18,6 @@ export default class userHistoryManager {
 	*/
 	async create(data: UserHistoryCreateParam) {
 		this.size++;
-
 		if (data.id == null) {
 			return client.userHistory.create({
 				data: {
@@ -39,8 +38,6 @@ export default class userHistoryManager {
 				},
 			});
 		}
-
-
 	}
 
 	/**
@@ -96,6 +93,41 @@ export default class userHistoryManager {
 			skip: page * CONSTANTS.DbPerPage,
 			take: CONSTANTS.DbPerPage,
 		});
+	}
+
+	/**
+		* Fetch all history that has name that starts with the param
+		* @param {string} name The name for searching
+		* @returns Array of user history entries
+	*/
+	async fetchEndpointByName(name: string) {
+		return client.userHistory.findMany({
+			where: {
+				endpoint: {
+					startsWith: name,
+				},
+			},
+		});
+	}
+
+	/**
+		* Fetch counts of all entries based on response code
+		* @returns Object of responseCode and total count
+	*/
+	async fetchResponseCodeCounts() {
+		const l: { [key: string]: number } = {};
+		const responseCodes = await client.userHistory.groupBy({
+			by: ['responseCode'],
+		});
+
+		for (const [, code] of Object.entries(responseCodes)) {
+			l[code.responseCode] = await client.userHistory.count({
+				where: {
+					responseCode: code.responseCode,
+				},
+			});
+		}
+		return l;
 	}
 
 	/**
