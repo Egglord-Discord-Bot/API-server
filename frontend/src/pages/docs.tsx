@@ -1,7 +1,7 @@
 import Header from '../components/header';
 import Navbar from '../components/navbar/main';
 import Link from 'next/link';
-import type { EndpointExtra } from '../types/types';
+import type { EndpointExtra, EndpointParam } from '../types/types';
 import { useSession } from 'next-auth/react';
 import Image from 'next/image';
 import type { GetServerSidePropsContext } from 'next';
@@ -13,6 +13,16 @@ interface Props {
 export default function Docs({ endpoints }: Props) {
 	const { data: session, status } = useSession();
 	if (status == 'loading') return null;
+
+	function displayExtraInfo(e: EndpointParam) {
+		switch (e.type) {
+			case 'string':
+				return e.enum?.length >= 1 ? `(${e.enum?.join(', ')})` : '';
+			case 'number':
+				return `(${e.minimum} - ${e.maximum})`;
+		}
+	}
+
 
 	return (
 		<>
@@ -112,7 +122,7 @@ export default function Docs({ endpoints }: Props) {
 																									<td>{p.name}</td>
 																									<td>{p.description}</td>
 																									<td>{p.required ? 'Yes' : 'No'}</td>
-																									<td>{p.type}</td>
+																									<td>{p.type} {displayExtraInfo(p)}</td>
 																								</tr>
 																							))}
 																						</tbody>

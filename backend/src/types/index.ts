@@ -138,3 +138,18 @@ export type TwitchFollowersData = {
 	to_name: string,
 	followed_at: Date
 }
+
+type swaggerPath = { [key:string]: {
+	'get'?: any;
+}
+}
+
+export interface swaggerJsdocType {
+	openapi: number
+  info: {
+		title: string,
+		version: string
+	}
+  paths: swaggerPath
+	tags: Array<string>
+}

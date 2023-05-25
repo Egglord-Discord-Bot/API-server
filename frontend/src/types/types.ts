@@ -14,11 +14,16 @@ export type UserHistory = {
   createdAt: Date
 }
 
-type EndpointParam = {
+export type EndpointParam = {
   name: string
   description: string
   required: boolean
-  type: string
+  type: 'string' | 'number'
+  // optional data
+  enum?: Array<string>
+  default: number | string
+  minimum: number
+  maximum: number
 }
 
 export type EndpointData = {
