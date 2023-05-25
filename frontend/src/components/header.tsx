@@ -1,5 +1,4 @@
 import Head from 'next/head';
-import Script from 'next/script';
 
 export default function Header() {
 	return (
@@ -13,7 +12,6 @@ export default function Header() {
 				<meta property="og:image" content="/favicon.ico" />
 				<title>API</title>
 			</Head>
-			<Script src="https://kit.fontawesome.com/fa3685e359.js" crossOrigin="anonymous"></Script>
 		</>
 	);
 }

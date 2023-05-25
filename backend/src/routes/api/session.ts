@@ -52,10 +52,38 @@ export function run(client: Client) {
 		const page = req.query.page;
 
 		if (ses?.user) {
-			const history = await client.UserHistoryManager.fetchEndpointUsagesPerUser({ userId: BigInt(ses.user.id), page: (page && !Number.isNaN(page)) ? Number(page) : 0 });
-			res.json({ history: history.map(h => ({ ...h, userId: '' })) });
+			const [history, total] = await Promise.all([client.UserHistoryManager.fetchEndpointUsagesPerUser({ userId: BigInt(ses.user.id), page: (page && !Number.isNaN(page)) ? Number(page) : 0 }),
+				client.UserHistoryManager.fetchCountByUserId(BigInt(ses.user.id))]);
+
+			res.json({ history: history.map(h => ({ ...h, userId: '' })), total });
 		} else {
-			res.json({ history: [] });
+			res.json({ history: [], total: 0 });
+		}
+	});
+
+	router.get('/history/graph', async (req, res) => {
+		const ses = await Utils.getSession(req);
+
+		if (ses?.user) {
+			const t = await client.UserHistoryManager.fetchEndpointCountByUser(BigInt(ses.user.id));
+			res.json({ data: t });
+		}
+	});
+
+	// Regenerate a new token
+	router.post('/regenerate', async (req, res) => {
+		const ses = await Utils.getSession(req);
+		if (ses?.user) {
+			try {
+				const token = new TokenGenerator({ bitSize: 512, baseEncoding: TokenBase.BASE62 }).generate();
+				await client.UserManager.update({ id: BigInt(ses.user.id), newToken: token });
+				res.json({ success: 'Successfully updated users token', token });
+			} catch (err) {
+				console.log(err);
+				res.json({ error: 'Failed to update users token' });
+			}
+		} else {
+			res.json({ error: 'Error' });
 		}
 	});
 

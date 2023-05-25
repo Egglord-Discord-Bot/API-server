@@ -69,12 +69,15 @@ export default class userHistoryManager {
 	}
 
 	/**
-		* Check if an image was sent with the request
-		* @param {number} userId The endpoint the user is trying to access
-		* @returns Whether or not they are being ratelimited
+		* Fetch a specific user's history
+		* @param {number} userId The userId for getting their user history
+		* @returns Array if user history entries based on userId
 	*/
 	async fetchEndpointUsagesPerUser({ userId, page }: endpointUserUnique & pagination) {
 		return client.userHistory.findMany({
+			orderBy: {
+				createdAt: 'desc',
+			},
 			where: {
 				userId,
 			},
@@ -131,11 +134,49 @@ export default class userHistoryManager {
 	}
 
 	/**
+		* Fetch a specific's user total history count
+		* @param {bigint} userId The userId for getting their user history count
+		* @returns The total number of entries by a user
+	*/
+	async fetchEndpointCountByUser(userId: bigint) {
+		const l: { [key: string]: number } = {};
+		const responseCodes = await client.userHistory.groupBy({
+			by: ['endpoint'],
+			where: {
+				userId: userId,
+			},
+		});
+
+		for (const [, code] of Object.entries(responseCodes)) {
+			l[code.endpoint] = await client.userHistory.count({
+				where: {
+					endpoint: code.endpoint,
+					userId: userId,
+				},
+			});
+		}
+		return l;
+	}
+
+	/**
 		* Returns the total number of entries
 		* @returns The total number of entries
 	*/
 	async fetchCount() {
 		if (this.size == 0) this.size = await client.userHistory.count();
 		return this.size;
+	}
+
+	/**
+		* Fetch a specific's user total history count
+		* @param {bigint} userId The userId for getting their user history count
+		* @returns The total number of entries by a user
+	*/
+	async fetchCountByUserId(userId: bigint) {
+		return client.userHistory.count({
+			where: {
+				userId: userId,
+			},
+		});
 	}
 }

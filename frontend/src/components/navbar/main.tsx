@@ -21,7 +21,7 @@ export default function Main({ user }: Props) {
 							<Link className="nav-link active" aria-current="page" href="/docs">Docs</Link>
 						</li>
 						<li className="nav-item">
-							<a className="nav-link" href="https://discord.gg/8g6zUQu">Discord</a>
+							<a className="nav-link active" href="https://discord.gg/8g6zUQu">Discord</a>
 						</li>
 					</ul>
 					<ul className="navbar-nav d-flex">

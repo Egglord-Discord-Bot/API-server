@@ -5,6 +5,10 @@ import type { GetServerSidePropsContext } from 'next';
 import { useSession } from 'next-auth/react';
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
 import { Pie } from 'react-chartjs-2';
+import { useState, useEffect } from 'react';
+import type { MouseEvent } from 'react';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faEye, faEyeSlash, faAnglesLeft, faAnglesRight } from '@fortawesome/free-solid-svg-icons';
 ChartJS.register(ArcElement, Tooltip, Legend);
 
 type history = {
@@ -16,15 +20,31 @@ type history = {
 type countEnum = { [key: string]: number }
 interface Props {
 	history: Array<history>
+	total: number
 	error?: string
+	data: countEnum
+	cookie: string
 }
 
-export default function Settings({ history, error }: Props) {
+export default function Settings({ history: hList, error, total = 0, data, cookie }: Props) {
 	const { data: session, status } = useSession();
+
+	// Fot toggle visibility of token + update token when regenerated
+	const [canSee, setCanSee] = useState(false);
+	const [token, setToken] = useState('');
+	useEffect(() => {
+		setToken(session?.user.token as string);
+	}, [status, session?.user.token]);
+
+	// For paginator
+	const [page, setPage] = useState(0);
+	const [history, setHistory] = useState<Array<history>>(hList);
 	if (status == 'loading') return null;
 
+
 	// Put their token in their clipboard
-	function copyUserToken() {
+	function copyUserToken(e: MouseEvent<HTMLButtonElement>) {
+		e.preventDefault();
 		// Get the text field
 		const copyText = document.getElementById('myInput') as HTMLInputElement;
 
@@ -34,6 +54,7 @@ export default function Settings({ history, error }: Props) {
 		copyText.setSelectionRange(0, 99999);
 
 		// Copy the text inside the text field
+		console.log(navigator);
 		navigator.clipboard.writeText(copyText.value);
 
 		// Alert the copied text
@@ -41,21 +62,53 @@ export default function Settings({ history, error }: Props) {
 	}
 
 	// Toggle the inpout field
-	function ToggleTokenVisibility() {
+	function toggleTokenVisibility(e: MouseEvent<HTMLButtonElement>) {
+		e.preventDefault();
 		const x = document.getElementById('myInput') as HTMLInputElement;
+		setCanSee(!canSee);
 		x.type = (x.type == 'password') ? 'text' : 'password';
 	}
 
-	const counts = {} as countEnum;
-	history.forEach((x) => counts[x.endpoint] = (counts[x.endpoint] || 0) + 1);
+	async function fetchHistory(p: number) {
+		try {
+			const res = await fetch(`/api/session/history?page=${p}`, {
+				method: 'get',
+				headers: {
+					'Accept': 'application/json',
+					'Content-Type': 'application/json',
+				},
+			});
+			setHistory((await res.json()).history);
+			setPage(p);
+		} catch (err) {
+			console.log(err);
+		}
+	}
+
+	async function resetToken(e: MouseEvent<HTMLButtonElement>) {
+		e.preventDefault();
+		try {
+			const res = await fetch('/api/session/regenerate', {
+				method: 'POST',
+				headers: {
+					'Accept': 'application/json',
+					'Content-Type': 'application/json',
+					'cookie': cookie,
+				},
+			});
+			setToken((await res.json()).token);
+		} catch (err) {
+			console.log(err);
+		}
+	}
 
 	// Create data for pie chart
-	const data = {
-		labels: Object.keys(counts),
+	const graphData = {
+		labels: Object.keys(data),
 		datasets: [
 			{
-				label: 'Accessed:',
-				data: Object.values(counts),
+				label: 'Accessed',
+				data: Object.values(data),
 				backgroundColor: [
 					'rgb(255, 159, 64)',
 					'rgb(255, 205, 86)',
@@ -81,35 +134,68 @@ export default function Settings({ history, error }: Props) {
 				<div className="row">
 					<form className="form-inline">
 						<h5>Your token:</h5>
-						<div className="form-group mb-2">
-							<input className="form-control mb-2 mr-sm-2" type="password" value={session?.user.token} id="myInput" readOnly />
+						<div className="input-group mb-3">
+							<input type="text" id="myInput" className="form-control" value={token} aria-label="Recipient's username" aria-describedby="basic-addon2" />
+							<button className="input-group-text" id="basic-addon2" onClick={(e) => toggleTokenVisibility(e)}><FontAwesomeIcon icon={canSee ? faEyeSlash : faEye} /></button>
 						</div>
-						<input type="checkbox" onClick={() => ToggleTokenVisibility()} />Show Token
-						<button className="btn btn-primary mb-2" onClick={() => copyUserToken()}>Copy text</button>
+						<button className="btn btn-primary mb-2" onClick={(e) => copyUserToken(e)}>Copy text</button>
+						&nbsp;
+						<button className="btn btn-primary mb-2" onClick={(e) => resetToken(e)}>Reset Token</button>
 					</form>
-					<div className="col-lg-6">
-						<Pie data={data} />
+					<div className="col-xl-6 col-lg-12">
+						<div className="card shadow mb-4">
+							<div className="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+								<h4 className="m-0 font-weight-bold text-primary">Access per an Endpoint</h4>
+							</div>
+							<div className="card-body">
+								<Pie data={graphData} />
+							</div>
+						</div>
 					</div>
-					<div className="col-lg-6">
-						<h5>Your endpoint history:</h5>
-						<table className="table">
-							<thead>
-								<tr>
-									<th scope="col">#</th>
-									<th scope="col">Endpoint:</th>
-									<th scope="col">Accessed at:</th>
-								</tr>
-							</thead>
-							<tbody>
-								{history.map(_ => (
-									<tr key={_.id}>
-										<td>{history.indexOf(_) + 1}</td>
-										<td>{_.endpoint}</td>
-										<td>{new Date(_.createdAt).toLocaleString('en-GB', { timeZone: 'UTC' })}</td>
-									</tr>
-								))}
-							</tbody>
-						</table>
+					<div className="col-xl-6 col-lg-12">
+						<div className="card shadow mb-4">
+							<div className="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+								<h4 className="m-0 font-weight-bold text-primary">Total Endpoint Usage ({total}):</h4>
+							</div>
+							<div className="card-body">
+								<table className="table" style={{ maxHeight:'400px' }}>
+									<thead>
+										<tr>
+											<th scope="col">#</th>
+											<th scope="col">Endpoint:</th>
+											<th scope="col">Accessed on:</th>
+										</tr>
+									</thead>
+									<tbody>
+										{history.map(_ => (
+											<tr key={_.id}>
+												<td scope="row">{(page * 50) + history.indexOf(_) + 1}</td>
+												<td>{_.endpoint}</td>
+												<td>{new Date(_.createdAt).toLocaleString('en-GB', { timeZone: 'UTC' })}</td>
+											</tr>
+										))}
+									</tbody>
+								</table>
+								<nav aria-label="Page navigation example">
+									<p style={{ display: 'inline' }}>Showing results {(page < 1 ? 0 : page) * 50} - {(page * 50) + (history.length < 50 ? history.length : 50)} of {total}</p>
+									<ul className="pagination justify-content-center">
+										<li className="page-item">
+											<button className="page-link" onClick={() => fetchHistory(page == 0 ? page : page - 1)}>
+												<FontAwesomeIcon icon={faAnglesLeft} />
+											</button>
+										</li>
+										<li className="page-item">
+											<p className="page-link">{page + 1}</p>
+										</li>
+										<li className="page-item">
+											<button className="page-link" onClick={() => fetchHistory(history.length >= 50 ? page + 1 : page)}>
+												<FontAwesomeIcon icon={faAnglesRight} />
+											</button>
+										</li>
+									</ul>
+								</nav>
+							</div>
+						</div>
 					</div>
 				</div>
 			</div>
@@ -120,15 +206,17 @@ export default function Settings({ history, error }: Props) {
 // Fetch basic API usage
 export async function getServerSideProps(ctx: GetServerSidePropsContext) {
 	try {
-		const resp = await fetch(`${process.env.BACKEND_URL}api/session/history`, {
+		const obj = {
 			method: 'get',
 			headers: {
 				'cookie': ctx.req.headers.cookie as string,
 			},
-		});
+		};
+		// Fetch data from API
+		const [res1, res2] = await Promise.all([fetch(`${process.env.BACKEND_URL}api/session/history`, obj), fetch(`${process.env.BACKEND_URL}api/session/history/graph`, obj)]);
+		const [{ history, total }, { data }] = await Promise.all([res1.json(), res2.json()]);
 
-		const { history } = await resp.json();
-		return { props: { history } };
+		return { props: { history, total, data, cookie: ctx.req.headers.cookie as string } };
 	} catch (err) {
 		return { props: { history: [], error: 'API server currently unavailable' } };
 	}
