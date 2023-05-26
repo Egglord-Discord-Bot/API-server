@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import type Client from '../../helpers/Client';
+import type Client from '../../../helpers/Client';
 const router = Router();
 
 export function run(client: Client) {

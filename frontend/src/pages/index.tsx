@@ -74,7 +74,7 @@ export default function Home({ userCount, endpointCount, totalAPIUsage }: Props)
 // Fetch basic API usage
 export async function getServerSideProps(ctx: GetServerSidePropsContext) {
 	try {
-		const res = await fetch(`${process.env.BACKEND_URL}api/stats/basic`, {
+		const res = await fetch(`${process.env.BACKEND_URL}api/session/stats/basic`, {
 			method: 'get',
 			headers: {
 				'cookie': ctx.req.headers.cookie as string,

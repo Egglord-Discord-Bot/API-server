@@ -18,6 +18,7 @@ dotenv.config();
 
 
 (async () => {
+
 	// Load passport and endpoint data
 	const client = new Client();
 	await (await import('./helpers/EndpointData')).default(client);

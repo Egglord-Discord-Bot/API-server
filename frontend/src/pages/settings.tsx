@@ -8,7 +8,7 @@ import { Pie } from 'react-chartjs-2';
 import { useState, useEffect } from 'react';
 import type { MouseEvent } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faEye, faEyeSlash, faAnglesLeft, faAnglesRight } from '@fortawesome/free-solid-svg-icons';
+import { faEye, faEyeSlash, faAnglesLeft, faAnglesRight, faEllipsis } from '@fortawesome/free-solid-svg-icons';
 ChartJS.register(ArcElement, Tooltip, Legend);
 
 type history = {
@@ -30,7 +30,7 @@ export default function Settings({ history: hList, error, total = 0, data, cooki
 	const { data: session, status } = useSession();
 
 	// Fot toggle visibility of token + update token when regenerated
-	const [canSee, setCanSee] = useState(false);
+	const [canSee, setCanSee] = useState(true);
 	const [token, setToken] = useState('');
 	useEffect(() => {
 		setToken(session?.user.token as string);
@@ -135,19 +135,39 @@ export default function Settings({ history: hList, error, total = 0, data, cooki
 					<form className="form-inline">
 						<h5>Your token:</h5>
 						<div className="input-group mb-3">
-							<input type="text" id="myInput" className="form-control" value={token} aria-label="Recipient's username" aria-describedby="basic-addon2" />
+							<input type="password" id="myInput" className="form-control" defaultValue={token} aria-label="Recipient's username" aria-describedby="basic-addon2" />
 							<button className="input-group-text" id="basic-addon2" onClick={(e) => toggleTokenVisibility(e)}><FontAwesomeIcon icon={canSee ? faEyeSlash : faEye} /></button>
 						</div>
 						<button className="btn btn-primary mb-2" onClick={(e) => copyUserToken(e)}>Copy text</button>
 						&nbsp;
-						<button className="btn btn-primary mb-2" onClick={(e) => resetToken(e)}>Reset Token</button>
-					</form>
-					<div className="col-xl-6 col-lg-12">
-						<div className="card shadow mb-4">
-							<div className="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-								<h4 className="m-0 font-weight-bold text-primary">Access per an Endpoint</h4>
+						<button className="btn btn-primary mb-2" type="button" data-bs-toggle="modal" data-bs-target="#resetPopup">Reset Token</button>
+						<div className="modal fade" id="resetPopup" tabIndex={-1} aria-labelledby="staticBackdropLabel" aria-hidden="true">
+							<div className="modal-dialog modal-dialog-centered">
+								<div className="modal-content">
+									<div className="modal-header">
+										<h1 className="modal-title fs-5" id="staticBackdropLabel">Token reset</h1>
+										<button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+									</div>
+									<div className="modal-body">
+										Are you sure you want to reset your token?
+									</div>
+									<div className="modal-footer">
+										<button type="button" className="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+										<button type="button" className="btn btn-primary" onClick={(e) => resetToken(e)}>Understood</button>
+									</div>
+								</div>
 							</div>
-							<div className="card-body">
+						</div>
+					</form>
+					<div className="col-xl-6 col-lg-12" style={{ paddingBottom: '15px' }}>
+						<div className="card shadow">
+							<div className="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+								<h4 className="m-0 font-weight-bold text-primary">Endpoint Usage</h4>
+								<a type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseExample">
+									<FontAwesomeIcon icon={faEllipsis} />
+								</a>
+							</div>
+							<div className="card-body collapse show" id="collapseOne">
 								<Pie data={graphData} />
 							</div>
 						</div>
@@ -156,8 +176,11 @@ export default function Settings({ history: hList, error, total = 0, data, cooki
 						<div className="card shadow mb-4">
 							<div className="card-header py-3 d-flex flex-row align-items-center justify-content-between">
 								<h4 className="m-0 font-weight-bold text-primary">Total Endpoint Usage ({total}):</h4>
+								<a type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="true" aria-controls="collapseExample">
+    							<FontAwesomeIcon icon={faEllipsis} />
+								</a>
 							</div>
-							<div className="card-body">
+							<div className="card-body collapse show" id="collapseTwo">
 								<table className="table" style={{ maxHeight:'400px' }}>
 									<thead>
 										<tr>

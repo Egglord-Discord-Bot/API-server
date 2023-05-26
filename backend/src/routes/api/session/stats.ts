@@ -1,23 +1,12 @@
 import { Router } from 'express';
 import type Client from '../../../helpers/Client';
 import { isAdmin } from '../../../middleware/middleware';
+import type { swaggerJsdocType } from '../../../types/';
 import swaggerJsdoc from 'swagger-jsdoc';
 const router = Router();
 
 
 export function run(client: Client) {
-	const options = {
-		failOnErrors: true,
-		definition: {
-			openapi: '3.0.0',
-			info: {
-				title: 'Hello World',
-				version: '1.0.0',
-			},
-		},
-		apis: ['./src/routes/api/*.ts'],
-	};
-
 	router.get('/basic', async (_req, res) => {
 		try {
 			const [users, endpoints, endpointUsage] = await Promise.all([client.UserManager.fetchCount(), client.EndpointManager.fetchCount(), client.UserHistoryManager.fetchCount()]);
@@ -38,20 +27,28 @@ export function run(client: Client) {
 	router.get('/users', isAdmin, async (req, res) => {
 		const page = req.query.page;
 		try {
-			const users = await client.UserManager.fetchUsers({ page: (page && !Number.isNaN(page)) ? Number(page) : 0 });
-			res.json({ users: users.map(i => ({ ...i, id: `${i.id}` })) });
+			const [users, total] = await Promise.all([client.UserManager.fetchUsers({ page: (page && !Number.isNaN(page)) ? Number(page) : 0 }), client.UserManager.fetchCount()]);
+			res.json({ users: users.map(i => ({ ...i, id: `${i.id}` })), total });
 		} catch (err) {
 			console.log(err);
-			res.json({ users: [] });
+			res.json({ users: [], total: 0 });
 		}
 	});
 
 	router.get('/endpoints', isAdmin, async (_req, res) => {
 		try {
 			const endpoints = await client.EndpointManager.fetchEndpointData();
-			const openapiSpecification = swaggerJsdoc(options);
-			console.log(openapiSpecification);
-			// @ts-ignore
+			const openapiSpecification = swaggerJsdoc({
+				failOnErrors: true,
+				definition: {
+					openapi: '3.0.0',
+					info: {
+						title: 'Hello World',
+						version: '1.0.0',
+					},
+				},
+				apis: ['./src/routes/api/*.ts'],
+			}) as swaggerJsdocType;
 			const el = endpoints.map(e => ({ ...e, data: openapiSpecification.paths[`${e.name.replace('/api', '')}`]?.get }));
 
 			res.json({ endpoints: el });
@@ -70,7 +67,7 @@ export function run(client: Client) {
 			res.json({ history: history.map(h => ({ ...h, userId: `${h.userId}` })), total });
 		} catch (err) {
 			console.log(err);
-			res.json({ history: [] });
+			res.json({ history: [], total: 0 });
 		}
 	});
 
@@ -102,6 +99,7 @@ export function run(client: Client) {
 		res.json({
 			current: { memory, cpu, disk },
 			history: systemHis,
+			uptime: process.uptime(),
 		});
 	});
 	return router;
