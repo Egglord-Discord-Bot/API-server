@@ -78,6 +78,39 @@ export default class UserManager {
 	}
 
 	/**
+		* Returns the total number of premium users
+	*/
+	async fetchPremiumCount() {
+		return client.user.count({
+			where: {
+				isPremium: true,
+			},
+		});
+	}
+	/**
+		* Returns the total number of entries
+		* @returns The total number of entries
+	*/
+	async fetchAdminCount() {
+		return client.user.count({
+			where: {
+				isAdmin: true,
+			},
+		});
+	}
+	/**
+		* Returns the total number of entries
+		* @returns The total number of entries
+	*/
+	async fetchBlockedCount() {
+		return client.user.count({
+			where: {
+				isBlocked: true,
+			},
+		});
+	}
+
+	/**
     * Fetch a user based on their ID
     * @param {Param} id The ID of the user
     * @returns A user
@@ -95,6 +128,9 @@ export default class UserManager {
   */
 	async fetchUsers({ page }: pagination) {
 		return client.user.findMany({
+			orderBy: {
+				createdAt: 'desc',
+			},
 			skip: page * CONSTANTS.DbPerPage,
 			take: CONSTANTS.DbPerPage,
 		});

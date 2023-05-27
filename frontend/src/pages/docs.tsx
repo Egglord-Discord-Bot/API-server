@@ -17,7 +17,7 @@ export default function Docs({ endpoints }: Props) {
 	function displayExtraInfo(e: EndpointParam) {
 		switch (e.type) {
 			case 'string':
-				return e.enum?.length >= 1 ? `(${e.enum?.join(', ')})` : '';
+				return (e.enum?.length ?? 0) >= 1 ? `(${e.enum?.join(', ')})` : '';
 			case 'number':
 				return `(${e.minimum} - ${e.maximum})`;
 		}
@@ -106,7 +106,7 @@ export default function Docs({ endpoints }: Props) {
 																			<div>
 																				<h6>{e.data?.description}. (Method: GET)</h6>
 																				<h5>Parameters:</h5>
-																				{e.data?.parameters?.length >= 1 ?
+																				{(e.data?.parameters?.length ?? 0) >= 1 ?
 																					<table className="table">
 																						<thead>
 																							<tr>

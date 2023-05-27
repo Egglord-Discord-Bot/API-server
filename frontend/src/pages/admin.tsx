@@ -2,59 +2,55 @@ import Header from '../components/header';
 import Sidebar from '../components/navbar/sidebar';
 import AdminNavbar from '../components/navbar/admin';
 import Error from '../components/error';
-import { nFormatter } from '../utils/functions';
+import InfoPill from '../components/dashboard/infoPill';
+import { nFormatter, formatBytes } from '../utils/functions';
 import { Pie, Line } from 'react-chartjs-2';
 import { useSession } from 'next-auth/react';
 import type { User } from '../types/next-auth';
 import type { GetServerSidePropsContext } from 'next';
+
+
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faDownload, faSignal, faUsers, faClock, faMemory, faEllipsis } from '@fortawesome/free-solid-svg-icons';
 import { Chart as ChartJS, ArcElement, Tooltip, Legend,	CategoryScale, LinearScale, PointElement, LineElement, Title } from 'chart.js';
 ChartJS.register(ArcElement, Tooltip, Legend, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
-
-type history = {
-	id: number,
-  userId: string,
-  endpoint: string,
-  createdAt: Date
-	responseCode: number
-	responseTime: number
-}
 
 type countEnum = { [key: string]: number }
 interface Props {
 	responseCode: countEnum
+	monthUsage: countEnum
 	userCount: number
-	totalHistory: Array<history>
 	count: number
+	uptime: number
+	memoryUsage: number
 	error?: string
 }
 
 export default function Admin(data: Props) {
 	const { data: session, status } = useSession();
-	const labels: countEnum = { 'January': 0, 'February': 0, 'March': 0, 'April': 0, 'May': 0, 'June': 0, 'July': 0, 'August': 0, 'September': 0, 'October': 0, 'November': 0, 'Decemeber': 0 };
-	data.totalHistory.forEach((x) => {
-		const y = Object.keys(labels).at(new Date(x.createdAt).getMonth());
-		if (y !== undefined) labels[y] += 1;
-	});
+	if (status == 'loading') return null;
+
 	const historyAccessed = {
-		labels: Object.keys(labels),
+		labels: Object.keys(data.monthUsage),
 		datasets: [
 			{
 				label: 'Accessed',
-				data: Object.values(labels),
+				data: Object.values(data.monthUsage),
 				borderColor: 'rgb(255, 99, 132)',
 				backgroundColor: 'rgba(255, 99, 132, 0.5)',
 			},
 		],
 	};
-
+	const mostAccessEndp = { datasets: [] };
 	// Create the data object for "Most accessed endpoints"
+	/*
 	const counts: countEnum = {};
 	data.totalHistory.forEach((x) => counts[x.endpoint] = (counts[x.endpoint] || 0) + 1);
 	const mostAccessEndp = {
 		labels: Object.keys(counts).slice(0, 10).map(i => i.split('/').at(-1)),
 		datasets: [
 			{
-				label: 'Accessed:',
+				label: 'Accessed',
 				data: Object.values(counts).slice(0, 10),
 				backgroundColor: [
 					'rgb(255, 159, 64)',
@@ -69,11 +65,11 @@ export default function Admin(data: Props) {
 			},
 		],
 	};
-
+	*/
 	return (
 		<>
 			<Header />
-			<div id="wrapper">
+			<div className="wrapper">
 				<Sidebar activeTab='dashboard'/>
 				<div id="content-wrapper" className="d-flex flex-column">
 					<div id="content">
@@ -85,116 +81,58 @@ export default function Admin(data: Props) {
 							<div className="d-sm-flex align-items-center justify-content-between mb-4">
 								<h1 className="h3 mb-0 text-gray-800">Dashboard</h1>
 								<a href="#" className="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm">
-									<i className="fas fa-download fa-sm text-white-50"></i> Generate Report
+									<FontAwesomeIcon icon={faDownload} /> Generate Report
 								</a>
 							</div>
 							<div className="row">
 								<div className="col-xl-3 col-md-6 mb-4">
-									<div className="card border-left-primary shadow h-100 py-2">
-										<div className="card-body">
-											<div className="row no-gutters align-items-center">
-												<div className="col mr-2">
-													<div className="text-xs font-weight-bold text-primary text-uppercase mb-1">
-														Total Request</div>
-													<div className="h5 mb-0 font-weight-bold text-gray-800">{nFormatter(data.count, 2)}</div>
-												</div>
-												<div className="col-auto">
-													<i className="fas fa-calendar fa-2x text-gray-300"></i>
-												</div>
-											</div>
-										</div>
-									</div>
+									<InfoPill title={'Total Requests'} text={nFormatter(data.count, 2)} icon={faSignal}/>
 								</div>
 								<div className="col-xl-3 col-md-6 mb-4">
-									<div className="card border-left-success shadow h-100 py-2">
-										<div className="card-body">
-											<div className="row no-gutters align-items-center">
-												<div className="col mr-2">
-													<div className="text-xs font-weight-bold text-success text-uppercase mb-1">
-														Total users</div>
-													<div className="h5 mb-0 font-weight-bold text-gray-800">{nFormatter(data.userCount, 2)}</div>
-												</div>
-												<div className="col-auto">
-													<i className="fas fa-dollar-sign fa-2x text-gray-300"></i>
-												</div>
-											</div>
-										</div>
-									</div>
+									<InfoPill title={'Total users'} text={nFormatter(data.userCount, 2)} icon={faUsers}/>
 								</div>
 								<div className="col-xl-3 col-md-6 mb-4">
-									<div className="card border-left-info shadow h-100 py-2">
-										<div className="card-body">
-											<div className="row no-gutters align-items-center">
-												<div className="col mr-2">
-													<div className="text-xs font-weight-bold text-info text-uppercase mb-1">Tasks
-													</div>
-													<div className="row align-items-center">
-														<div className="col-auto">
-															<div className="h5 mb-0 mr-3 font-weight-bold text-gray-800">50%</div>
-														</div>
-														<div className="col">
-															<div className="progress progress-sm">
-																<div className="progress-bar bg-info" role="progressbar" style={{ width: '50%' }} aria-valuenow={50} aria-valuemin={0}	aria-valuemax={100}></div>
-															</div>
-														</div>
-													</div>
-												</div>
-												<div className="col-auto">
-													<i className="fas fa-clipboard-list fa-2x text-gray-300"></i>
-												</div>
-											</div>
-										</div>
-									</div>
+									<InfoPill title={'Uptime'} text={new Date(data.uptime * 1000).toISOString().slice(11, 19)} icon={faClock}/>
 								</div>
 								<div className="col-xl-3 col-md-6 mb-4">
-									<div className="card border-left-warning shadow h-100 py-2">
-										<div className="card-body">
-											<div className="row no-gutters align-items-center">
-												<div className="col mr-2">
-													<div className="text-xs font-weight-bold text-warning text-uppercase mb-1">
-														Pending Requests</div>
-													<div className="h5 mb-0 font-weight-bold text-gray-800">18</div>
-												</div>
-												<div className="col-auto">
-													<i className="fas fa-comments fa-2x text-gray-300"></i>
-												</div>
-											</div>
-										</div>
-									</div>
+									<InfoPill title={'Memory Usage'} text={formatBytes(data.memoryUsage)} icon={faMemory}/>
 								</div>
 							</div>
 							<div className="row">
 								<div className="col-xl-8 col-lg-7">
 									<div className="card shadow mb-4">
 										<div className="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-											<h6 className="m-0 font-weight-bold text-primary">Total API usage</h6>
+											<h5 className="m-0 fw-bold text-primary">Total API usage (Year)</h5>
 											<div className="dropdown no-arrow">
 												<a className="dropdown-toggle" href="#" role="button" id="dropdownMenuLink"	data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-													<i className="fas fa-ellipsis-v fa-sm fa-fw text-gray-400"></i>
+													<FontAwesomeIcon icon={faEllipsis} />
 												</a>
-												<div className="dropdown-menu dropdown-menu-right shadow animated--fade-in"	aria-labelledby="dropdownMenuLink">
-													<div className="dropdown-header">Dropdown Header:</div>
-													<a className="dropdown-item" href="#">Action</a>
-													<a className="dropdown-item" href="#">Another action</a>
+												<div className="dropdown-menu dropdown-menu-end shadow animated--fade-in"	aria-labelledby="dropdownMenuLink">
+													<a className="dropdown-item" href="#">Month</a>
+													<a className="dropdown-item" href="#">Day</a>
 													<div className="dropdown-divider"></div>
-													<a className="dropdown-item" href="#">Something else here</a>
+													<a className="dropdown-item" href="#" role="button" data-bs-toggle="collapse" data-bs-target="#collapseHistoryAcc">Collapse</a>
 												</div>
 											</div>
 										</div>
 										<div className="card-body">
-											<Line data={historyAccessed} />
+											<div id="collapseHistoryAcc" className="accordion-collapse collapse show" aria-labelledby="headingOne" data-bs-parent="#accordionExample">
+												<div className="accordion-body">
+													<Line data={historyAccessed} />
+												</div>
+										 </div>
 										</div>
 									</div>
 									<div className="card shadow mb-4">
 										<div className="card-header py-3">
-											<h6 className="m-0 font-weight-bold text-primary">API responses code</h6>
+											<h5 className="m-0 fw-bold text-primary">API Responses Code</h5>
 										</div>
 										<div className="card-body">
-											{Object.keys(data.responseCode).map(e => (
+											{Object.entries(data.responseCode).sort(([, a], [, b]) => a - b).reverse().map(e => (
 												<>
-													<h4 className="small font-weight-bold">{e} <span className="float-right">{Math.round((data.responseCode[e] / data.count) * 100)}%</span></h4>
+													<h4 className="small font-weight-bold">{e[0]} <span className="float-end">{Math.round((e[1] / data.count) * 100)}%</span></h4>
 													<div className="progress mb-4">
-														<div className="progress-bar bg-success" role="progressbar" style={{ width: `${(data.responseCode[e] / data.count) * 100}%` }}	aria-valuenow={data.responseCode[e]} aria-valuemin={0} aria-valuemax={data.count}>{data.responseCode[e]}</div>
+														<div className="progress-bar bg-success" role="progressbar" style={{ width: `${(e[1] / data.count) * 100}%` }}	aria-valuenow={e[1]} aria-valuemin={0} aria-valuemax={data.count}>{e[1]}</div>
 													</div>
 												</>
 											))}
@@ -207,26 +145,22 @@ export default function Admin(data: Props) {
 											<h6 className="m-0 font-weight-bold text-primary">Most accessed endpoints</h6>
 											<div className="dropdown no-arrow">
 												<a className="dropdown-toggle" href="#" role="button" id="dropdownMenuLink"	data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-													<i className="fas fa-ellipsis-v fa-sm fa-fw text-gray-400"></i>
+													<FontAwesomeIcon icon={faEllipsis} />
 												</a>
 												<div className="dropdown-menu dropdown-menu-right shadow animated--fade-in" aria-labelledby="dropdownMenuLink">
-													<div className="dropdown-header">Dropdown Header:</div>
 													<a className="dropdown-item" href="#">Action</a>
 													<a className="dropdown-item" href="#">Another action</a>
 													<div className="dropdown-divider"></div>
-													<a className="dropdown-item" href="#">Something else here</a>
+													<a className="dropdown-item" href="#" role="button" data-bs-toggle="collapse" data-bs-target="#collapseMostAccessEnd">Collapse</a>
 												</div>
 											</div>
 										</div>
 										<div className="card-body">
-											<Pie data={mostAccessEndp} />
-											<div className="mt-4 text-center small">
-												{mostAccessEndp.labels.map(_ => (
-													<span className="mr-2" key={_}>
-														<i className="fas fa-circle" style={{ color: `${mostAccessEndp.datasets[0].backgroundColor[mostAccessEndp.labels.indexOf(_)]}` }}></i> {_}
-													</span>
-												))}
-											</div>
+											<div id="collapseMostAccessEnd" className="accordion-collapse collapse show" aria-labelledby="headingOne" data-bs-parent="#accordionExample">
+												<div className="accordion-body">
+													<Pie data={mostAccessEndp} />
+												</div>
+										 </div>
 										</div>
 									</div>
 								</div>
@@ -242,23 +176,24 @@ export default function Admin(data: Props) {
 // Fetch admin API usage
 export async function getServerSideProps(ctx: GetServerSidePropsContext) {
 	try {
+		// Fetch data from API
 		const obj = {
 			method: 'get',
 			headers: {
 				'cookie': ctx.req.headers.cookie as string,
 			},
 		};
-		const [res, res1, res2] = await Promise.all([fetch(`${process.env.BACKEND_URL}api/stats/history/responseCode`, obj),
-			fetch(`${process.env.BACKEND_URL}api/stats/history`, obj),
-			fetch(`${process.env.BACKEND_URL}api/stats/users`, obj),
+		const [res1, res2, res3] = await Promise.all([fetch(`${process.env.BACKEND_URL}api/session/admin/json`, obj),
+			fetch(`${process.env.BACKEND_URL}api/session/stats/system`, obj),
+			fetch(`${process.env.BACKEND_URL}api/session/admin/history?time=year`, obj),
 		]);
+		const { historyCount, userCount, responseCodes } = await res1.json();
+		const { uptime, current: { memory: { USAGE } } } = await res2.json();
+		const { months } = await res3.json();
 
-		const { history: h } = await res.json();
-		const { history, total } = await res1.json();
-		const { users } = await res2.json();
-
-		return { props: { count: total, responseCode: h, userCount: users.length, totalHistory: history } };
+		return { props: { count: historyCount, responseCode: responseCodes, userCount, uptime, memoryUsage: USAGE, monthUsage: months } };
 	} catch (err) {
-		return { props: { count: 0, responseCode: { '0': 0 }, userCount: 0, totalHistory: [], error: 'API server currently unavailable' } };
+		console.log(err);
+		return { props: { count: 0, responseCode: { '0': 0 }, userCount: 0, error: 'API server currently unavailable' } };
 	}
 }

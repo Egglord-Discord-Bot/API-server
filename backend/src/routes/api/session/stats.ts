@@ -1,8 +1,6 @@
 import { Router } from 'express';
 import type Client from '../../../helpers/Client';
 import { isAdmin } from '../../../middleware/middleware';
-import type { swaggerJsdocType } from '../../../types/';
-import swaggerJsdoc from 'swagger-jsdoc';
 const router = Router();
 
 
@@ -32,29 +30,6 @@ export function run(client: Client) {
 		} catch (err) {
 			console.log(err);
 			res.json({ users: [], total: 0 });
-		}
-	});
-
-	router.get('/endpoints', isAdmin, async (_req, res) => {
-		try {
-			const endpoints = await client.EndpointManager.fetchEndpointData();
-			const openapiSpecification = swaggerJsdoc({
-				failOnErrors: true,
-				definition: {
-					openapi: '3.0.0',
-					info: {
-						title: 'Hello World',
-						version: '1.0.0',
-					},
-				},
-				apis: ['./src/routes/api/*.ts'],
-			}) as swaggerJsdocType;
-			const el = endpoints.map(e => ({ ...e, data: openapiSpecification.paths[`${e.name.replace('/api', '')}`]?.get }));
-
-			res.json({ endpoints: el });
-		} catch (err) {
-			console.log(err);
-			res.json({ endpoints: [] });
 		}
 	});
 
@@ -92,15 +67,5 @@ export function run(client: Client) {
 		}
 	});
 
-	router.get('/system', isAdmin, async (_req, res) => {
-		const [systemHis, cpu, disk] = await Promise.all([client.SystemHistoryManager.fetchSystemHistoryData(), client.SystemHistoryManager.calculateCPUUsage(), client.SystemHistoryManager.calculateDiskUsage()]);
-		const memory = client.SystemHistoryManager.calculateMemoryUsage();
-
-		res.json({
-			current: { memory, cpu, disk },
-			history: systemHis,
-			uptime: process.uptime(),
-		});
-	});
 	return router;
 }

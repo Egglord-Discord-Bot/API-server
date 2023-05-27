@@ -2,12 +2,15 @@ import Header from '../../components/header';
 import Sidebar from '../../components/navbar/sidebar';
 import AdminNavbar from '../../components/navbar/admin';
 import Error from '../../components/error';
+import InfoPill from '../../components/dashboard/infoPill';
 import { useSession } from 'next-auth/react';
 import type { User } from '../../types/next-auth';
 import { useState, useEffect } from 'react';
 import type { GetServerSidePropsContext } from 'next';
 import { formatBytes } from '../../utils/functions';
 import { Line } from 'react-chartjs-2';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faDownload, faCalendar, faDollarSign, faComments } from '@fortawesome/free-solid-svg-icons';
 import { Chart as ChartJS, ArcElement, Tooltip, Legend,	CategoryScale, LinearScale, PointElement, LineElement, Title } from 'chart.js';
 ChartJS.register(ArcElement, Tooltip, Legend, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
 
@@ -42,7 +45,7 @@ export default function AdminSystem({ history: h, current: c, error }: Props) {
 	useEffect(() => {
 		const timer = setInterval(async () => {
 			try {
-				const res = await fetch('/api/stats/system', {
+				const res = await fetch('/api/session/admin/system', {
 					method: 'get',
 					headers: {
 						'cookie': '',
@@ -59,6 +62,7 @@ export default function AdminSystem({ history: h, current: c, error }: Props) {
 
 		return () => clearInterval(timer);
 	}, []);
+	if (status == 'loading') return null;
 
 	// Set CPU history data
 	const cpuHistory = {
@@ -84,24 +88,12 @@ export default function AdminSystem({ history: h, current: c, error }: Props) {
 				backgroundColor: 'rgba(255, 99, 132, 0.5)',
 			},
 		],
-		options: {
-			scales: {
-				y: {
-					beginAtZero: true,
-					ticks: {
-						callback: formatBytes,
-					},
-				},
-			},
-		},
 	};
 
-
-	if (status == 'loading') return null;
 	return (
 		<>
 			<Header />
-			<div id="wrapper">
+			<div className="wrapper">
 				<Sidebar activeTab='system'/>
 				<div id="content-wrapper" className="d-flex flex-column">
 					<div id="content">
@@ -113,26 +105,12 @@ export default function AdminSystem({ history: h, current: c, error }: Props) {
 							<div className="d-sm-flex align-items-center justify-content-between mb-4">
 								<h1 className="h3 mb-0 text-gray-800">System Dashboard</h1>
 								<a href="#" className="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm">
-									<i className="fas fa-download fa-sm text-white-50"></i> Generate Report
+									<FontAwesomeIcon icon={faDownload} /> Generate Report
 								</a>
 							</div>
 							<div className="row">
 								<div className="col-xl-3 col-md-6 mb-4">
-									<div className="card border-left-primary shadow h-100 py-2">
-										<div className="card-body">
-											<div className="row no-gutters align-items-center">
-												<div className="col mr-2">
-													<p className="text-xs font-weight-bold text-primary text-uppercase mb-1">
-														CPU usage
-													</p>
-													<p className="h5 mb-0 font-weight-bold text-gray-800">{current.cpu}%</p>
-												</div>
-												<div className="col-auto">
-													<i className="fas fa-calendar fa-2x text-gray-300"></i>
-												</div>
-											</div>
-										</div>
-									</div>
+									<InfoPill title={'CPU Usage'} text={`${current.cpu}%`} icon={faCalendar}/>
 								</div>
 								<div className="col-xl-3 col-md-6 mb-4">
 									<div className="card border-left-success shadow h-100 py-2">
@@ -156,28 +134,14 @@ export default function AdminSystem({ history: h, current: c, error }: Props) {
 													</div>
 												</div>
 												<div className="col-auto">
-													<i className="fas fa-dollar-sign fa-2x text-gray-300"></i>
+													<FontAwesomeIcon icon={faDollarSign} />
 												</div>
 											</div>
 										</div>
 									</div>
 								</div>
 								<div className="col-xl-3 col-md-6 mb-4">
-									<div className="card border-left-primary shadow h-100 py-2">
-										<div className="card-body">
-											<div className="row no-gutters align-items-center">
-												<div className="col mr-2">
-													<p className="text-xs font-weight-bold text-primary text-uppercase mb-1">
-														Network
-													</p>
-													<p className="h5 mb-0 font-weight-bold text-gray-800">0{/* formatBytes(sysData[0].NETWORK) */}</p>
-												</div>
-												<div className="col-auto">
-													<i className="fas fa-calendar fa-2x text-gray-300"></i>
-												</div>
-											</div>
-										</div>
-									</div>
+									<InfoPill title={'Network'} text={formatBytes(0)} icon={faCalendar}/>
 								</div>
 								<div className="col-xl-3 col-md-6 mb-4">
 									<div className="card border-left-warning shadow h-100 py-2">
@@ -201,7 +165,7 @@ export default function AdminSystem({ history: h, current: c, error }: Props) {
 													</div>
 												</div>
 												<div className="col-auto">
-													<i className="fas fa-comments fa-2x text-gray-300"></i>
+													<FontAwesomeIcon icon={faComments} />
 												</div>
 											</div>
 										</div>
@@ -249,7 +213,7 @@ export default function AdminSystem({ history: h, current: c, error }: Props) {
 											</div>
 										</div>
 										<div className="card-body">
-											<Line data={memoryHistory} options={memoryHistory.options}/>
+											<Line data={memoryHistory} />
 										</div>
 									</div>
 								</div>
@@ -265,7 +229,7 @@ export default function AdminSystem({ history: h, current: c, error }: Props) {
 // Fetch basic API usage
 export async function getServerSideProps(ctx: GetServerSidePropsContext) {
 	try {
-		const res = await fetch(`${process.env.BACKEND_URL}api/stats/system`, {
+		const res = await fetch(`${process.env.BACKEND_URL}api/session/admin/system`, {
 			method: 'get',
 			headers: {
 				'cookie': ctx.req.headers.cookie as string,

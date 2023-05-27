@@ -159,6 +159,22 @@ export default class userHistoryManager {
 	}
 
 	/**
+		* Fetch a specific's user total history count
+		* @param {number} month The userId for getting their user history count
+		* @returns The total number of entries by a user
+	*/
+	async fetchEndpointByMonth(month: number) {
+		return client.userHistory.count({
+			where: {
+				createdAt: {
+					gte: new Date(`${new Date().getFullYear()}-${month}-1`),
+					lte: new Date(`${new Date().getFullYear()}-${month}-${32 - new Date(new Date().getFullYear(), month + 1, 32).getDate()}`),
+				},
+			},
+		});
+	}
+
+	/**
 		* Returns the total number of entries
 		* @returns The total number of entries
 	*/

@@ -5,17 +5,81 @@ import Error from '../../components/error';
 import { useSession } from 'next-auth/react';
 import type { User } from '../../types/next-auth';
 import type { GetServerSidePropsContext } from 'next';
+import type { SyntheticEvent } from 'react';
+import { useState } from 'react';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faAnglesLeft, faAnglesRight, faUsers, faBan, faDollarSign, faUserCheck, faSearch } from '@fortawesome/free-solid-svg-icons';
+import InfoPill from '../../components/dashboard/infoPill';
 
 interface Props {
 	users: Array<User>
 	error?: string
+	total: number
+	admin: number
+	premium: number
+	block: number
 }
 type userUpdateEnum = 'block' | 'premium' | 'admin'
+type userTitle = null | 'name' | 'id' | 'join' | 'block' | 'premium' | 'admin'
+type SortOrder = 'ascn' | 'dscn';
 
-
-export default function AdminUsers({ users, error }: Props) {
+export default function AdminUsers({ users: userList, error, total, admin, premium, block }: Props) {
 	const { data: session, status } = useSession();
+	const [users, setUsers] = useState<Array<User>>(userList);
+	const [page, setPage] = useState(0);
+	const [sort, setSort] = useState<userTitle>(null);
+	const [sortOrder, setSortOrder] = useState<SortOrder>('ascn');
 	if (status == 'loading') return null;
+
+	function updateDOM(e: SyntheticEvent) {
+		const el = e.target as HTMLInputElement;
+		if (el) {
+			if (el.value.length > 0) {
+				setUsers(userList.filter(i => i.username.startsWith(el.value)));
+			} else {
+				setUsers(userList);
+			}
+		}
+	}
+
+	async function fetchUsers(p: number) {
+		try {
+			const res = await fetch(`/api/session/stats/users?page=${p}`, {
+				method: 'get',
+				headers: {
+					'Accept': 'application/json',
+					'Content-Type': 'application/json',
+				},
+			});
+
+			const data = await res.json();
+			setUsers(data.users);
+			setPage(p);
+		} catch (err) {
+			return { props: { users: [], error: 'API server currently unavailable' } };
+		}
+	}
+
+	function toggle(name: userTitle) {
+		setSortOrder(sortOrder == 'ascn' ? 'dscn' : 'ascn');
+		switch(name) {
+			case 'name' : {
+				if (sortOrder == 'ascn') {
+					setUsers(userList.sort((a, b) => (a.username ?? '').localeCompare(b.username)));
+				} else {
+					setUsers(userList.sort((a, b) => (a.username ?? '').localeCompare(b.username)));
+				}
+				setSort(name);
+			}
+			case 'id': {
+				if (sortOrder == 'ascn') {
+					setUsers(userList.sort((a, b) => a.id > b.id ? -1 : 1));
+				} else {
+					setUsers(userList.sort((a, b) => a.id < b.id ? -1 : 1));
+				}
+			}
+		}
+	}
 
 	async function updateUser(type: userUpdateEnum, userId: string) {
 		// Get the type and what value it should be
@@ -47,7 +111,7 @@ export default function AdminUsers({ users, error }: Props) {
 	return (
 		<>
 			<Header />
-			<div id="wrapper">
+			<div className="wrapper">
 				<Sidebar activeTab='users'/>
 				<div id="content-wrapper" className="d-flex flex-column">
 					<div id="content">
@@ -64,68 +128,16 @@ export default function AdminUsers({ users, error }: Props) {
 							</div>
 							<div className="row">
 								<div className="col-xl-3 col-md-6 mb-4">
-									<div className="card border-left-primary shadow h-100 py-2">
-										<div className="card-body">
-											<div className="row no-gutters align-items-center">
-												<div className="col mr-2">
-													<div className="text-xs font-weight-bold text-primary text-uppercase mb-1">
-														Total Users</div>
-													<div className="h5 mb-0 font-weight-bold text-gray-800">{users.length}</div>
-												</div>
-												<div className="col-auto">
-													<i className="fas fa-users fa-2x text-gray-300"></i>
-												</div>
-											</div>
-										</div>
-									</div>
+									<InfoPill title={'Total Users'} text={`${total}`} icon={faUsers} />
 								</div>
 								<div className="col-xl-3 col-md-6 mb-4">
-									<div className="card border-left-danger shadow h-100 py-2">
-										<div className="card-body">
-											<div className="row no-gutters align-items-center">
-												<div className="col mr-2">
-													<div className="text-xs font-weight-bold text-danger text-uppercase mb-1">
-														Blocked users</div>
-													<div className="h5 mb-0 font-weight-bold text-gray-800">{users.filter(u => u.isBlocked).length}</div>
-												</div>
-												<div className="col-auto">
-													<i className="fas fa-ban fa-2x text-gray-300"></i>
-												</div>
-											</div>
-										</div>
-									</div>
+									<InfoPill title={'Blocked users'} text={`${block}`} icon={faBan} />
 								</div>
 								<div className="col-xl-3 col-md-6 mb-4">
-									<div className="card border-left-success shadow h-100 py-2">
-										<div className="card-body">
-											<div className="row no-gutters align-items-center">
-												<div className="col mr-2">
-													<div className="text-xs font-weight-bold text-success text-uppercase mb-1">
-                            Premium users</div>
-													<div className="h5 mb-0 font-weight-bold text-gray-800">{users.filter(u => u.isPremium).length}</div>
-												</div>
-												<div className="col-auto">
-													<i className="fas fa-dollar-sign fa-2x text-gray-300"></i>
-												</div>
-											</div>
-										</div>
-									</div>
+									<InfoPill title={'Premium users'} text={`${premium}`} icon={faDollarSign} />
 								</div>
 								<div className="col-xl-3 col-md-6 mb-4">
-									<div className="card border-left-warning shadow h-100 py-2">
-										<div className="card-body">
-											<div className="row no-gutters align-items-center">
-												<div className="col mr-2">
-													<div className="text-xs font-weight-bold text-warning text-uppercase mb-1">
-														Admin users</div>
-													<div className="h5 mb-0 font-weight-bold text-gray-800">{users.filter(u => u.isAdmin).length}</div>
-												</div>
-												<div className="col-auto">
-													<i className="fas fa-user-check fa-2x text-gray-300"></i>
-												</div>
-											</div>
-										</div>
-									</div>
+									<InfoPill title={'Admin users'} text={`${admin}`} icon={faUserCheck} />
 								</div>
 							</div>
 							<div className="card shadow mb-4">
@@ -134,23 +146,22 @@ export default function AdminUsers({ users, error }: Props) {
 								</div>
 								<div className="card-body">
 									<form	className="d-none d-sm-inline-block form-inline mr-auto ml-md-3 my-2 my-md-0 mw-100">
-										<div className="input-group">
-											<input type="text" className="form-control bg-light border-0 small" placeholder="Search for..." aria-label="Search" aria-describedby="basic-addon2" />
-											<div className="input-group-append">
-												<button className="btn btn-primary" type="button">
-													<i className="fas fa-search fa-sm"></i>
-												</button>
-											</div>
+										<div className="input-group mb-3">
+											<input type="text" className="form-control  bg-light border-0 small" placeholder="Search for..." aria-label="Recipient's username" aria-describedby="basic-addon2" />
+											<button className="btn btn-outline-primary" type="button">
+												<FontAwesomeIcon icon={faSearch} />
+											</button>
 										</div>
 									</form>
 									<table className="table" style={{ paddingTop: '10px' }}>
 										<thead>
 											<tr>
-												<th scope="col">ID</th>
-												<th scope="col">Name</th>
-												<th scope="col">Blocked</th>
-												<th scope="col">Premium</th>
-												<th scope="col">Admin</th>
+												<th scope="col" onClick={() => toggle('id')}>ID</th>
+												<th onClick={() => toggle('name')}>Name</th>
+												<th>Joined</th>
+												<th>Blocked</th>
+												<th>Premium</th>
+												<th>Admin</th>
 											</tr>
 										</thead>
 										<tbody>
@@ -158,6 +169,7 @@ export default function AdminUsers({ users, error }: Props) {
 												<tr key={u.id}>
 													<th scope="row">{u.id}</th>
 													<th>{u.username}#{u.discriminator}</th>
+													<th>{new Date(u.createdAt).toLocaleString('en-US')}</th>
 													<td>
 														<input className="form-check-input" type="checkbox" onChange={() => updateUser('block', u.id)} id={`${u.id}_block`} defaultChecked={u.isBlocked} />
 														<span id={`${u.id}_block_text`}>{u.isBlocked ? 'Yes' : 'No'}</span>
@@ -174,6 +186,24 @@ export default function AdminUsers({ users, error }: Props) {
 											))}
 										</tbody>
 									</table>
+									<nav aria-label="Page navigation example">
+										<p style={{ display: 'inline' }}>Showing results {users.length < 50 ? users.length : 50} of {users.length}</p>
+										<ul className="pagination justify-content-center">
+											<li className="page-item">
+												<a className="page-link" onClick={() => fetchUsers(page == 0 ? page : page - 1)} href="#">
+													<FontAwesomeIcon icon={faAnglesLeft} />
+												</a>
+											</li>
+											<li className="page-item">
+												<p className="page-link">{page}</p>
+											</li>
+											<li className="page-item">
+												<a className="page-link" onClick={() => fetchUsers(users.length >= 10 ? page + 1 : page)} href="#">
+													<FontAwesomeIcon icon={faAnglesRight} />
+												</a>
+											</li>
+										</ul>
+									</nav>
 								</div>
 							</div>
 						</div>
@@ -187,15 +217,15 @@ export default function AdminUsers({ users, error }: Props) {
 // Fetch basic API usage
 export async function getServerSideProps(ctx: GetServerSidePropsContext) {
 	try {
-		const res = await fetch(`${process.env.BACKEND_URL}api/stats/users`, {
+		const res = await fetch(`${process.env.BACKEND_URL}api/session/admin/users/json`, {
 			method: 'get',
 			headers: {
 				'cookie': ctx.req.headers.cookie as string,
 			},
 		});
 
-		const data = await res.json();
-		return { props: { users: data.users } };
+		const { users, total, admin, premium, block } = await res.json();
+		return { props: { users, total, admin, premium, block } };
 	} catch (err) {
 		return { props: { users: [], error: 'API server currently unavailable' } };
 	}

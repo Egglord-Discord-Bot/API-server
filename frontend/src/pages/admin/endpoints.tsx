@@ -7,24 +7,45 @@ import type { User } from '../../types/next-auth';
 import type { Endpoint, UserHistory } from '../../types/types';
 import type { GetServerSidePropsContext } from 'next';
 import type { SyntheticEvent } from 'react';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faAnglesLeft, faAnglesRight, faSearch } from '@fortawesome/free-solid-svg-icons';
 import { useState } from 'react';
 
 interface Props {
   endpointData: Array<Endpoint>
   history: Array<UserHistory>
+  total: number
   error?: string
 }
 
-export default function AdminEndpoints({ endpointData, history, error }: Props) {
+export default function AdminEndpoints({ endpointData, history: h, error, total }: Props) {
 	const { data: session, status } = useSession();
-	const [his, setHis] = useState<Array<UserHistory>>(history);
-
+	const [history, setHistory] = useState<Array<UserHistory>>(h);
+	const [page, setPage] = useState(0);
 	if (status == 'loading') return null;
 
 	function updateDOM(e: SyntheticEvent) {
 		const el = e.target as HTMLInputElement;
 		if (el) {
-			setHis(history.filter(i => i.endpoint.startsWith(el.value)));
+			setHistory(history.filter(i => i.endpoint.startsWith(el.value)));
+		}
+	}
+
+	async function fetchHistory(p: number) {
+		try {
+			const res = await fetch(`/api/session/stats/history?page=${p}`, {
+				method: 'get',
+				headers: {
+					'Accept': 'application/json',
+					'Content-Type': 'application/json',
+				},
+			});
+
+			const data = await res.json();
+			setHistory(data.history);
+			setPage(p);
+		} catch (err) {
+			return { props: { users: [], error: 'API server currently unavailable' } };
 		}
 	}
 
@@ -66,7 +87,7 @@ export default function AdminEndpoints({ endpointData, history, error }: Props) 
 	return (
 		<>
 			<Header />
-			<div id="wrapper">
+			<div className="wrapper">
 				<Sidebar activeTab='endpoint'/>
 				<div id="content-wrapper" className="d-flex flex-column">
 					<div id="content">
@@ -85,7 +106,7 @@ export default function AdminEndpoints({ endpointData, history, error }: Props) 
 								<div className="col-xl-6 col-lg-12">
 									<div className="card shadow mb-4">
 										<div className="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-											<h6 className="m-0 font-weight-bold text-primary">Total endpoints ({endpointData.length}):</h6>
+											<h5 className="m-0 fw-bold text-primary">Total endpoints ({endpointData.length}):</h5>
 										</div>
 										<div className="card-body">
 											<table className="table">
@@ -135,12 +156,14 @@ export default function AdminEndpoints({ endpointData, history, error }: Props) 
 								<div className="col-xl-6 col-lg-6">
 									<div className="card shadow mb-4">
 										<div className="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-											<h6 className="m-0 font-weight-bold text-primary">Total API usage ({history.length}):</h6>
+											<h5 className="m-0 fw-bold text-primary">Total API usage ({total}):</h5>
 										</div>
 										<div className="card-body">
 											<div className="input-group mb-3">
 												<input type="text" className="form-control" placeholder="Endpoint" aria-label="Endpoint" aria-describedby="basic-addon2" onChange={updateDOM}/>
-												<span className="input-group-text" id="basic-addon2"><i className="fas fa-search fa-sm"></i></span>
+												<span className="input-group-text" id="basic-addon2">
+													<FontAwesomeIcon icon={faSearch} />
+												</span>
 											</div>
 											<table className="table">
 												<thead>
@@ -152,36 +175,35 @@ export default function AdminEndpoints({ endpointData, history, error }: Props) 
 													</tr>
 												</thead>
 												<tbody >
-													{his.map(h => (
-														<tr key={h.id}>
-															<th scope="row">{h.userId}</th>
-															<td>{h.endpoint}</td>
-															<td>{new Date(h.createdAt).toDateString()} {new Date(h.createdAt).toLocaleTimeString('en-US')}</td>
+													{history.map(hi => (
+														<tr key={hi.id}>
+															<th scope="row">{hi.userId}</th>
+															<td>{hi.endpoint}</td>
+															<td>{new Date(hi.createdAt).toDateString()} {new Date(hi.createdAt).toLocaleTimeString('en-US')}</td>
 															<td>
-																<input className="form-check-input" type="checkbox" id="flexCheckChecked" onClick={() => deleteEndpoint(h.id)} />
+																<input className="form-check-input" type="checkbox" id="flexCheckChecked" onClick={() => deleteEndpoint(hi.id)} />
 															</td>
 														</tr>
 													))}
 												</tbody>
 											</table>
 											<nav aria-label="Page navigation example">
-												<p style={{ display: 'inline' }}>Showing results {his.length < 10 ? his.length : 10} of {his.length}</p>
-												{/* NONE FUNCTION CURRENTLY */}
+                      	<p style={{ display: 'inline' }}>Showing results {(page < 1 ? 0 : page) * 50} - {(page * 50) + (history.length < 50 ? history.length : 50)} of {total}</p>
 												<ul className="pagination justify-content-center">
-													<li className="page-item">
-														<a className="page-link" href="#">
-															<i className="fa-solid fa-angles-left"></i>
-														</a>
-													</li>
-													<li className="page-item">
-														<a className="page-link" href="#">1</a>
-													</li>
-													<li className="page-item">
-														<a className="page-link" href="#">
-															<i className="fa-solid fa-angles-right"></i>
-														</a>
-													</li>
-												</ul>
+    											<li className="page-item">
+    												<a className="page-link" onClick={() => fetchHistory(page == 0 ? page : page - 1)} href="#">
+    													<FontAwesomeIcon icon={faAnglesLeft} />
+    												</a>
+    											</li>
+    											<li className="page-item">
+    												<p className="page-link">{page}</p>
+    											</li>
+    											<li className="page-item">
+    												<a className="page-link" onClick={() => fetchHistory(endpointData.length >= 50 ? page + 1 : page)} href="#">
+    													<FontAwesomeIcon icon={faAnglesRight} />
+    												</a>
+    											</li>
+    										</ul>
 											</nav>
 										</div>
 									</div>
@@ -199,25 +221,18 @@ export default function AdminEndpoints({ endpointData, history, error }: Props) 
 // Fetch endpoints
 export async function getServerSideProps(ctx: GetServerSidePropsContext) {
 	try {
-		// Fetch endpoint data
-		const res = await fetch(`${process.env.BACKEND_URL}api/stats/endpoints`, {
-			method: 'get',
-			headers: {
-				'cookie': ctx.req.headers.cookie as string,
-			},
-		});
-		const { endpoints: endpointData } = await res.json();
+		const obj = {
+  			method: 'get',
+  			headers: {
+  				'cookie': ctx.req.headers.cookie as string,
+  			},
+		};
 
-		// Fetch total history
-		const res1 = await fetch(`${process.env.BACKEND_URL}api/stats/history`, {
-			method: 'get',
-			headers: {
-				'cookie': ctx.req.headers.cookie as string,
-			},
-		});
-		const { history } = await res1.json();
+		const [res1, res2] = await Promise.all([fetch(`${process.env.BACKEND_URL}api/session/admin/endpoints/json`, obj), fetch(`${process.env.BACKEND_URL}api/session/stats/history`, obj)]);
+		const { endpoints: endpointData } = await res1.json();
+		const { history, total } = await res2.json();
 
-		return { props: { endpointData, history } };
+		return { props: { endpointData, history, total } };
 	} catch (err) {
 		return { props: { endpointData: [], history: [], error: 'API server currently unavailable' } };
 	}

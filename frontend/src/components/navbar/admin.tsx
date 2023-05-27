@@ -2,6 +2,8 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { signOut } from 'next-auth/react';
 import type { User } from '../../types/next-auth';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faSearch, faBell, faFileAlt, faCogs, faSignOutAlt } from '@fortawesome/free-solid-svg-icons';
 
 interface Props {
 	user: User
@@ -9,52 +11,49 @@ interface Props {
 
 export default function Admin({ user }: Props) {
 	return (
-		<nav className="navbar navbar-expand navbar-light bg-white topbar mb-4 static-top shadow">
-			<button id="sidebarToggleTop" className="btn btn-link d-md-none rounded-circle mr-3">
-				<i className="fa fa-bars"></i>
-			</button>
+		<nav className="navbar navbar-expand navbar-light bg-white topbar mb-4 static-top shadow" style={{ paddingLeft:'5px' }}>
 			<form	className="d-none d-sm-inline-block form-inline mr-auto ml-md-3 my-2 my-md-0 mw-100 navbar-search">
-				<div className="input-group">
-					<input type="text" className="form-control bg-light border-0 small" placeholder="Search for..." aria-label="Search" aria-describedby="basic-addon2" />
-					<div className="input-group-append">
-						<button className="btn btn-primary" type="button">
-							<i className="fas fa-search fa-sm"></i>
-						</button>
-					</div>
+				<div className="input-group mb-3">
+					<input type="text" className="form-control  bg-light border-0 small" placeholder="Search for..." aria-label="Recipient's username" aria-describedby="basic-addon2" />
+					<button className="btn btn-outline-primary" type="button">
+						<FontAwesomeIcon icon={faSearch} />
+					</button>
 				</div>
 			</form>
-			<ul className="navbar-nav ml-auto">
+			<ul className="navbar-nav me-auto mb-2 mb-lg-0">
 				<li className="nav-item dropdown no-arrow d-sm-none">
 					<a className="nav-link dropdown-toggle" href="#" id="searchDropdown" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-						<i className="fas fa-search fa-fw"></i>
+						<FontAwesomeIcon icon={faSearch} />
 					</a>
 					<div className="dropdown-menu dropdown-menu-right p-3 shadow animated--grow-in" aria-labelledby="searchDropdown">
 						<form className="form-inline mr-auto w-100 navbar-search">
-							<div className="input-group">
-								<input type="text" className="form-control bg-light border-0 small" placeholder="Search for..." aria-label="Search"	aria-describedby="basic-addon2" />
-								<div className="input-group-append">
-									<button className="btn btn-primary" type="button">
-										<i className="fas fa-search fa-sm"></i>
-									</button>
-								</div>
+							<div className="input-group mb-3">
+								<input type="text" className="form-control  bg-light border-0 small" placeholder="Search for..." aria-label="Recipient's username" aria-describedby="basic-addon2" />
+								<button className="btn btn-outline-primary" type="button">
+									<FontAwesomeIcon icon={faSearch} />
+								</button>
 							</div>
 						</form>
 					</div>
 				</li>
+			</ul>
+			<ul className="navbar-nav ml-auto">
 				<li className="nav-item dropdown no-arrow mx-1">
-					<a className="nav-link dropdown-toggle" href="#" id="alertsDropdown" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-						<i className="fas fa-bell fa-fw"></i>
-						<span className="badge badge-danger badge-counter">3+</span>
+					<a type="button" className="nav-link dropdown-toggle position-relative" id="alertsDropdown" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+						<FontAwesomeIcon icon={faBell} />
+						<span className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+    					3+
+							<span className="visually-hidden">unread messages</span>
+						</span>
 					</a>
-					<div className="dropdown-list dropdown-menu dropdown-menu-end shadow animated--grow-in"
-						aria-labelledby="alertsDropdown">
+					<div className="dropdown-menu dropdown-menu-end shadow animated--grow-in" aria-labelledby="alertsDropdown">
 						<h6 className="dropdown-header">
               Alerts Center
 						</h6>
 						<a className="dropdown-item d-flex align-items-center" href="#">
-							<div className="mr-3">
+							<div className="me-3">
 								<div className="icon-circle bg-primary">
-									<i className="fas fa-file-alt text-white"></i>
+									<FontAwesomeIcon icon={faFileAlt} style={{ color: 'white' }}/>
 								</div>
 							</div>
 							<div>
@@ -68,18 +67,18 @@ export default function Admin({ user }: Props) {
 				<div className="topbar-divider d-none d-sm-block"></div>
 				<li className="nav-item dropdown no-arrow">
 					<a className="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-						<span className="mr-2 d-none d-lg-inline text-gray-600 small">{user.username}#{user.discriminator}</span>
-						<Image className="img-profile rounded-circle" src={user.avatar} alt="..." width={64} height={64}/>
+						<span className="mr-2 d-none d-lg-inline text-gray-600 small">{user.username}#{user.discriminator} </span>
+						<Image className="img-profile rounded-circle" src={user.avatar} alt="..." width={32} height={32}/>
 					</a>
 					<div className="dropdown-menu dropdown-menu-end shadow animated--grow-in" aria-labelledby="userDropdown">
-						<Link className="dropdown-item" href="/settings">
-							<i className="fas fa-cogs fa-sm fa-fw mr-2 text-gray-400"></i>
-              Settings
+						<Link className="dropdown-item" href="/settings" style={{ color: 'grey' }}>
+							<FontAwesomeIcon icon={faCogs} />
+							<span> Settings</span>
 						</Link>
 						<div className="dropdown-divider"></div>
-						<Link className="dropdown-item" onClick={() => signOut()} href="/">
-							<i className="fas fa-sign-out-alt fa-sm fa-fw mr-2 text-gray-400"></i>
-              Logout
+						<Link className="dropdown-item" onClick={() => signOut()} href="/" style={{ color: 'grey' }}>
+							<FontAwesomeIcon icon={faSignOutAlt} />
+							<span> Logout</span>
 						</Link>
 					</div>
 				</li>
