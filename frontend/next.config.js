@@ -7,7 +7,7 @@ const nextConfig = {
 		return [
 			{
 				source: '/api/:path((?!auth).*)',
-				destination: 'http://localhost:4500/api/:path*',
+				destination: `${process.env.BACKEND_URL}api/:path*`,
 			},
 		];
 	},
