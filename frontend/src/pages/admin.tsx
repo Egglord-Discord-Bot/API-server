@@ -184,7 +184,7 @@ export async function getServerSideProps(ctx: GetServerSidePropsContext) {
 			},
 		};
 		const [res1, res2, res3] = await Promise.all([fetch(`${process.env.BACKEND_URL}api/session/admin/json`, obj),
-			fetch(`${process.env.BACKEND_URL}api/session/stats/system`, obj),
+			fetch(`${process.env.BACKEND_URL}api/session/admin/system`, obj),
 			fetch(`${process.env.BACKEND_URL}api/session/admin/history?time=year`, obj),
 		]);
 		const { historyCount, userCount, responseCodes } = await res1.json();
