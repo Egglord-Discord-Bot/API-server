@@ -103,10 +103,11 @@ export default function AdminSystem({ history: h, current: c, error }: Props) {
 				<div id="content-wrapper" className="d-flex flex-column">
 					<div id="content">
 						<AdminNavbar user={session?.user as User}/>
-						<div className="container-fluid">
+						<div className="container-fluid" style={{ overflowY: 'scroll', maxHeight: 'calc(100vh - 64px)', minHeight: 'calc(100vh - 64px)' }}>
 							{error && (
 								<Error text={error} />
 							)}
+							&nbsp;
 							<div className="d-sm-flex align-items-center justify-content-between mb-4">
 								<h1 className="h3 mb-0 text-gray-800">System Dashboard</h1>
 								<a href="#" className="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm">

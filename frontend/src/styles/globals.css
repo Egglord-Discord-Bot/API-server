@@ -250,6 +250,10 @@ section {
   font-size: 14px;
 }
 
+.container-fluid {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
 /* ---------------------------------------------------
     SIDEBAR STYLE
 ----------------------------------------------------- */
@@ -265,7 +269,6 @@ section {
 }
 .sidebar {
     width: 6.5rem;
-    min-height: 100vh
 }
 
 .sidebar .nav-item {

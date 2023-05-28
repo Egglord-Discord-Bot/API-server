@@ -8,8 +8,6 @@ import { Pie, Line } from 'react-chartjs-2';
 import { useSession } from 'next-auth/react';
 import type { User } from '../types/next-auth';
 import type { GetServerSidePropsContext } from 'next';
-
-
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faDownload, faSignal, faUsers, faClock, faMemory, faEllipsis } from '@fortawesome/free-solid-svg-icons';
 import { Chart as ChartJS, ArcElement, Tooltip, Legend,	CategoryScale, LinearScale, PointElement, LineElement, Title } from 'chart.js';
@@ -42,30 +40,7 @@ export default function Admin(data: Props) {
 		],
 	};
 	const mostAccessEndp = { datasets: [] };
-	// Create the data object for "Most accessed endpoints"
-	/*
-	const counts: countEnum = {};
-	data.totalHistory.forEach((x) => counts[x.endpoint] = (counts[x.endpoint] || 0) + 1);
-	const mostAccessEndp = {
-		labels: Object.keys(counts).slice(0, 10).map(i => i.split('/').at(-1)),
-		datasets: [
-			{
-				label: 'Accessed',
-				data: Object.values(counts).slice(0, 10),
-				backgroundColor: [
-					'rgb(255, 159, 64)',
-					'rgb(255, 205, 86)',
-					'rgb(0, 163, 51)',
-					'rgb(54, 162, 235)',
-					'rgb(153, 102, 255)',
-					'rgb(201, 203, 207)',
-					'rgb(0,0,255)',
-				],
-				borderWidth: 1,
-			},
-		],
-	};
-	*/
+
 	return (
 		<>
 			<Header />
@@ -74,12 +49,13 @@ export default function Admin(data: Props) {
 				<div id="content-wrapper" className="d-flex flex-column">
 					<div id="content">
 						<AdminNavbar user={session?.user as User}/>
-						<div className="container-fluid">
+						<div className="container-fluid" style={{ overflowY: 'scroll', maxHeight: 'calc(100vh - 64px)' }}>
 							{data.error && (
 								<Error text={data.error} />
 							)}
+							&nbsp;
 							<div className="d-sm-flex align-items-center justify-content-between mb-4">
-								<h1 className="h3 mb-0 text-gray-800">Dashboard</h1>
+								<h1 className="h3 mb-0 text-gray-800">Admin Dashboard</h1>
 								<a href="#" className="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm">
 									<FontAwesomeIcon icon={faDownload} /> Generate Report
 								</a>
@@ -124,7 +100,7 @@ export default function Admin(data: Props) {
 										</div>
 									</div>
 									<div className="card shadow mb-4">
-										<div className="card-header py-3">
+										<div className="card-header py-3" style={{ height: '100%' }}>
 											<h5 className="m-0 fw-bold text-primary">API Responses Code</h5>
 										</div>
 										<div className="card-body">

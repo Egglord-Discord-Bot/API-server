@@ -101,6 +101,20 @@ export function run(client: Client) {
 		}
 	});
 
+	router.get('/user/history', async (_req, res) => {
+		type countEnum = { [key: string]: number }
+		const months: countEnum = { 'January': 0, 'February': 0, 'March': 0, 'April': 0, 'May': 0, 'June': 0, 'July': 0, 'August': 0, 'September': 0, 'October': 0, 'November': 0, 'December': 0 };
+		const d = new Date();
+		d.setDate(1);
+		for (let i = 0; i <= 11; i++) {
+			const y = Object.keys(months).at(d.getMonth());
+			const year = new Date().getFullYear() - (new Date().getMonth() <= i ? 1 : 0);
+			if (y !== undefined) months[y] = await client.UserManager.fetchUsersByMonth(d.getMonth() + 1, year);
+			d.setMonth(d.getMonth() - 1);
+		}
+		return res.json({ months });
+	});
+
 	router.get('/history', async (req, res) => {
 		type countEnum = { [key: string]: number }
 		const timeFrame = req.query.time as string;
@@ -112,7 +126,9 @@ export function run(client: Client) {
 				d.setDate(1);
 				for (let i = 0; i <= 11; i++) {
 					const y = Object.keys(months).at(d.getMonth());
-					if (y !== undefined) months[y] = await client.UserHistoryManager.fetchEndpointByMonth(d.getMonth() + 1);
+					// IF i is bigger than the current month then it has reached the previous year
+					const year = new Date().getFullYear() - (new Date().getMonth() <= i ? 1 : 0);
+					if (y !== undefined) months[y] = await client.UserHistoryManager.fetchEndpointsByMonth(d.getMonth() + 1, year);
 					d.setMonth(d.getMonth() - 1);
 				}
 				return res.json({ months });

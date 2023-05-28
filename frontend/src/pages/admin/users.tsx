@@ -3,14 +3,18 @@ import Sidebar from '../../components/navbar/sidebar';
 import AdminNavbar from '../../components/navbar/admin';
 import Error from '../../components/error';
 import { useSession } from 'next-auth/react';
+import InfoPill from '../../components/dashboard/infoPill';
 import type { User } from '../../types/next-auth';
 import type { GetServerSidePropsContext } from 'next';
 import type { SyntheticEvent } from 'react';
 import { useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faAnglesLeft, faAnglesRight, faUsers, faBan, faDollarSign, faUserCheck, faSearch } from '@fortawesome/free-solid-svg-icons';
-import InfoPill from '../../components/dashboard/infoPill';
+import { Pie, Line } from 'react-chartjs-2';
+import { faAnglesLeft, faAnglesRight, faUsers, faBan, faDollarSign, faUserCheck, faSearch, faDownload, faEllipsis } from '@fortawesome/free-solid-svg-icons';
+import { Chart as ChartJS, ArcElement, Tooltip, Legend,	CategoryScale, LinearScale, PointElement, LineElement, Title } from 'chart.js';
+ChartJS.register(ArcElement, Tooltip, Legend, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
 
+type countEnum = { [key: string]: number }
 interface Props {
 	users: Array<User>
 	error?: string
@@ -18,12 +22,13 @@ interface Props {
 	admin: number
 	premium: number
 	block: number
+	months: countEnum
 }
 type userUpdateEnum = 'block' | 'premium' | 'admin'
 type userTitle = null | 'name' | 'id' | 'join' | 'block' | 'premium' | 'admin'
 type SortOrder = 'ascn' | 'dscn';
 
-export default function AdminUsers({ users: userList, error, total, admin, premium, block }: Props) {
+export default function AdminUsers({ users: userList, error, total, admin, premium, block, months }: Props) {
 	const { data: session, status } = useSession();
 	const [users, setUsers] = useState<Array<User>>(userList);
 	const [page, setPage] = useState(0);
@@ -108,22 +113,57 @@ export default function AdminUsers({ users: userList, error, total, admin, premi
 		}
 	}
 
+	// Create data for pie chart
+	const graphData = {
+		labels: ['Normal', 'blocked', 'Admin', 'Premium'],
+		datasets: [
+			{
+				label: 'Accessed',
+				data: [(total - admin - premium - block), block, admin, premium],
+				backgroundColor: [
+					'rgb(255, 159, 64)',
+					'rgb(255, 205, 86)',
+					'rgb(0, 163, 51)',
+					'rgb(54, 162, 235)',
+					'rgb(153, 102, 255)',
+					'rgb(201, 203, 207)',
+					'rgb(0,0,255)',
+				],
+				borderWidth: 1,
+			},
+		],
+	};
+
+
+	const userJoinData = {
+		labels: Object.keys(months),
+		datasets: [
+			{
+				label: 'New accounts',
+				data: Object.values(months),
+				borderColor: 'rgb(255, 99, 132)',
+				backgroundColor: 'rgba(255, 99, 132, 0.5)',
+			},
+		],
+	};
+
 	return (
 		<>
 			<Header />
 			<div className="wrapper">
-				<Sidebar activeTab='users'/>
+				<Sidebar activeTab='dashboard'/>
 				<div id="content-wrapper" className="d-flex flex-column">
 					<div id="content">
 						<AdminNavbar user={session?.user as User}/>
-						<div className="container-fluid">
+						<div className="container-fluid" style={{ overflowY: 'scroll', maxHeight: 'calc(100vh - 64px)' }}>
 							{error && (
 								<Error text={error} />
 							)}
+							&nbsp;
 							<div className="d-sm-flex align-items-center justify-content-between mb-4">
-								<h1 className="h3 mb-0 text-gray-800">Users Dashboard</h1>
+								<h1 className="h3 mb-0 text-gray-800">Dashboard</h1>
 								<a href="#" className="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm">
-									<i className="fas fa-download fa-sm text-white-50"></i> Generate Report
+									<FontAwesomeIcon icon={faDownload} /> Generate Report
 								</a>
 							</div>
 							<div className="row">
@@ -140,6 +180,35 @@ export default function AdminUsers({ users: userList, error, total, admin, premi
 									<InfoPill title={'Admin users'} text={`${admin}`} icon={faUserCheck} />
 								</div>
 							</div>
+							<div className="row">
+								<div className="col-xl-8 col-lg-7">
+									<div className="card shadow mb-4">
+										<div className="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+											<h4 className="m-0 font-weight-bold text-primary">User Growth</h4>
+											<a type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseExample">
+												<FontAwesomeIcon icon={faEllipsis} />
+											</a>
+										</div>
+										<div className="card-body collapse show" id="collapseOne">
+											<Line data={userJoinData} />
+										</div>
+									</div>
+								</div>
+								<div className="col-xl-4 col-lg-5">
+									<div className="card shadow">
+										<div className="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+											<h4 className="m-0 font-weight-bold text-primary">User Make-up</h4>
+											<a type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseExample">
+												<FontAwesomeIcon icon={faEllipsis} />
+											</a>
+										</div>
+										<div className="card-body collapse show" id="collapseOne">
+											<Pie data={graphData} />
+										</div>
+									</div>
+								</div>
+							</div>
+							&nbsp;
 							<div className="card shadow mb-4">
 								<div className="card-header py-3 d-flex flex-row align-items-center justify-content-between">
 									<h6 className="m-0 font-weight-bold text-primary">Users</h6>
@@ -187,7 +256,7 @@ export default function AdminUsers({ users: userList, error, total, admin, premi
 										</tbody>
 									</table>
 									<nav aria-label="Page navigation example">
-										<p style={{ display: 'inline' }}>Showing results {users.length < 50 ? users.length : 50} of {users.length}</p>
+										<p style={{ display: 'inline' }}>Showing results {(page < 1 ? 0 : page) * 50} - {(page * 50) + (users.length < 50 ? users.length : 50)} of {total}</p>
 										<ul className="pagination justify-content-center">
 											<li className="page-item">
 												<a className="page-link" onClick={() => fetchUsers(page == 0 ? page : page - 1)} href="#">
@@ -198,7 +267,7 @@ export default function AdminUsers({ users: userList, error, total, admin, premi
 												<p className="page-link">{page}</p>
 											</li>
 											<li className="page-item">
-												<a className="page-link" onClick={() => fetchUsers(users.length >= 10 ? page + 1 : page)} href="#">
+												<a className="page-link" onClick={() => fetchUsers(users.length >= 50 ? page + 1 : page)} href="#">
 													<FontAwesomeIcon icon={faAnglesRight} />
 												</a>
 											</li>
@@ -217,15 +286,20 @@ export default function AdminUsers({ users: userList, error, total, admin, premi
 // Fetch basic API usage
 export async function getServerSideProps(ctx: GetServerSidePropsContext) {
 	try {
-		const res = await fetch(`${process.env.BACKEND_URL}api/session/admin/users/json`, {
+		const obj = {
 			method: 'get',
 			headers: {
 				'cookie': ctx.req.headers.cookie as string,
 			},
-		});
+		};
 
-		const { users, total, admin, premium, block } = await res.json();
-		return { props: { users, total, admin, premium, block } };
+		const [res1, res2] = await Promise.all([fetch(`${process.env.BACKEND_URL}api/session/admin/users/json`, obj),
+			fetch(`${process.env.BACKEND_URL}api/session/admin/user/history`, obj)]);
+
+
+		const { users, total, admin, premium, block } = await res1.json();
+		const { months } = await res2.json();
+		return { props: { users, total, admin, premium, block, months } };
 	} catch (err) {
 		return { props: { users: [], error: 'API server currently unavailable' } };
 	}

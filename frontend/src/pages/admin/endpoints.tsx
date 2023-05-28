@@ -8,7 +8,7 @@ import type { Endpoint, UserHistory } from '../../types/types';
 import type { GetServerSidePropsContext } from 'next';
 import type { SyntheticEvent } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faAnglesLeft, faAnglesRight, faSearch } from '@fortawesome/free-solid-svg-icons';
+import { faAnglesLeft, faAnglesRight, faSearch, faDownload } from '@fortawesome/free-solid-svg-icons';
 import { useState } from 'react';
 
 interface Props {
@@ -20,6 +20,7 @@ interface Props {
 
 export default function AdminEndpoints({ endpointData, history: h, error, total }: Props) {
 	const { data: session, status } = useSession();
+	const [endpoints, setEndpoints] = useState<Array<Endpoint>>(endpointData);
 	const [history, setHistory] = useState<Array<UserHistory>>(h);
 	const [page, setPage] = useState(0);
 	if (status == 'loading') return null;
@@ -30,6 +31,18 @@ export default function AdminEndpoints({ endpointData, history: h, error, total 
 			setHistory(history.filter(i => i.endpoint.startsWith(el.value)));
 		}
 	}
+
+	function searchEndpoint(e: SyntheticEvent) {
+		const el = e.target as HTMLInputElement;
+		if (el) {
+			if (el.value.length >= 1) {
+				setEndpoints(endpoints.filter(i => i.name.startsWith(el.value)));
+			} else {
+				setEndpoints(endpointData);
+			}
+		}
+	}
+
 
 	async function fetchHistory(p: number) {
 		try {
@@ -92,14 +105,15 @@ export default function AdminEndpoints({ endpointData, history: h, error, total 
 				<div id="content-wrapper" className="d-flex flex-column">
 					<div id="content">
 						<AdminNavbar user={session?.user as User}/>
-						<div className="container-fluid">
+						<div className="container-fluid" style={{ overflowY: 'scroll', maxHeight: 'calc(100vh - 64px)', minHeight: 'calc(100vh - 64px)' }}>
 							{error && (
 								<Error text={error} />
 							)}
+              &nbsp;
 							<div className="d-sm-flex align-items-center justify-content-between mb-4">
 								<h1 className="h3 mb-0 text-gray-800">Endpoint Dashboard</h1>
 								<a href="#" className="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm">
-									<i className="fas fa-download fa-sm text-white-50"></i> Generate Report
+									<FontAwesomeIcon icon={faDownload} /> Generate Report
 								</a>
 							</div>
 							<div className="row">
@@ -109,6 +123,12 @@ export default function AdminEndpoints({ endpointData, history: h, error, total 
 											<h5 className="m-0 fw-bold text-primary">Total endpoints ({endpointData.length}):</h5>
 										</div>
 										<div className="card-body">
+											<div className="input-group mb-3">
+												<input type="text" className="form-control" placeholder="Endpoint" aria-label="Endpoint" aria-describedby="basic-addon2" onChange={searchEndpoint}/>
+												<span className="input-group-text" id="basic-addon2">
+													<FontAwesomeIcon icon={faSearch} />
+												</span>
+											</div>
 											<table className="table">
 												<thead>
 													<tr>
@@ -120,7 +140,7 @@ export default function AdminEndpoints({ endpointData, history: h, error, total 
 													</tr>
 												</thead>
 												<tbody>
-													{endpointData.map(e => (
+													{endpoints.map(e => (
 														<tr key={e.name}>
 															<th scope="row" className="text-truncate">{e.name}</th>
 															<td>
@@ -153,7 +173,7 @@ export default function AdminEndpoints({ endpointData, history: h, error, total 
 										</div>
 									</div>
 								</div>
-								<div className="col-xl-6 col-lg-6">
+								<div className="col-xl-6 col-lg-12">
 									<div className="card shadow mb-4">
 										<div className="card-header py-3 d-flex flex-row align-items-center justify-content-between">
 											<h5 className="m-0 fw-bold text-primary">Total API usage ({total}):</h5>

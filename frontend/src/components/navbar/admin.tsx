@@ -3,7 +3,7 @@ import Image from 'next/image';
 import { signOut } from 'next-auth/react';
 import type { User } from '../../types/next-auth';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faSearch, faBell, faFileAlt, faCogs, faSignOutAlt } from '@fortawesome/free-solid-svg-icons';
+import { faBell, faFileAlt, faCogs, faSignOutAlt } from '@fortawesome/free-solid-svg-icons';
 
 interface Props {
 	user: User
@@ -11,31 +11,8 @@ interface Props {
 
 export default function Admin({ user }: Props) {
 	return (
-		<nav className="navbar navbar-expand navbar-light bg-white topbar mb-4 static-top shadow" style={{ paddingLeft:'5px' }}>
-			<form	className="d-none d-sm-inline-block form-inline mr-auto ml-md-3 my-2 my-md-0 mw-100 navbar-search">
-				<div className="input-group mb-3">
-					<input type="text" className="form-control  bg-light border-0 small" placeholder="Search for..." aria-label="Recipient's username" aria-describedby="basic-addon2" />
-					<button className="btn btn-outline-primary" type="button">
-						<FontAwesomeIcon icon={faSearch} />
-					</button>
-				</div>
-			</form>
+		<nav className="navbar navbar-expand navbar-light static-top shadow" style={{ paddingLeft:'5px' }}>
 			<ul className="navbar-nav me-auto mb-2 mb-lg-0">
-				<li className="nav-item dropdown no-arrow d-sm-none">
-					<a className="nav-link dropdown-toggle" href="#" id="searchDropdown" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-						<FontAwesomeIcon icon={faSearch} />
-					</a>
-					<div className="dropdown-menu dropdown-menu-right p-3 shadow animated--grow-in" aria-labelledby="searchDropdown">
-						<form className="form-inline mr-auto w-100 navbar-search">
-							<div className="input-group mb-3">
-								<input type="text" className="form-control  bg-light border-0 small" placeholder="Search for..." aria-label="Recipient's username" aria-describedby="basic-addon2" />
-								<button className="btn btn-outline-primary" type="button">
-									<FontAwesomeIcon icon={faSearch} />
-								</button>
-							</div>
-						</form>
-					</div>
-				</li>
 			</ul>
 			<ul className="navbar-nav ml-auto">
 				<li className="nav-item dropdown no-arrow mx-1">
