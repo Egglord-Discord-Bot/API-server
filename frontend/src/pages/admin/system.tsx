@@ -3,6 +3,7 @@ import Sidebar from '../../components/navbar/sidebar';
 import AdminNavbar from '../../components/navbar/admin';
 import Error from '../../components/error';
 import InfoPill from '../../components/dashboard/infoPill';
+import InfoPillProgress from '../../components/dashboard/infoPill-progress';
 import { useSession } from 'next-auth/react';
 import type { User } from '../../types/next-auth';
 import { useState, useEffect } from 'react';
@@ -10,9 +11,13 @@ import type { GetServerSidePropsContext } from 'next';
 import { formatBytes } from '../../utils/functions';
 import { Line } from 'react-chartjs-2';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faDownload, faCalendar, faDollarSign, faComments } from '@fortawesome/free-solid-svg-icons';
+import { faDownload, faMicrochip, faServer, faNetworkWired, faHardDrive } from '@fortawesome/free-solid-svg-icons';
+import TimeAgo from 'javascript-time-ago';
+import en from 'javascript-time-ago/locale/en';
 import { Chart as ChartJS, ArcElement, Tooltip, Legend,	CategoryScale, LinearScale, PointElement, LineElement, Title } from 'chart.js';
+
 ChartJS.register(ArcElement, Tooltip, Legend, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
+TimeAgo.addDefaultLocale(en);
 
 type historyData = {
 	memoryUsage: number
@@ -69,7 +74,7 @@ export default function AdminSystem({ history: h, current: c, error }: Props) {
 		labels: history.map(i => i.createdAt).reverse(),
 		datasets: [
 			{
-				label: 'Accessed',
+				label: 'CPU Usage',
 				data: history.map(i => i.cpuUsage).reverse(),
 				borderColor: 'rgb(255, 99, 132)',
 				backgroundColor: 'rgba(255, 99, 132, 0.5)',
@@ -82,7 +87,7 @@ export default function AdminSystem({ history: h, current: c, error }: Props) {
 		labels: history.map(i => i.createdAt).reverse(),
 		datasets: [
 			{
-				label: 'Accessed',
+				label: 'RAM usage',
 				data: history.map(i => i.memoryUsage).reverse(),
 				borderColor: 'rgb(255, 99, 132)',
 				backgroundColor: 'rgba(255, 99, 132, 0.5)',
@@ -110,73 +115,23 @@ export default function AdminSystem({ history: h, current: c, error }: Props) {
 							</div>
 							<div className="row">
 								<div className="col-xl-3 col-md-6 mb-4">
-									<InfoPill title={'CPU Usage'} text={`${current.cpu}%`} icon={faCalendar}/>
+									<InfoPill title={'CPU Usage'} text={`${current.cpu}%`} icon={faMicrochip}/>
 								</div>
 								<div className="col-xl-3 col-md-6 mb-4">
-									<div className="card border-left-success shadow h-100 py-2">
-										<div className="card-body">
-											<div className="row no-gutters align-items-center">
-												<div className="col mr-2">
-													<div className="text-xs font-weight-bold text-success text-uppercase mb-1">
-													RAM usage
-													</div>
-													<div className="row align-items-center">
-														<div className="col-auto">
-															<div className="h5 mb-0 mr-3 font-weight-bold text-gray-800">{formatBytes(current.memory.USAGE)}</div>
-														</div>
-														<div className="col">
-															<div className="progress progress-sm">
-																<div className="progress-bar bg-info" role="progressbar" style={{ width: `${Number(history[0]?.memoryUsage / current.memory.MAX).toFixed(2)}%` }} aria-valuenow={Math.round(history[0]?.memoryUsage / current.memory.MAX)} aria-valuemin={0}	aria-valuemax={current.memory.MAX}>
-																	{((history[0]?.memoryUsage ?? 0) / current.memory.MAX).toFixed(2)}%
-																</div>
-															</div>
-														</div>
-													</div>
-												</div>
-												<div className="col-auto">
-													<FontAwesomeIcon icon={faDollarSign} />
-												</div>
-											</div>
-										</div>
-									</div>
+									<InfoPillProgress title={'RAM usage'} text={`${formatBytes(current.memory.USAGE)}/${formatBytes(current.memory.MAX)}`} icon={faServer} max={current.memory.MAX} current={history[0]?.memoryUsage}/>
 								</div>
 								<div className="col-xl-3 col-md-6 mb-4">
-									<InfoPill title={'Network'} text={formatBytes(0)} icon={faCalendar}/>
+									<InfoPill title={'Network'} text={formatBytes(0)} icon={faNetworkWired}/>
 								</div>
 								<div className="col-xl-3 col-md-6 mb-4">
-									<div className="card border-left-warning shadow h-100 py-2">
-										<div className="card-body">
-											<div className="row no-gutters align-items-center">
-												<div className="col mr-2">
-													<p className="text-xs font-weight-bold text-warning text-uppercase mb-1">
-														Disk Usage
-													</p>
-													<div className="row align-items-center">
-														<div className="col-auto">
-															<div className="h5 mb-0 mr-3 font-weight-bold text-gray-800">{formatBytes(current.disk.total - current.disk.free)}</div>
-														</div>
-														<div className="col">
-															<div className="progress progress-sm">
-																<div className="progress-bar bg-info" role="progressbar" style={{ width: `${(((current.disk.total - current.disk.free) / current.disk.total) * 100).toFixed(2)}%` }} aria-valuenow={Math.round(current.disk.total - current.disk.free)} aria-valuemin={0}	aria-valuemax={current.disk.total}>
-																	{(((current.disk.total - current.disk.free) / current.disk.total) * 100).toFixed(2)}%
-																</div>
-															</div>
-														</div>
-													</div>
-												</div>
-												<div className="col-auto">
-													<FontAwesomeIcon icon={faComments} />
-												</div>
-											</div>
-										</div>
-									</div>
+									<InfoPillProgress title={'Disk Usage'} text={`${formatBytes(current.disk.total - current.disk.free)}/${formatBytes(current.disk.total)}`} icon={faHardDrive} max={current.disk.total} current={current.disk.total - current.disk.free}/>
 								</div>
 							</div>
 							<div className="row" style={{ height: '100%' }}>
 								<div className="col-lg-6">
 									<div className="card shadow mb-4">
 										<div className="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-											<h6 className="m-0 font-weight-bold text-primary">Total CPU usage</h6>
+											<h5 className="mb-0 mr-3 fw-bold text-gray-800">Total CPU usage</h5>
 											<div className="dropdown no-arrow">
 												<a className="dropdown-toggle" href="#" role="button" id="dropdownMenuLink"	data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
 													<i className="fas fa-ellipsis-v fa-sm fa-fw text-gray-400"></i>
@@ -191,14 +146,33 @@ export default function AdminSystem({ history: h, current: c, error }: Props) {
 											</div>
 										</div>
 										<div className="card-body">
-											<Line data={cpuHistory}/>
+											<Line data={cpuHistory} options={{
+												scales: {
+													y: {
+														ticks: {
+															callback: function(label) {
+																return `${label}%`;
+															},
+														},
+														beginAtZero: true,
+													},
+													x: {
+														ticks: {
+															callback: function(value) {
+																const date = memoryHistory.labels[value as number];
+																return new TimeAgo('en-US').format(new Date().getTime() - (new Date().getTime() - new Date(date).getTime()));
+															},
+														},
+													},
+												},
+											}} />
 										</div>
 									</div>
 								</div>
 								<div className="col-lg-6">
 									<div className="card shadow mb-4">
 										<div className="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-											<h6 className="m-0 font-weight-bold text-primary">Total memory usage</h6>
+											<h5 className="mb-0 mr-3 fw-bold text-gray-800">Total memory usage</h5>
 											<div className="dropdown no-arrow">
 												<a className="dropdown-toggle" href="#" role="button" id="dropdownMenuLink"	data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
 													<i className="fas fa-ellipsis-v fa-sm fa-fw text-gray-400"></i>
@@ -213,7 +187,25 @@ export default function AdminSystem({ history: h, current: c, error }: Props) {
 											</div>
 										</div>
 										<div className="card-body">
-											<Line data={memoryHistory} />
+											<Line data={memoryHistory} options={{
+												scales: {
+													y: {
+														ticks: {
+															callback: function(label) {
+																return formatBytes(label as number);
+															},
+														},
+													},
+													x: {
+														ticks: {
+															callback: function(value) {
+																const date = memoryHistory.labels[value as number];
+																return new TimeAgo('en-US').format(new Date().getTime() - (new Date().getTime() - new Date(date).getTime()));
+															},
+														},
+													},
+												},
+											}} />
 										</div>
 									</div>
 								</div>

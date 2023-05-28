@@ -12,6 +12,8 @@ export default class SystemManager extends SystemHistory {
 		super();
 		this.used_bytes = 0,
 		this.bandwidth = 0;
+
+		this.init();
 	}
 
 	async calculateNetworkUsage() {
