@@ -53,7 +53,6 @@ export default class RateLimit {
 
 		// Bypass ratelimit if user is an Admin
 		if (!user.isAdmin) {
-			console.log('user is admin');
 			// Now check if user is rate limited by global rate Limit
 			const isGloballyRateLimited = this._checkGlobalCooldown(user.id);
 			if (isGloballyRateLimited) return this.sendResponse({ req, res, userId: user.id, endpoint: endpoint.name, response: Error.GlobalRateLimit });
@@ -90,7 +89,7 @@ export default class RateLimit {
 				await this.client.UserHistoryManager.create({ id: userId == null ? null : BigInt(userId), endpoint, responseCode: status, responseTime: response_time });
 			});
 		});
-		if (response != null) response(res);
+		if (response != null) response(res, endpoint);
 	}
 
 
