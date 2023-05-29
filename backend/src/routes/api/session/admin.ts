@@ -108,8 +108,9 @@ export function run(client: Client) {
 		d.setDate(1);
 		for (let i = 0; i <= 11; i++) {
 			const y = Object.keys(months).at(d.getMonth());
-			const year = new Date().getFullYear() - (new Date().getMonth() <= i ? 1 : 0);
-			if (y !== undefined) months[y] = await client.UserManager.fetchUsersByMonth(d.getMonth() + 1, year);
+			// IF i is bigger than the current month then it has reached the previous year
+			const year = new Date().getFullYear() - (new Date().getMonth() < i ? 1 : 0);
+			if (y !== undefined) months[y] = await client.UserManager.fetchUsersByMonth(d.getMonth(), year);
 			d.setMonth(d.getMonth() - 1);
 		}
 		return res.json({ months });
@@ -127,8 +128,8 @@ export function run(client: Client) {
 				for (let i = 0; i <= 11; i++) {
 					const y = Object.keys(months).at(d.getMonth());
 					// IF i is bigger than the current month then it has reached the previous year
-					const year = new Date().getFullYear() - (new Date().getMonth() <= i ? 1 : 0);
-					if (y !== undefined) months[y] = await client.UserHistoryManager.fetchEndpointsByMonth(d.getMonth() + 1, year);
+					const year = new Date().getFullYear() - (new Date().getMonth() < i ? 1 : 0);
+					if (y !== undefined) months[y] = await client.UserHistoryManager.fetchEndpointsByMonth(d.getMonth(), year);
 					d.setMonth(d.getMonth() - 1);
 				}
 				return res.json({ months });

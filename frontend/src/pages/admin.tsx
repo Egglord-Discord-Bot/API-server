@@ -28,12 +28,23 @@ export default function Admin(data: Props) {
 	const { data: session, status } = useSession();
 	if (status == 'loading') return null;
 
+
+	const usage = [];
+	const monthName = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+	const d = new Date();
+	d.setDate(1);
+	const currentData = Object.entries(data.monthUsage);
+	for (let i = 0; i <= 11; i++) {
+		usage.push([monthName[d.getMonth()], currentData.find(f => f[0] == monthName[d.getMonth()])?.[1] ]);
+		d.setMonth(d.getMonth() - 1);
+	}
+
 	const historyAccessed = {
-		labels: Object.keys(data.monthUsage),
+		labels: usage.map(u => u[0]).reverse(),
 		datasets: [
 			{
 				label: 'Accessed',
-				data: Object.values(data.monthUsage),
+				data: usage.map(u => u[1]).reverse(),
 				borderColor: 'rgb(255, 99, 132)',
 				backgroundColor: 'rgba(255, 99, 132, 0.5)',
 			},

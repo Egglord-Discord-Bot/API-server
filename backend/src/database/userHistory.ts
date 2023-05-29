@@ -93,6 +93,9 @@ export default class userHistoryManager {
 	*/
 	async fetchAllEndpointUsage({ page }: pagination) {
 		return client.userHistory.findMany({
+			orderBy: {
+				createdAt: 'desc',
+			},
 			skip: page * CONSTANTS.DbPerPage,
 			take: CONSTANTS.DbPerPage,
 		});
@@ -167,8 +170,8 @@ export default class userHistoryManager {
 		return client.userHistory.count({
 			where: {
 				createdAt: {
-					gte: new Date(`${year}-${month}-1`),
-					lte: new Date(`${year}-${month}-${32 - new Date(year, month + 1, 32).getDate()}`),
+					gte: new Date(year, month, 1),
+					lte: new Date(year, month + 1, 0),
 				},
 			},
 		});

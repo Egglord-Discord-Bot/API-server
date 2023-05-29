@@ -130,8 +130,8 @@ export default class UserManager {
 		return client.user.count({
 			where: {
 				createdAt: {
-					gte: new Date(`${year}-${month}-1`),
-					lte: new Date(`${year}-${month}-${32 - new Date(year, month + 1, 32).getDate()}`),
+					gte: new Date(year, month, 1),
+					lte: new Date(year, month + 1, 0),
 				},
 			},
 		});

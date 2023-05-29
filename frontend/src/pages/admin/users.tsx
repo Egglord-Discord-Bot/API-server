@@ -134,13 +134,22 @@ export default function AdminUsers({ users: userList, error, total, admin, premi
 		],
 	};
 
+	const usage = [];
+	const monthName = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+	const d = new Date();
+	d.setDate(1);
+	const currentData = Object.entries(months);
+	for (let i = 0; i <= 11; i++) {
+		usage.push([monthName[d.getMonth()], currentData.find(f => f[0] == monthName[d.getMonth()])?.[1] ]);
+		d.setMonth(d.getMonth() - 1);
+	}
 
 	const userJoinData = {
-		labels: Object.keys(months),
+		labels: usage.map(u => u[0]).reverse(),
 		datasets: [
 			{
 				label: 'New accounts',
-				data: Object.values(months),
+				data: usage.map(u => u[1]).reverse(),
 				borderColor: 'rgb(255, 99, 132)',
 				backgroundColor: 'rgba(255, 99, 132, 0.5)',
 			},
@@ -161,7 +170,7 @@ export default function AdminUsers({ users: userList, error, total, admin, premi
 							)}
 							&nbsp;
 							<div className="d-sm-flex align-items-center justify-content-between mb-4">
-								<h1 className="h3 mb-0 text-gray-800">Dashboard</h1>
+								<h1 className="h3 mb-0 text-gray-800">User Dashboard</h1>
 								<a href="#" className="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm">
 									<FontAwesomeIcon icon={faDownload} /> Generate Report
 								</a>
