@@ -23,9 +23,6 @@ export default function Sidebar({ activeTab }: Props) {
 				</Link>
 			</li>
 			<hr className="sidebar-divider" />
-			<div className="sidebar-heading">
-				Interface
-			</div>
 			<li className={`nav-item ${activeTab == 'users' ? 'active' : ''}`}>
 				<Link className="nav-link" href="/admin/users">
 					<FontAwesomeIcon icon={faUsers} />

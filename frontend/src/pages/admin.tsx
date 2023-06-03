@@ -8,10 +8,11 @@ import { Pie, Line } from 'react-chartjs-2';
 import { useSession } from 'next-auth/react';
 import type { User } from '../types/next-auth';
 import type { GetServerSidePropsContext } from 'next';
+import Script from 'next/script';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faDownload, faSignal, faUsers, faClock, faMemory, faEllipsis } from '@fortawesome/free-solid-svg-icons';
-import { Chart as ChartJS, ArcElement, Tooltip, Legend,	CategoryScale, LinearScale, PointElement, LineElement, Title } from 'chart.js';
-ChartJS.register(ArcElement, Tooltip, Legend, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
+import { Chart as ChartJS, ArcElement, Tooltip as t, Legend,	CategoryScale, LinearScale, PointElement, LineElement, Title } from 'chart.js';
+ChartJS.register(ArcElement, t, Legend, CategoryScale, LinearScale, PointElement, LineElement, Title);
 
 type countEnum = { [key: string]: number }
 interface Props {
@@ -27,7 +28,6 @@ interface Props {
 export default function Admin(data: Props) {
 	const { data: session, status } = useSession();
 	if (status == 'loading') return null;
-
 
 	const usage = [];
 	const monthName = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
@@ -118,7 +118,7 @@ export default function Admin(data: Props) {
 											{Object.entries(data.responseCode).sort(([, a], [, b]) => a - b).reverse().map(e => (
 												<>
 													<h4 className="small font-weight-bold">{e[0]} <span className="float-end">{Math.round((e[1] / data.count) * 100)}%</span></h4>
-													<div className="progress mb-4">
+													<div className="progress mb-4" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title={`${e[1]}`}>
 														<div className="progress-bar bg-success" role="progressbar" style={{ width: `${(e[1] / data.count) * 100}%` }}	aria-valuenow={e[1]} aria-valuemin={0} aria-valuemax={data.count}>{e[1]}</div>
 													</div>
 												</>
@@ -156,6 +156,9 @@ export default function Admin(data: Props) {
 					</div>
 				</div>
 			</div>
+			<Script id="show-banner">
+				{'const tooltipTriggerList = document.querySelectorAll(\'[data-bs-toggle=\"tooltip\"]\'); [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl))'}
+			</Script>
 		</>
 	);
 }
