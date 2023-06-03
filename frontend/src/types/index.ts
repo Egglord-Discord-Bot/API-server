@@ -12,6 +12,8 @@ export type UserHistory = {
   userId: string
   endpoint: string
   createdAt: Date
+  responseCode: number
+  responseTime: number
 }
 
 export type EndpointParam = {

@@ -222,10 +222,10 @@ export default function AdminUsers({ users: userList, error, total, admin, premi
 								<div className="card-header py-3 d-flex flex-row align-items-center justify-content-between">
 									<h6 className="m-0 font-weight-bold text-primary">Users</h6>
 								</div>
-								<div className="card-body">
+								<div className="card-body table-responsive">
 									<form	className="d-none d-sm-inline-block form-inline mr-auto ml-md-3 my-2 my-md-0 mw-100">
 										<div className="input-group mb-3">
-											<input type="text" className="form-control  bg-light border-0 small" placeholder="Search for..." aria-label="Recipient's username" aria-describedby="basic-addon2" />
+											<input type="text" className="form-control bg-light border-0 small" placeholder="Search for..." aria-label="Recipient's username" aria-describedby="basic-addon2" />
 											<button className="btn btn-outline-primary" type="button">
 												<FontAwesomeIcon icon={faSearch} />
 											</button>

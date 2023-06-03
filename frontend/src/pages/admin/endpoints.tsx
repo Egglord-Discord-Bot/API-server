@@ -4,12 +4,14 @@ import AdminNavbar from '../../components/navbar/admin';
 import Error from '../../components/error';
 import { useSession } from 'next-auth/react';
 import type { User } from '../../types/next-auth';
-import type { Endpoint, UserHistory } from '../../types/types';
+import type { Endpoint, UserHistory } from '@/types';
 import type { GetServerSidePropsContext } from 'next';
+import { getStatusColour } from '@/utils/functions';
 import type { SyntheticEvent } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faAnglesLeft, faAnglesRight, faSearch, faDownload } from '@fortawesome/free-solid-svg-icons';
+import { faAnglesLeft, faAnglesRight, faSearch, faDownload, faCircle } from '@fortawesome/free-solid-svg-icons';
 import { useState } from 'react';
+import Script from 'next/script';
 
 interface Props {
   endpointData: Array<Endpoint>
@@ -122,7 +124,7 @@ export default function AdminEndpoints({ endpointData, history: h, error, total 
 										<div className="card-header py-3 d-flex flex-row align-items-center justify-content-between">
 											<h5 className="m-0 fw-bold text-primary">Total endpoints ({endpointData.length}):</h5>
 										</div>
-										<div className="card-body">
+										<div className="card-body table-responsive">
 											<div className="input-group mb-3">
 												<input type="text" className="form-control" placeholder="Endpoint" aria-label="Endpoint" aria-describedby="basic-addon2" onChange={searchEndpoint}/>
 												<span className="input-group-text" id="basic-addon2">
@@ -178,7 +180,7 @@ export default function AdminEndpoints({ endpointData, history: h, error, total 
 										<div className="card-header py-3 d-flex flex-row align-items-center justify-content-between">
 											<h5 className="m-0 fw-bold text-primary">Total API usage ({total}):</h5>
 										</div>
-										<div className="card-body">
+										<div className="card-body table-responsive">
 											<div className="input-group mb-3">
 												<input type="text" className="form-control" placeholder="Endpoint" aria-label="Endpoint" aria-describedby="basic-addon2" onChange={updateDOM}/>
 												<span className="input-group-text" id="basic-addon2">
@@ -191,6 +193,7 @@ export default function AdminEndpoints({ endpointData, history: h, error, total 
 														<th scope="col">UserID</th>
 														<th scope="col">Endpoint</th>
 														<th scope="col">Accessed at</th>
+														<th scope="col">Status</th>
 														<th scope="col">Delete</th>
 													</tr>
 												</thead>
@@ -200,6 +203,7 @@ export default function AdminEndpoints({ endpointData, history: h, error, total 
 															<th scope="row">{hi.userId}</th>
 															<td>{hi.endpoint}</td>
 															<td>{new Date(hi.createdAt).toDateString()} {new Date(hi.createdAt).toLocaleTimeString('en-US')}</td>
+															<td style={{ textAlign: 'center' }} data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title={`${hi.responseCode}`}><FontAwesomeIcon icon={faCircle} style={{ color: getStatusColour(hi.responseCode) }}/></td>
 															<td>
 																<input className="form-check-input" type="checkbox" id="flexCheckChecked" onClick={() => deleteEndpoint(hi.id)} />
 															</td>
@@ -233,6 +237,9 @@ export default function AdminEndpoints({ endpointData, history: h, error, total 
 					</div>
 				</div>
 			</div>
+			<Script id="show-banner">
+				{'setInterval(() => {const tooltipTriggerList = document.querySelectorAll(\'[data-bs-toggle=\"tooltip\"]\'); [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl))}, 5000)'}
+			</Script>
 		</>
 	);
 }

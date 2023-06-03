@@ -22,3 +22,19 @@ export function formatBytes(bytes: number, decimals = 2) {
 
 	return `${parseFloat((bytes / Math.pow(1024, i)).toFixed(dm))} ${sizes[i]}`;
 }
+
+export function getStatusColour(code: number) {
+
+	switch (code) {
+		case 200:
+		case 304:
+			return 'green';
+		case 401:
+		case 404:
+		case 412:
+		case 429:
+			return 'orange';
+		case 500:
+			return 'red';
+	}
+}
