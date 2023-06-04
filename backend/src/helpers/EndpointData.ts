@@ -14,9 +14,17 @@ export default async function EndpointData(client: Client) {
 			return [...new Set(j.stack.map((l:any) => l.regexp.toString().replace('/^\\/', '').replace('\\/?$/i', '')))].map(i => `${endpointsBasedOnFiles[index].route}/${i}`);
 		}).flat();
 
-	const endpointsBasedOnDB = await client.EndpointManager.fetchEndpointData();
-	const endpointsNotOnDB = files.filter(e => !endpointsBasedOnDB.map(end => end.name).includes(e) && e.startsWith('/api/'));
+	const endpointsFromOnDB = await client.EndpointManager.fetchEndpointData();
+	const endpointsNotOnDB = files.filter(e => !endpointsFromOnDB.map(end => end.name).includes(e) && e.startsWith('/api/'));
 
+	// Delete old endpoints
+	const endpointsToBeDeleted = endpointsFromOnDB.filter(d => files.indexOf(d.name) == -1);
+	Logger.debug(`Found ${endpointsToBeDeleted.length} old endpoints`);
+	for (const oldEndpoint of endpointsToBeDeleted) {
+		await client.EndpointManager.delete(oldEndpoint.name);
+	}
+
+	// Add new endpoints
 	Logger.debug(`Found ${endpointsNotOnDB.length} new endpoints`);
 	for (const newEndpoint of endpointsNotOnDB) {
 		await client.EndpointManager.create({ name: newEndpoint });

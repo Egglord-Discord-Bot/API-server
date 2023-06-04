@@ -49,6 +49,18 @@ export default class EndpointManager {
 	}
 
 	/**
+		* Delete an endpoint from the databasee
+		* @param {string} name The name of endpoint
+		* @returns The old endpoint data
+	*/
+	async delete(name: string) {
+		return client.endpoint.delete({
+			where: {
+				name,
+			},
+		});
+	}
+	/**
 		* Fetch an array of endpoint data entries
 		* @returns An array of endpoint data entries
 	*/
