@@ -26,7 +26,7 @@ export default function Home({ userCount, endpointCount, totalAPIUsage }: Props)
 					<h1>Welcome to <span>Egglord API.</span></h1>
 					<h2>Only the best free API.</h2>
 					<div className="d-flex">
-						<Link href="/login" className="btn-get-started" style={{ textDecoration: 'none' }}>Get Started</Link>
+						<Link href="/generate" className="btn-get-started" style={{ textDecoration: 'none' }}>Get Started</Link>
               &nbsp;
 						<Link href="/docs" className="btn-get-started" style={{ textDecoration: 'none' }}>Docs</Link>
 					</div>
@@ -65,7 +65,6 @@ export default function Home({ userCount, endpointCount, totalAPIUsage }: Props)
 					</div>
 				</section>
 			</main>
-			<a href="#" className="back-to-top d-flex align-items-center justify-content-center"><i className="bi bi-arrow-up-short"></i></a>
 			<Footer />
 		</>
 	);

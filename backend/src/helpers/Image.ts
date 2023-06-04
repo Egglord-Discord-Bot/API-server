@@ -18,7 +18,6 @@ export default class Image {
 		ctx.drawImage(img, 180, 383, 200, 157);
 
 		const result = await canvas.encode('png');
-		this.generateImage(result, 'affect');
 		return result;
 	}
 
@@ -34,7 +33,6 @@ export default class Image {
 		ctx.drawImage(img, 258, 229, 84, 95);
 
 		const result = await canvas.encode('png');
-		this.generateImage(result, 'beautiful');
 		return result;
 	}
 
@@ -53,7 +51,6 @@ export default class Image {
 		ctx.drawImage(avatar1, 53, 575, 100, 100);
 
 		const result = await canvas.encode('png');
-		this.generateImage(result, 'bed');
 		return result;
 	}
 
@@ -69,7 +66,6 @@ export default class Image {
 		ctx.drawImage(canvas, 0, 0, canvas.width / 4, canvas.height / 4, 0, 0, canvas.width + 5, canvas.height + 5);
 
 		const result = await canvas.encode('png');
-		this.generateImage(result, 'blur');
 		return result;
 	}
 
@@ -118,7 +114,6 @@ export default class Image {
 		}
 
 		const result = await canvas.encode('png');
-		this.generateImage(result, 'changemymind');
 		return result;
 	}
 
@@ -130,7 +125,6 @@ export default class Image {
 		Image._circle(ctx, canvas.width, canvas.height);
 
 		const result = await canvas.encode('png');
-		this.generateImage(result, 'circle');
 		return result;
 	}
 
@@ -147,7 +141,6 @@ export default class Image {
 		ctx.fillText(text.substring(0, 66), 75, 50);
 
 		const result = await canvas.encode('png');
-		this.generateImage(result, 'clyde');
 		return result;
 	}
 
@@ -166,7 +159,6 @@ export default class Image {
 		if (avatar3) ctx.drawImage(avatar3, 730, 110, 130, 130);
 
 		const result = await canvas.encode('png');
-		this.generateImage(result, 'distracted');
 		return result;
 	}
 
@@ -181,7 +173,6 @@ export default class Image {
 		ctx.drawImage(layer, 0, 0, 632, 357);
 
 		const result = await canvas.encode('png');
-		this.generateImage(result, 'facepalm');
 		return result;
 	}
 
@@ -203,7 +194,6 @@ export default class Image {
 		ctx.putImageData(imgData, 0, 0);
 
 		const result = await canvas.encode('png');
-		this.generateImage(result, 'invert');
 		return result;
 	}
 
@@ -218,7 +208,6 @@ export default class Image {
 		ctx.drawImage(layer, 0, 0, 425, 404);
 
 		const result = await canvas.encode('png');
-		this.generateImage(result, 'joke-over-head');
 		return result;
 	}
 
@@ -233,7 +222,6 @@ export default class Image {
 		ctx.drawImage(avatar, 150, 25, 200, 200);
 
 		const result = await canvas.encode('png');
-		this.generateImage(result, 'kiss');
 		return result;
 	}
 
@@ -250,7 +238,6 @@ export default class Image {
 		ctx.fillText(message.length <= 20 ? message : message.substring(0, 20).trim() + '...', 540, 195);
 
 		const result = await canvas.encode('png');
-		this.generateImage(result, 'ohno');
 		return result;
 	}
 
@@ -263,7 +250,6 @@ export default class Image {
 		ctx.drawImage(img, 63, 110, 90, 90);
 
 		const result = await canvas.encode('png');
-		this.generateImage(result, 'rip');
 		return result;
 	}
 
@@ -278,7 +264,6 @@ export default class Image {
 		ctx.drawImage(avatar, 350, 70, 220, 220);
 
 		const result = await canvas.encode('png');
-		this.generateImage(result, 'slap');
 		return result;
 	}
 
@@ -293,7 +278,6 @@ export default class Image {
 		ctx.drawImage(avatar, 225, 5, 140, 140);
 
 		const result = await canvas.encode('png');
-		this.generateImage(result, 'spank');
 		return result;
 	}
 
@@ -338,8 +322,6 @@ export default class Image {
 			stream.on('end', () => resolve(Buffer.concat(data)));
 			stream.on('error', reject);
 		});
-
-		this.generateImage(result, 'trigger');
 		return result;
 	}
 
@@ -349,7 +331,6 @@ export default class Image {
 
 
 		const result = await canvas.encode('png');
-		this.generateImage(result, 'wanted');
 		return result;
 	}
 
@@ -359,7 +340,6 @@ export default class Image {
 
 
 		const result = await canvas.encode('png');
-		this.generateImage(result, 'wasted');
 		return result;
 	}
 
@@ -376,7 +356,6 @@ export default class Image {
 
 
 		const result = await canvas.encode('png');
-		this.generateImage(result, 'whowouldwin');
 		return result;
 	}
 
@@ -423,11 +402,4 @@ export default class Image {
 		return ctx;
 	}
 
-	// Generate the image to show in the examples folder
-	static generateImage(data: Buffer, name: string) {
-		const filetype = name == 'trigger' ? '.gif' : '.png';
-		if (!fs.existsSync(`${process.cwd()}/src/public/images/${name}${filetype}`)) {
-			fs.writeFileSync(`${process.cwd()}/src/public/images/${name}${filetype}`, data);
-		}
-	}
 }
