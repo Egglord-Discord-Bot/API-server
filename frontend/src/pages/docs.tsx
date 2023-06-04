@@ -159,7 +159,7 @@ export default function Docs({ endpoints }: Props) {
 export async function getServerSideProps(ctx: GetServerSidePropsContext) {
 
 	try {
-		const res = await fetch(`${process.env.BACKEND_URL}api/stats/endpoints`, {
+		const res = await fetch(`${process.env.BACKEND_URL}api/session/admin/endpoints/json`, {
 			method: 'get',
 			headers: {
 				'cookie': ctx.req.headers.cookie as string,
