@@ -53,9 +53,10 @@ export default class SystemManager extends SystemHistory {
 			const { stdout } = await cmd('df -Pk --');
 			const parsed = stdout.trim().split('\n').slice(1).map(line => line.trim().split(/\s+(?=[\d/])/));
 			const filtered = parsed.filter(() => true);
+			// Multiply by 1024 cuz linux
 			return {
-				free: Number(filtered[0][3]),
-				total: Number(filtered[0][1]),
+				free: Number(filtered[0][3]) * 1024,
+				total: Number(filtered[0][1]) * 1024,
 			};
 		}
 	}
