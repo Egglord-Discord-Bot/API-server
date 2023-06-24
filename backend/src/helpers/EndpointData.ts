@@ -11,7 +11,10 @@ export default async function EndpointData(client: Client) {
 	const files = fileData
 		.map(e => e.run(client))
 		.map((j, index) => {
-			return [...new Set(j.stack.map((l:any) => l.regexp.toString().replace('/^\\/', '').replace('\\/?$/i', '')))].map(i => `${endpointsBasedOnFiles[index].route}/${i}`);
+			return [...new Set(j.stack.map((l: any) => {
+				const text = l.regexp.toString() as string;
+				return text.substring(4, text.length - 6).split('\\/').join('/');
+			}))].filter(i => i !== '/').map(i => `${endpointsBasedOnFiles[index].route}/${i}`);
 		}).flat();
 
 	const endpointsFromOnDB = await client.EndpointManager.fetchEndpointData();
