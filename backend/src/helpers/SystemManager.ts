@@ -69,6 +69,12 @@ export default class SystemManager extends SystemHistory {
 	}
 
 	init() {
-		setInterval(async () => await this.saveSystemHistory(), 60_000);
+		setInterval(async () => {
+			// Save the new data
+			await this.saveSystemHistory();
+
+			// Delete if older than 7 days
+			await this.delete();
+		}, 60_000);
 	}
 }

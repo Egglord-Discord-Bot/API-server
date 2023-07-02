@@ -32,4 +32,16 @@ export default class SystemHistoryManager {
 			take: 10,
 		});
 	}
+
+	async delete() {
+		const date = new Date();
+
+		return client.systemHistory.deleteMany({
+			where: {
+				createdAt: {
+					lte: new Date(date.setDate(date.getDate() - 7)),
+				},
+			},
+		});
+	}
 }
