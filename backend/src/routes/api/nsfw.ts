@@ -16,6 +16,7 @@ export function run() {
 		*       - name: type
 	  *         description: Type of image
 	  *         required: true
+		*         enum: [cosplay, hentai, ass, pgif, swimsuit, thigh, hass, boobs, hboobs, pussypaizuri, pantsu, lewdneko, feet, hyuri, hthigh, hmidriff, anal, nakadashi, blowjob, gonewild, hkitsune, tentacle, 4k, kanna, hentai_anal, food, neko, holo, pee, kemonomimi, coffee, yaoi, futa, gah]
 	  *         type: string
 	*/
 	router.get('/image', async (req, res) => {
@@ -40,7 +41,7 @@ export function run() {
 		*  get:
 		*    description: Check if an image is NSFW or not
 		*    parameters:
-		*       - name: type
+		*       - name: url
 	  *         description: The url of the image.
 	  *         required: true
 	  *         type: string

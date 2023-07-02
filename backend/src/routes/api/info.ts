@@ -209,7 +209,7 @@ export function run() {
 	});
 
 	/**
- * @API
+ * @openapi
  * /info/urban-dictionary:
  *  get:
  *    description: Translate a message
@@ -234,7 +234,7 @@ export function run() {
 	});
 
 	/**
- * @API
+ * @openapi
  * /info/weather:
  *  get:
  *    description: Get the weather of a location

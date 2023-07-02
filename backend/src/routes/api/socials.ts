@@ -77,25 +77,38 @@ export function run() {
 	 * @openapi
    * /socials/github:
    *  get:
-   *    description: Get information on a Github repo
+   *    description: Get information on a Github user or repository
    *    tags: social
    *    parameters:
-   *       - name: repo
-   *         description: The name of the author and name of repo
+	 *       - name: username
+   *         description: The username of Github user
    *         required: true
+   *         type: string
+   *       - name: repo
+   *         description: The name of the repository, the user owns.
+   *         required: false
    *         type: string
   */
 	router.get('/github', async (req, res) => {
+		const username = req.query.username as string;
 		const repo = req.query.repo as string;
-		if (!repo) return Error.MissingQuery(res, 'repo');
+		if (!username) return Error.MissingQuery(res, 'username');
 
 		let sentData = {};
-		if (GithubHandler.data.get(repo)) {
-			sentData = GithubHandler.data.get(repo) as object;
+		if (GithubHandler.data.get(`${username}_${repo}`)) {
+			sentData = GithubHandler.data.get(`${username}_${repo}`) as object;
 		} else {
 			try {
-				const data = (await axios.get(`https://api.github.com/repos/${repo}`)).data;
-				GithubHandler._addData({ id: repo, data: data });
+				// Check repo or just user
+				let data;
+				if (repo.length == 0) {
+					data = (await axios.get(`https://api.github.com/users/${username}`)).data;
+				} else {
+					data = (await axios.get(`https://api.github.com/repos/${username}/${repo}`)).data;
+				}
+
+				// Save data to cache
+				GithubHandler._addData({ id: `${username}_${repo}`, data: data });
 				sentData = data;
 			} catch (err: any) {
 				console.log(err);
@@ -188,7 +201,6 @@ export function run() {
 				console.log(err);
 				return Error.GenericError(res, err.message);
 			}
-
 		}
 
 		res.json({ data: sentData });

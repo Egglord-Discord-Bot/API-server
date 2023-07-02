@@ -18,11 +18,6 @@ export function run() {
 		* /misc/advice:
 		*  get:
 		*    description: Get some advice
-		*    parameters:
-		*       - name: image1
-		*         description: The URL of the message
-		*         required: true
-		*         type: string
 	*/
 	router.get('/advice', async (_req, res) => {
 		try {
@@ -37,11 +32,11 @@ export function run() {
 	 * @openapi
 	 * /misc/pokemon:
 	 *  get:
-	 *    description: Get a pokemon's stats
+	 *    description: Get information on a pokemon
 	 *    tags: misc
 	 *    parameters:
 	 *       - name: pokemon
-	 *         description: The pokemon
+	 *         description: The name of the pokemon
 	 *         required: true
 	 *         type: string
 	 */
@@ -56,26 +51,6 @@ export function run() {
 			Error.GenericError(res, err.message);
 		}
 	});
-
-	/*
-	router.get('/screenshot', chechAuth, async (req, res) => {
-		const { url } = req.query;
-		try {
-			console.log(url);
-			const browser = await Puppeteer.launch({ args: ['--no-sandbox', '--disable-setuid-sandbox'] });
-			const page = await browser.newPage();
-			await page.setViewport({ width: 1280, height: 720 });
-			await page.goto(url as string);
-			await new Promise(r => setTimeout(r, 1500));
-			const data = await page.screenshot();
-			await browser.close();
-			res.json({ success: data });
-		} catch (err: any) {
-			console.log(err);
-			res.json({ error: err.message });
-		}
-	});
-	*/
 
 	/**
 	 * @openapi
@@ -150,6 +125,13 @@ export function run() {
 		});
 	});
 
+	/**
+	 * @openapi
+	 * /misc/animal:
+	 *  get:
+	 *    description: Get a link to a picture of an animal
+	 *    tags: misc
+	 */
 	router.get('/animal', async (req, res) => {
 		let name = req.query.name as string;
 
@@ -175,6 +157,13 @@ export function run() {
 		res.json({ data: validAnimals });
 	});
 
+	/**
+	 * @openapi
+	 * /misc/qrcode:
+	 *  get:
+	 *    description: Create a QR code based on the URL
+	 *    tags: misc
+	 */
 	router.get('/qrcode', async (req, res) => {
 		const url = req.query.url as string;
 		if (!url) return Error.MissingQuery(res, 'url');

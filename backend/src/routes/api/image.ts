@@ -112,8 +112,8 @@ export function run() {
 	  *  get:
 	  *    description: Create an change my mind image
 	  *    parameters:
-	  *       - name: image1
-	  *         description: The URL of the message
+	  *       - name: text
+	  *         description: The text to put on the sign
 	  *         required: true
 	  *         type: string
 	*/
