@@ -55,6 +55,30 @@ export function run() {
 
 	/**
 	  * @openapi
+	  * /image/approved:
+	  *  get:
+	  *    description: Create an approved image
+	  *    parameters:
+	  *       - name: image1
+	  *         description: The URL of the message
+	  *         required: true
+	  *         type: string
+	*/
+	router.get('/approved', checkImage(1), async (req, res) => {
+		const image = req.query.image1;
+		try {
+			const img = await Image.approved(image as string);
+			res.set('Content-Disposition', 'inline; filename=approved.png');
+			res.setHeader('content-type', 'image/png');
+			res.send(img);
+		} catch (err: any) {
+			console.log(err);
+			Error.GenericError(res, err.message);
+		}
+	});
+
+	/**
+	  * @openapi
 	  * /image/beautiful:
 	  *  get:
 	  *    description: Create an affect image

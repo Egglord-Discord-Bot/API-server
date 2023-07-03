@@ -34,6 +34,20 @@ export default class Image {
 		return result;
 	}
 
+	static async approved(image: imageParam) {
+		const img = await Canvas.loadImage(image);
+		const bg = await Canvas.loadImage(Image._getImage('approved'));
+
+		const canvas = Canvas.createCanvas(bg.width, bg.height);
+		const ctx = canvas.getContext('2d');
+
+		ctx.drawImage(img, 0, 0, 280, 280);
+		ctx.drawImage(bg, 0, 0);
+
+		const result = await canvas.encode('png');
+		return result;
+	}
+
 	static async beautiful(image: imageParam) {
 		const img = await Canvas.loadImage(image);
 		const base = await Canvas.loadImage(Image._getImage('beautiful'));
