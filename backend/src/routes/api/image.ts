@@ -7,6 +7,30 @@ import Image from '../../helpers/Image';
 export function run() {
 	/**
 	  * @openapi
+	  * /image/3000years:
+	  *  get:
+	  *    description: Create an 3000years image
+	  *    parameters:
+	  *       - name: image1
+	  *         description: The URL of the message
+	  *         required: true
+	  *         type: string
+	*/
+	router.get('/3000years', checkImage(1), async (req, res) => {
+		const image = req.query.image1;
+		try {
+			const img = await Image.threeThousandYears(image as string);
+			res.set('Content-Disposition', 'inline; filename=3000years.png');
+			res.setHeader('content-type', 'image/png');
+			res.send(img);
+		} catch (err: any) {
+			console.log(err);
+			Error.GenericError(res, err.message);
+		}
+	});
+
+	/**
+	  * @openapi
 	  * /image/affect:
 	  *  get:
 	  *    description: Create an affect image

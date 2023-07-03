@@ -1,12 +1,25 @@
-// @ts-nocheck
 import Canvas, { createCanvas, GlobalFonts } from '@napi-rs/canvas';
 import fs from 'node:fs';
 import { GifEncoder } from '@skyra/gifenc';
-import type { SKRSContext2D } from '@napi-rs/canvas';
 import type { imageParam, getLines } from '../types';
 GlobalFonts.registerFromPath(`${process.cwd()}/src/assets/fonts/Georgia.ttf`, 'Georgia');
 
 export default class Image {
+
+	static async threeThousandYears(image: imageParam) {
+		const img = await Canvas.loadImage(image);
+		const bg = await Canvas.loadImage(Image._getImage('3000years'));
+
+		const canvas = Canvas.createCanvas(bg.width, bg.height);
+		const ctx = canvas.getContext('2d');
+
+		ctx.drawImage(bg, 0, 0);
+		ctx.drawImage(img, 461, 127, 200, 200);
+
+		const result = await canvas.encode('png');
+		return result;
+	}
+
 	static async affect(image: imageParam) {
 		const img = await Canvas.loadImage(image);
 		const bg = await Canvas.loadImage(Image._getImage('affect'));
@@ -122,8 +135,11 @@ export default class Image {
 		const canvas = Canvas.createCanvas(img.width, img.height);
 		const ctx = canvas.getContext('2d');
 		ctx.drawImage(img, 0, 0);
-		Image._circle(ctx, canvas.width, canvas.height);
-
+		ctx.globalCompositeOperation = 'destination-in';
+		ctx.beginPath();
+		ctx.arc(canvas.width / 2, canvas.height / 2, canvas.height / 2, 0, Math.PI * 2, true);
+		ctx.closePath();
+		ctx.fill();
 		const result = await canvas.encode('png');
 		return result;
 	}
@@ -328,7 +344,8 @@ export default class Image {
 	static async wanted(image: imageParam) {
 		const canvas = Canvas.createCanvas(500, 500);
 		const ctx = canvas.getContext('2d');
-
+		const avatar = await Canvas.loadImage(image);
+		ctx.drawImage(avatar, 350, 220, 120, 120);
 
 		const result = await canvas.encode('png');
 		return result;
@@ -337,7 +354,8 @@ export default class Image {
 	static async wasted(image: imageParam) {
 		const canvas = Canvas.createCanvas(500, 500);
 		const ctx = canvas.getContext('2d');
-
+		const avatar = await Canvas.loadImage(image);
+		ctx.drawImage(avatar, 350, 220, 120, 120);
 
 		const result = await canvas.encode('png');
 		return result;
@@ -392,14 +410,4 @@ export default class Image {
 	static _getImage(image: string) {
 		return fs.readFileSync(`${process.cwd()}/src/assets/images/${image}.png`);
 	}
-
-	static _circle(ctx: SKRSContext2D, w: number, h: number) {
-		ctx.globalCompositeOperation = 'destination-in';
-		ctx.beginPath();
-		ctx.arc(w / 2, h / 2, h / 2, 0, Math.PI * 2);
-		ctx.closePath();
-		ctx.fill();
-		return ctx;
-	}
-
 }
