@@ -16,7 +16,7 @@ export function run() {
 		*       - name: type
 	  *         description: Type of image
 	  *         required: true
-		*         enum: [cosplay, hentai, ass, pgif, swimsuit, thigh, hass, boobs, hboobs, pussypaizuri, pantsu, lewdneko, feet, hyuri, hthigh, hmidriff, anal, nakadashi, blowjob, gonewild, hkitsune, tentacle, 4k, kanna, hentai_anal, food, neko, holo, pee, kemonomimi, coffee, yaoi, futa, gah]
+		*         enum: [hentai, ass, pgif, thigh, hass, boobs, hboobs, pussy, paizuri, pantsu, lewdneko, feet, hyuri, hthigh, hmidriff, anal, blowjob, gonewild, hkitsune, tentacle, 4k, hentai_anal, neko, holo, kemonomimi]
 	  *         type: string
 	*/
 	router.get('/image', async (req, res) => {
@@ -24,7 +24,9 @@ export function run() {
 		if (!type) return Error.MissingQuery(res, 'type');
 
 		// Make sure type is from set
-		const allowedTypes = ['cosplay', 'hentai', 'ass', 'pgif', 'swimsuit', 'thigh', 'hass', 'boobs', 'hboobs', 'pussypaizuri', 'pantsu', 'lewdneko', 'feet', 'hyuri', 'hthigh', 'hmidriff', 'anal', 'nakadashi', 'blowjob', 'gonewild', 'hkitsune', 'tentacle', '4k', 'kanna', 'hentai_anal', 'food', 'neko', 'holo', 'pee', 'kemonomimi', 'coffee', 'yaoi', 'futa', 'gah'];
+		const allowedTypes = ['hentai', 'ass', 'pgif', 'thigh', 'hass', 'boobs', 'hboobs', 'pussy', 'paizuri',
+			'pantsu', 'lewdneko', 'feet', 'hyuri', 'hthigh', 'hmidriff', 'anal', 'blowjob', 'gonewild', 'hkitsune', 'tentacle',
+			'4k', 'hentai_anal', 'neko', 'holo', 'kemonomimi'];
 		if (!allowedTypes.includes(type)) return Error.InvalidValue(res, 'type', allowedTypes);
 
 		try {
