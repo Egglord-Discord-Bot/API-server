@@ -174,6 +174,59 @@ export default class Image {
 		return result;
 	}
 
+	static async deepfry(image1: imageParam) {
+		const img = await Canvas.loadImage(image1);
+		const canvas = Canvas.createCanvas(img.width, img.height);
+		const ctx = canvas.getContext('2d');
+		ctx.drawImage(img, 0, 0);
+
+		// Apply image manipulations
+		ctx.globalAlpha = 0.5;
+		ctx.globalCompositeOperation = 'difference';
+		ctx.imageSmoothingEnabled = false;
+
+		// Get the image data
+		const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+		const data = imageData.data;
+
+		// Apply pixelation
+		const pixelSize = 2;
+		for (let y = 0; y < canvas.height; y += pixelSize) {
+			for (let x = 0; x < canvas.width; x += pixelSize) {
+				const baseIndex = (y * canvas.width + x) * 4;
+				const r = data[baseIndex];
+				const g = data[baseIndex + 1];
+				const b = data[baseIndex + 2];
+
+				// Set the pixel color for the pixelation effect
+				for (let py = y; py < y + pixelSize; py++) {
+					for (let px = x; px < x + pixelSize; px++) {
+						const pixelIndex = (py * canvas.width + px) * 4;
+						data[pixelIndex] = r;
+						data[pixelIndex + 1] = g;
+						data[pixelIndex + 2] = b;
+					}
+				}
+			}
+		}
+
+		// Apply posterization
+		const levels = 10;
+		const step = 255 / (levels - 1);
+		for (let i = 0; i < data.length; i += 4) {
+			const r = Math.round(data[i] / step) * step;
+			const g = Math.round(data[i + 1] / step) * step;
+			const b = Math.round(data[i + 2] / step) * step;
+
+			data[i] = r;
+			data[i + 1] = g;
+			data[i + 2] = b;
+		}
+		ctx.putImageData(imageData, 0, 0);
+		const result = await canvas.encode('png');
+		return result;
+	}
+
 	static async distracted(image1: imageParam, image2: imageParam, image3 = '') {
 		const background = await Canvas.loadImage(Image._getImage('distracted'));
 		const avatar1 = await Canvas.loadImage(await Image.circle(image1));

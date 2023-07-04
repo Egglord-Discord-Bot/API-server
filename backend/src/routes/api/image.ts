@@ -231,6 +231,30 @@ export function run() {
 	});
 
 	/**
+	  * @openapi
+	  * /image/deepfry:
+	  *  get:
+	  *    description: Create an deepfry image
+	  *    parameters:
+	  *       - name: image1
+	  *         description: The URL of the message
+	  *         required: true
+	  *         type: string
+	*/
+	router.get('/deepfry', checkImage(1), async (req, res) => {
+		const image = req.query.image1;
+		try {
+			const img = await Image.deepfry(image as string);
+			res.set('Content-Disposition', 'inline; filename=deepfry.png');
+			res.setHeader('content-type', 'image/png');
+			res.send(img);
+		} catch (err: any) {
+			console.log(err);
+			Error.GenericError(res, err.message);
+		}
+	});
+
+	/**
 	 * @openapi
 	 * /image/distracted:
 	 *  get:
