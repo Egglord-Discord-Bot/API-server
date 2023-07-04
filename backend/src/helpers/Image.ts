@@ -148,12 +148,14 @@ export default class Image {
 		const img = await Canvas.loadImage(image);
 		const canvas = Canvas.createCanvas(img.width, img.height);
 		const ctx = canvas.getContext('2d');
-		ctx.drawImage(img, 0, 0);
-		ctx.globalCompositeOperation = 'destination-in';
+
+		const radius = canvas.width / 2;
 		ctx.beginPath();
-		ctx.arc(canvas.width / 2, canvas.height / 2, canvas.height / 2, 0, Math.PI * 2, true);
+		ctx.arc(radius, radius, radius, 0, Math.PI * 2, false);
 		ctx.closePath();
-		ctx.fill();
+		ctx.clip();
+		ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
 		const result = await canvas.encode('png');
 		return result;
 	}
