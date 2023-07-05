@@ -441,11 +441,25 @@ export default class Image {
 		return result;
 	}
 
-	static async wasted(image: imageParam) {
+	static async wasted(image1: imageParam) {
 		const canvas = Canvas.createCanvas(500, 500);
 		const ctx = canvas.getContext('2d');
-		const avatar = await Canvas.loadImage(image);
-		ctx.drawImage(avatar, 350, 220, 120, 120);
+		const img = await Canvas.loadImage(image1);
+
+		// Greyscale the image first
+		ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+		const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+		const pixels = imgData.data;
+		for (let i = 0; i < pixels.length; i += 4) {
+			const lightness = (pixels[i] + pixels[i + 1] + pixels[i + 2]) / 3;
+			pixels[i] = lightness;
+			pixels[i + 1] = lightness;
+			pixels[i + 2] = lightness;
+		}
+		ctx.putImageData(imgData, 0, 0);
+
+		const bg = await Canvas.loadImage(Image._getImage('wasted'));
+		ctx.drawImage(bg, canvas.width / 2 - 188, canvas.height / 2 - 50, 375, 250);
 
 		const result = await canvas.encode('png');
 		return result;
