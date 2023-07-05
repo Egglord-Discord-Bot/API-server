@@ -311,6 +311,30 @@ export function run() {
 
 	/**
 	  * @openapi
+	  * /image/greyscale:
+	  *  get:
+	  *    description: Create an greyscale image
+	  *    parameters:
+	  *       - name: image1
+	  *         description: The URL of the message
+	  *         required: true
+	  *         type: string
+	*/
+	router.get('/greyscale', checkImage(1), async (req, res) => {
+		const image = req.query.image1;
+		try {
+			const img = await Image.greyscale(image as string);
+			res.set('Content-Disposition', 'inline; filename=greyscale.png');
+			res.setHeader('content-type', 'image/png');
+			res.send(img);
+		} catch (err: any) {
+			console.log(err);
+			Error.GenericError(res, err.message);
+		}
+	});
+
+	/**
+	  * @openapi
 	  * /image/invert:
 	  *  get:
 	  *    description: Create an invert image

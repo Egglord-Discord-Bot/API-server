@@ -261,6 +261,27 @@ export default class Image {
 		return result;
 	}
 
+	static async greyscale(image1: imageParam) {
+		const img = await Canvas.loadImage(image1);
+		const canvas = Canvas.createCanvas(img.width, img.height);
+		const ctx = canvas.getContext('2d');
+
+		ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+		const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+		const pixels = imgData.data;
+		for (let i = 0; i < pixels.length; i += 4) {
+			const lightness = (pixels[i] + pixels[i + 1] + pixels[i + 2]) / 3;
+			pixels[i] = lightness;
+			pixels[i + 1] = lightness;
+			pixels[i + 2] = lightness;
+		}
+		ctx.putImageData(imgData, 0, 0);
+
+		const result = await canvas.encode('png');
+		return result;
+	}
+
+
 	static async invert(image: imageParam) {
 		const img = await Canvas.loadImage(image);
 		const canvas = Canvas.createCanvas(img.width, img.height);
