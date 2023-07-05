@@ -455,13 +455,13 @@ export default class Image {
 		const canvas = Canvas.createCanvas(500, 500);
 		const ctx = canvas.getContext('2d');
 
-		const background = await Canvas.loadImage(Image._getImage('spank'));
+		const background = await Canvas.loadImage(Image._getImage('whowouldwin'));
 		ctx.drawImage(background, 0, 0, canvas.width, canvas.height);
 		const avatar = await Canvas.loadImage(image1);
 		const avatar1 = await Canvas.loadImage(image2);
-		ctx.drawImage(avatar1, 350, 220, 120, 120);
-		ctx.drawImage(avatar, 225, 5, 140, 140);
 
+		ctx.drawImage(avatar, 10, 104, 225, 225);
+		ctx.drawImage(avatar1, 270, 104, 225, 225);
 
 		const result = await canvas.encode('png');
 		return result;
