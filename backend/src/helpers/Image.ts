@@ -5,97 +5,106 @@ import type { imageParam, getLines } from '../types';
 GlobalFonts.registerFromPath(`${process.cwd()}/src/assets/fonts/Georgia.ttf`, 'Georgia');
 
 export default class Image {
-
+	/**
+	 * Create a 3000 year meme image
+	 * @param {imageParam} image The URL or Buffer of the image
+	*/
 	static async threeThousandYears(image: imageParam) {
-		const img = await Canvas.loadImage(image);
-		const bg = await Canvas.loadImage(Image._getImage('3000years'));
+		const [img, bg] = await Promise.all([Canvas.loadImage(image), Canvas.loadImage(Image._getImage('3000years'))]);
 
 		const canvas = Canvas.createCanvas(bg.width, bg.height);
 		const ctx = canvas.getContext('2d');
-
 		ctx.drawImage(bg, 0, 0);
 		ctx.drawImage(img, 461, 127, 200, 200);
 
-		const result = await canvas.encode('png');
-		return result;
+		return canvas.encode('png');
 	}
 
+	/**
+	 * Create a 'Doesnt affect my baby' meme image
+	 * @param {imageParam} image The URL or Buffer of the image
+	*/
 	static async affect(image: imageParam) {
-		const img = await Canvas.loadImage(image);
-		const bg = await Canvas.loadImage(Image._getImage('affect'));
+		const [img, bg] = await Promise.all([Canvas.loadImage(image), Canvas.loadImage(Image._getImage('affect'))]);
 
 		const canvas = Canvas.createCanvas(bg.width, bg.height);
 		const ctx = canvas.getContext('2d');
-
 		ctx.drawImage(bg, 0, 0);
 		ctx.drawImage(img, 180, 383, 200, 157);
 
-		const result = await canvas.encode('png');
-		return result;
+		return canvas.encode('png');
 	}
 
+	/**
+	 * Create an approved meme image
+	 * @param {imageParam} image The URL or Buffer of the image
+	*/
 	static async approved(image: imageParam) {
-		const img = await Canvas.loadImage(image);
-		const bg = await Canvas.loadImage(Image._getImage('approved'));
+		const [img, bg] = await Promise.all([ Canvas.loadImage(image), Canvas.loadImage(Image._getImage('approved'))]);
 
 		const canvas = Canvas.createCanvas(bg.width, bg.height);
 		const ctx = canvas.getContext('2d');
-
 		ctx.drawImage(img, 0, 0, 280, 280);
 		ctx.drawImage(bg, 0, 0);
 
-		const result = await canvas.encode('png');
-		return result;
+		return canvas.encode('png');
 	}
 
+	/**
+	 * Create a 'this is beautiful' meme image
+	 * @param {imageParam} image The URL or Buffer of the image
+	*/
 	static async beautiful(image: imageParam) {
-		const img = await Canvas.loadImage(image);
-		const base = await Canvas.loadImage(Image._getImage('beautiful'));
+		const [img, bg] = await Promise.all([Canvas.loadImage(image), Canvas.loadImage(Image._getImage('beautiful'))]);
 
 		const canvas = Canvas.createCanvas(376, 400);
 		const ctx = canvas.getContext('2d');
-
-		ctx.drawImage(base, 0, 0, canvas.width, canvas.height);
+		ctx.drawImage(bg, 0, 0, canvas.width, canvas.height);
 		ctx.drawImage(img, 258, 28, 84, 95);
 		ctx.drawImage(img, 258, 229, 84, 95);
 
-		const result = await canvas.encode('png');
-		return result;
+		return canvas.encode('png');
 	}
 
+	/**
+		* Create a 'Hideous under bed' meme image
+		* @param {imageParam} image1 The URL or Buffer of the image
+	 	* @param {imageParam} image2 The URL or Buffer of the image
+	*/
 	static async bed(image1: imageParam, image2: imageParam) {
-		const avatar = await Canvas.loadImage(image1);
-		const avatar1 = await Canvas.loadImage(image2);
-		const background = await Canvas.loadImage(Image._getImage('bed'));
+		const [img1, img2, bg] = await Promise.all([Canvas.loadImage(await Image.circle(image1)), Canvas.loadImage(await Image.circle(image2)), Canvas.loadImage(Image._getImage('bed'))]);
 
-		const canvas = Canvas.createCanvas(background.width, background.height);
+		const canvas = Canvas.createCanvas(bg.width, bg.height);
 		const ctx = canvas.getContext('2d');
-		ctx.drawImage(background, 0, 0, canvas.width, canvas.height);
+		ctx.drawImage(bg, 0, 0, canvas.width, canvas.height);
+		ctx.drawImage(img1, 25, 100, 100, 100);
+		ctx.drawImage(img1, 25, 300, 100, 100);
+		ctx.drawImage(img1, 53, 450, 70, 70);
+		ctx.drawImage(img2, 53, 575, 100, 100);
 
-		ctx.drawImage(avatar, 25, 100, 100, 100);
-		ctx.drawImage(avatar, 25, 300, 100, 100);
-		ctx.drawImage(avatar, 53, 450, 70, 70);
-		ctx.drawImage(avatar1, 53, 575, 100, 100);
-
-		const result = await canvas.encode('png');
-		return result;
+		return canvas.encode('png');
 	}
 
+	/**
+		* Make an image blurry
+		* @param {imageParam} image The URL or Buffer of the image
+	*/
 	static async blur(image: imageParam) {
 		const img = await Canvas.loadImage(image);
 		const canvas = Canvas.createCanvas(img.width, img.height);
 		const ctx = canvas.getContext('2d');
 
-		ctx.fillStyle = '#ffffff';
-		ctx.fillRect(0, 0, canvas.width, canvas.height);
 		ctx.drawImage(img, 0, 0, canvas.width / 4, canvas.height / 4);
-		ctx.imageSmoothingEnabled = true;
+		ctx.filter = 'blur(5px)';
 		ctx.drawImage(canvas, 0, 0, canvas.width / 4, canvas.height / 4, 0, 0, canvas.width + 5, canvas.height + 5);
 
-		const result = await canvas.encode('png');
-		return result;
+		return canvas.encode('png');
 	}
 
+	/**
+		* Create a 'change my mind' meme image
+		* @param {string} text The text to put on the sign
+	*/
 	static async changemymind(text: string) {
 		const base = await Canvas.loadImage(Image._getImage('changemymind'));
 		const canvas = Canvas.createCanvas(base.width, base.height);
@@ -140,10 +149,13 @@ export default class Image {
 			i++;
 		}
 
-		const result = await canvas.encode('png');
-		return result;
+		return canvas.encode('png');
 	}
 
+	/**
+		* Turn the image into a circle
+		* @param {imageParam} image The URL or Buffer of the image
+	*/
 	static async circle(image: imageParam) {
 		const img = await Canvas.loadImage(image);
 		const canvas = Canvas.createCanvas(img.width, img.height);
@@ -156,10 +168,13 @@ export default class Image {
 		ctx.clip();
 		ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
 
-		const result = await canvas.encode('png');
-		return result;
+		return canvas.encode('png');
 	}
 
+	/**
+		* Create a discord clyde message meme image
+		* @param {imageParam} text The text for the bot to say
+	*/
 	static async clyde(text: string) {
 		const background = await Canvas.loadImage(Image._getImage('clyde'));
 		const canvas = Canvas.createCanvas(background.width, background.height);
@@ -167,17 +182,19 @@ export default class Image {
 		ctx.drawImage(background, 0, 0, canvas.width, canvas.height);
 
 		// Draw text to image
-
 		ctx.fillStyle = 'white';
 		ctx.font = '15px Georgia';
 		ctx.fillText(text.substring(0, 66), 75, 50);
 
-		const result = await canvas.encode('png');
-		return result;
+		return canvas.encode('png');
 	}
 
-	static async deepfry(image1: imageParam) {
-		const img = await Canvas.loadImage(image1);
+	/**
+		* Create a deepfried meme image
+		* @param {imageParam} image The URL or Buffer of the image
+	*/
+	static async deepfry(image: imageParam) {
+		const img = await Canvas.loadImage(image);
 		const canvas = Canvas.createCanvas(img.width, img.height);
 		const ctx = canvas.getContext('2d');
 		ctx.drawImage(img, 0, 0);
@@ -225,28 +242,33 @@ export default class Image {
 			data[i + 2] = b;
 		}
 		ctx.putImageData(imageData, 0, 0);
-		const result = await canvas.encode('png');
-		return result;
+		return canvas.encode('png');
 	}
 
-	static async distracted(image1: imageParam, image2: imageParam, image3 = '') {
-		const background = await Canvas.loadImage(Image._getImage('distracted'));
-		const avatar1 = await Canvas.loadImage(await Image.circle(image1));
-		const avatar2 = await Canvas.loadImage(await Image.circle(image2));
-		const avatar3 = image3 ? await Canvas.loadImage(await Image.circle(image3)) : null;
+	/**
+		* Create a distracted meme image
+		* @param {imageParam} image1 The URL or Buffer of the image
+		* @param {imageParam} image2 The URL or Buffer of the image
+		* @param {?imageParam} image3 The URL or Buffer of the image
+	*/
+	static async distracted(image1: imageParam, image2: imageParam, image3?: imageParam) {
+		const [img1, img2, bg] = await Promise.all([Canvas.loadImage(await Image.circle(image1)), Canvas.loadImage(await Image.circle(image2)), Canvas.loadImage(Image._getImage('distracted'))]);
+		const img3 = image3 ? await Canvas.loadImage(await Image.circle(image3)) : null;
 
-		const canvas = Canvas.createCanvas(background.width, background.height);
+		const canvas = Canvas.createCanvas(bg.width, bg.height);
 		const ctx = canvas.getContext('2d');
+		ctx.drawImage(bg, 0, 0, canvas.width, canvas.height);
+		ctx.drawImage(img1, 180, 90, 150, 150);
+		ctx.drawImage(img2, 480, 35, 130, 130);
+		if (img3) ctx.drawImage(img3, 730, 110, 130, 130);
 
-		ctx.drawImage(background, 0, 0, canvas.width, canvas.height);
-		ctx.drawImage(avatar1, 180, 90, 150, 150);
-		ctx.drawImage(avatar2, 480, 35, 130, 130);
-		if (avatar3) ctx.drawImage(avatar3, 730, 110, 130, 130);
-
-		const result = await canvas.encode('png');
-		return result;
+		return canvas.encode('png');
 	}
 
+	/**
+		* Create a face palm meme image
+		* @param {imageParam} image The URL or Buffer of the image
+	*/
 	static async facepalm(image: imageParam) {
 		const layer = await Canvas.loadImage(Image._getImage('facepalm'));
 		const canvas = Canvas.createCanvas(632, 357);
@@ -257,12 +279,15 @@ export default class Image {
 		ctx.drawImage(avatar, 199, 112, 235, 235);
 		ctx.drawImage(layer, 0, 0, 632, 357);
 
-		const result = await canvas.encode('png');
-		return result;
+		return canvas.encode('png');
 	}
 
-	static async greyscale(image1: imageParam) {
-		const img = await Canvas.loadImage(image1);
+	/**
+		* Turn an image into a greyscale version
+		* @param {imageParam} image The URL or Buffer of the image
+	*/
+	static async greyscale(image: imageParam) {
+		const img = await Canvas.loadImage(image);
 		const canvas = Canvas.createCanvas(img.width, img.height);
 		const ctx = canvas.getContext('2d');
 
@@ -277,11 +302,13 @@ export default class Image {
 		}
 		ctx.putImageData(imgData, 0, 0);
 
-		const result = await canvas.encode('png');
-		return result;
+		return canvas.encode('png');
 	}
 
-
+	/**
+		* Turn the image into an inverted version
+		* @param {imageParam} image The URL or Buffer of the image
+	*/
 	static async invert(image: imageParam) {
 		const img = await Canvas.loadImage(image);
 		const canvas = Canvas.createCanvas(img.width, img.height);
@@ -289,104 +316,136 @@ export default class Image {
 		ctx.drawImage(img, 0, 0);
 
 		const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-
 		for (let i = 0; i < imgData.data.length; i += 4) {
 			imgData.data[i] = 255 - imgData.data[i];
 			imgData.data[i + 1] = 255 - imgData.data[i + 1];
 			imgData.data[i + 2] = 255 - imgData.data[i + 2];
 			imgData.data[i + 3] = 255;
 		}
-
 		ctx.putImageData(imgData, 0, 0);
 
-		const result = await canvas.encode('png');
-		return result;
+		return canvas.encode('png');
 	}
 
+	/**
+		* Create a 'joke over head' meme image
+		* @param {imageParam} image The URL or Buffer of the image
+	*/
 	static async jokeOverHead(image: imageParam) {
-		const layer = await Canvas.loadImage(Image._getImage('jokeoverhead'));
-		const img = await Canvas.loadImage(image);
+		const [img, bg] = await Promise.all([Canvas.loadImage(image), Canvas.loadImage(Image._getImage('jokeoverhead'))]);
 		const canvas = Canvas.createCanvas(425, 404);
 		const ctx = canvas.getContext('2d');
 		ctx.fillStyle = 'black';
 		ctx.fillRect(0, 0, 425, 404);
 		ctx.drawImage(img, 125, 130, 140, 135);
-		ctx.drawImage(layer, 0, 0, 425, 404);
+		ctx.drawImage(bg, 0, 0, 425, 404);
 
-		const result = await canvas.encode('png');
-		return result;
+		return canvas.encode('png');
 	}
 
+	/**
+		* Create a kissing meme image
+		* @param {imageParam} image1 The URL or Buffer of the image
+		* @param {imageParam} image2 The URL or Buffer of the image
+	*/
 	static async kiss(image1: imageParam, image2: imageParam) {
+		const [img1, img2, bg] = await Promise.all([Canvas.loadImage(await Image.circle(image1)),
+			Canvas.loadImage(await Image.circle(image2)), Canvas.loadImage(Image._getImage('kiss'))]);
+
 		const canvas = Canvas.createCanvas(768, 574);
 		const ctx = canvas.getContext('2d');
-		const background = await Canvas.loadImage(Image._getImage('kiss'));
-		ctx.drawImage(background, 0, 0, canvas.width, canvas.height);
-		const avatar = await Canvas.loadImage(image1);
-		const avatar1 = await Canvas.loadImage(image2);
-		ctx.drawImage(avatar1, 370, 25, 200, 200);
-		ctx.drawImage(avatar, 150, 25, 200, 200);
+		ctx.drawImage(bg, 0, 0, canvas.width, canvas.height);
+		ctx.drawImage(img1, 150, 25, 200, 200);
+		ctx.drawImage(img2, 370, 25, 200, 200);
 
-		const result = await canvas.encode('png');
-		return result;
+		return canvas.encode('png');
 	}
 
-	static async ohno(message: string) {
+	/**
+		* Create a 'oh no' meme image
+		* @param {string} text The URL or Buffer of the image
+	*/
+	static async ohno(text: string) {
 		const bg = await Canvas.loadImage(Image._getImage('ohno'));
 		const canvas = Canvas.createCanvas(1000, 1000);
 		const ctx = canvas.getContext('2d');
 
+		// TODO: Update text to follow existing style
 		ctx.drawImage(bg, 0, 0, canvas.width, canvas.height);
-
-		ctx.font = 'bold 50px ROBOTO_REGULAR,NOTO_COLOR_EMOJI';
-		ctx.fillStyle = '#000000';
-
-		ctx.fillText(message.length <= 20 ? message : message.substring(0, 20).trim() + '...', 540, 195);
-
-		const result = await canvas.encode('png');
-		return result;
+		ctx.fillStyle = 'black';
+		ctx.font = '15px Georgia';
+		ctx.fillText(text.substring(0, 66), 540, 195);
+		return canvas.encode('png');
 	}
 
+	/**
+		* Create a 'RIP' meme image
+		* @param {imageParam} image The URL or Buffer of the image
+	*/
 	static async rip(image: imageParam) {
-		const img = await Canvas.loadImage(image);
-		const bg = await Canvas.loadImage(Image._getImage('RIP'));
+		const [img, bg] = await Promise.all([Canvas.loadImage(image), Canvas.loadImage(Image._getImage('RIP'))]);
+
 		const canvas = Canvas.createCanvas(244, 253);
 		const ctx = canvas.getContext('2d');
 		ctx.drawImage(bg, 0, 0, canvas.width, canvas.height);
 		ctx.drawImage(img, 63, 110, 90, 90);
 
-		const result = await canvas.encode('png');
-		return result;
+		return canvas.encode('png');
 	}
 
+	/**
+		* Create a 'bat slap' meme image
+		* @param {imageParam} image1 The URL or Buffer of the image
+		* @param {imageParam} image2 The URL or Buffer of the image
+	*/
 	static async slap(image1: imageParam, image2: imageParam) {
+		const [img1, img2, bg] = await Promise.all([Canvas.loadImage(await Image.circle(image1)), Canvas.loadImage(await Image.circle(image2)),
+			Canvas.loadImage(Image._getImage('batslap'))]);
+
 		const canvas = Canvas.createCanvas(1000, 500);
 		const ctx = canvas.getContext('2d');
-		const background = await Canvas.loadImage(Image._getImage('batslap'));
-		ctx.drawImage(background, 0, 0, canvas.width, canvas.height);
-		const avatar = await Canvas.loadImage(image1);
-		const avatar1 = await Canvas.loadImage(image2);
-		ctx.drawImage(avatar1, 580, 260, 200, 200);
-		ctx.drawImage(avatar, 350, 70, 220, 220);
+		ctx.drawImage(bg, 0, 0, canvas.width, canvas.height);
+		ctx.drawImage(img2, 580, 260, 200, 200);
+		ctx.drawImage(img1, 335, 50, 220, 220);
 
-		const result = await canvas.encode('png');
-		return result;
+		return canvas.encode('png');
 	}
 
+	/**
+		* Create a 'spank' meme image
+		* @param {imageParam} image1 The URL or Buffer of the image
+		* @param {imageParam} image2 The URL or Buffer of the image
+	*/
 	static async spank(image1: imageParam, image2: imageParam) {
+		const [img1, img2, bg] = await Promise.all([Canvas.loadImage(await Image.circle(image1)), Canvas.loadImage(await Image.circle(image2)),
+			Canvas.loadImage(Image._getImage('spank'))]);
+
 		const canvas = Canvas.createCanvas(500, 500);
 		const ctx = canvas.getContext('2d');
-		const background = await Canvas.loadImage(Image._getImage('spank'));
-		ctx.drawImage(background, 0, 0, canvas.width, canvas.height);
-		const avatar = await Canvas.loadImage(image1);
-		const avatar1 = await Canvas.loadImage(image2);
-		ctx.drawImage(avatar1, 350, 220, 120, 120);
-		ctx.drawImage(avatar, 225, 5, 140, 140);
+		ctx.drawImage(bg, 0, 0, canvas.width, canvas.height);
+		ctx.drawImage(img2, 350, 220, 120, 120);
+		ctx.drawImage(img1, 225, 5, 140, 140);
 
-		const result = await canvas.encode('png');
-		return result;
+		return canvas.encode('png');
 	}
 
+	/**
+		* Create a coloured square
+		* @param {string} colour The colour for filling the square with
+	*/
+	static async square(colour: string) {
+		const canvas = createCanvas(200, 200),
+			context = canvas.getContext('2d');
+		context.fillStyle = colour;
+		context.fillRect(0, 0, 200, 200);
+
+		return canvas.encode('png');
+	}
+
+	/**
+		* Create a 'triggered' meme GIF
+		* @param {imageParam} image The URL or Buffer of the image
+	*/
 	static async trigger(image: imageParam) {
 		const base = await Canvas.loadImage(Image._getImage('triggered'));
 		const img = await Canvas.loadImage(image);
@@ -428,59 +487,65 @@ export default class Image {
 			stream.on('end', () => resolve(Buffer.concat(data)));
 			stream.on('error', reject);
 		});
+
 		return result;
 	}
 
+	/**
+		* Create a 'wanted' meme image
+		* @param {imageParam} image The URL or Buffer of the image
+	*/
 	static async wanted(image: imageParam) {
+		const avatar = await Canvas.loadImage(image);
+
 		const canvas = Canvas.createCanvas(500, 500);
 		const ctx = canvas.getContext('2d');
-		const avatar = await Canvas.loadImage(image);
 		ctx.drawImage(avatar, 350, 220, 120, 120);
 
-		const result = await canvas.encode('png');
-		return result;
+		return canvas.encode('png');
 	}
 
-	static async wasted(image1: imageParam) {
+	/**
+		* Create a 'wasted' meme image
+		* @param {imageParam} image The URL or Buffer of the image
+	*/
+	static async wasted(image: imageParam) {
+		const img = await Canvas.loadImage(await Image.greyscale(image));
 		const canvas = Canvas.createCanvas(500, 500);
 		const ctx = canvas.getContext('2d');
-		const img = await Canvas.loadImage(image1);
 
-		// Greyscale the image first
+		// Add WASTED text to image
 		ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-		const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-		const pixels = imgData.data;
-		for (let i = 0; i < pixels.length; i += 4) {
-			const lightness = (pixels[i] + pixels[i + 1] + pixels[i + 2]) / 3;
-			pixels[i] = lightness;
-			pixels[i + 1] = lightness;
-			pixels[i + 2] = lightness;
-		}
-		ctx.putImageData(imgData, 0, 0);
-
 		const bg = await Canvas.loadImage(Image._getImage('wasted'));
 		ctx.drawImage(bg, canvas.width / 2 - 188, canvas.height / 2 - 50, 375, 250);
 
-		const result = await canvas.encode('png');
-		return result;
+		return canvas.encode('png');
 	}
 
+	/**
+		* Create a 'who would win' meme image
+		* @param {imageParam} image1 The URL or Buffer of the image
+		* @param {imageParam} image2 The URL or Buffer of the image
+	*/
 	static async whowouldwin(image1: imageParam, image2: imageParam) {
+		const [img1, img2, bg] = await Promise.all([Canvas.loadImage(image1), Canvas.loadImage(image2), Canvas.loadImage(Image._getImage('whowouldwin'))]);
+
 		const canvas = Canvas.createCanvas(500, 500);
 		const ctx = canvas.getContext('2d');
+		ctx.drawImage(bg, 0, 0, canvas.width, canvas.height);
+		ctx.drawImage(img1, 10, 104, 225, 225);
+		ctx.drawImage(img2, 270, 104, 225, 225);
 
-		const background = await Canvas.loadImage(Image._getImage('whowouldwin'));
-		ctx.drawImage(background, 0, 0, canvas.width, canvas.height);
-		const avatar = await Canvas.loadImage(image1);
-		const avatar1 = await Canvas.loadImage(image2);
-
-		ctx.drawImage(avatar, 10, 104, 225, 225);
-		ctx.drawImage(avatar1, 270, 104, 225, 225);
-
-		const result = await canvas.encode('png');
-		return result;
+		return canvas.encode('png');
 	}
 
+	/**
+		* Create a 'who would win' meme image
+		* @param {getLines} obj The Object
+		* @param {string} obj.text The text to add on the canvas
+		* @param {SKRSContext2D} obj.ctx The canvas
+		* @param {number} obj.maxWidth The max width text can be
+	*/
 	static getLines({ text, ctx, maxWidth }: getLines) {
 		if (!text) return [];
 		if (!ctx) throw new Error('Canvas context was not provided!');
@@ -496,22 +561,14 @@ export default class Image {
 			lines.push(result.substring(0, j || result.length));
 			text = text.substring(lines[lines.length - 1].length, text.length);
 		}
-
 		return lines;
 	}
 
-	static async square(colour: string) {
-		const canvas = createCanvas(200, 200),
-			context = canvas.getContext('2d');
-		context.fillStyle = colour;
-		context.fillRect(0, 0, 200, 200);
-		const result = await canvas.encode('png');
-		return result;
-	}
-
-
-	// Get the background image
-	static _getImage(image: string) {
-		return fs.readFileSync(`${process.cwd()}/src/assets/images/${image}.png`);
+	/**
+		* Get the required image to create the meme
+		* @param {string} imageName The name of the image for creating meme template
+	*/
+	private static _getImage(imageName: string) {
+		return fs.readFileSync(`${process.cwd()}/src/assets/images/${imageName}.png`);
 	}
 }
