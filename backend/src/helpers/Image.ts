@@ -497,10 +497,11 @@ export default class Image {
 	*/
 	static async wanted(image: imageParam) {
 		const avatar = await Canvas.loadImage(image);
-
-		const canvas = Canvas.createCanvas(500, 500);
+		const bg = await Canvas.loadImage(Image._getImage('wanted'));
+		const canvas = Canvas.createCanvas(bg.width, bg.height);
 		const ctx = canvas.getContext('2d');
-		ctx.drawImage(avatar, 350, 220, 120, 120);
+		ctx.drawImage(bg, 0, 0);
+		ctx.drawImage(avatar, 100, 265, 500, 500);
 
 		return canvas.encode('png');
 	}
