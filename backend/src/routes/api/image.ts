@@ -12,7 +12,7 @@ export function run() {
 	  *    description: Create an 3000years image
 	  *    parameters:
 	  *       - name: image1
-	  *         description: The URL of the message
+	  *         description: The URL of the image
 	  *         required: true
 	  *         type: string
 	*/
@@ -36,7 +36,7 @@ export function run() {
 	  *    description: Create an affect image
 	  *    parameters:
 	  *       - name: image1
-	  *         description: The URL of the message
+	  *         description: The URL of the image
 	  *         required: true
 	  *         type: string
 	*/
@@ -60,7 +60,7 @@ export function run() {
 	  *    description: Create an approved image
 	  *    parameters:
 	  *       - name: image1
-	  *         description: The URL of the message
+	  *         description: The URL of the image
 	  *         required: true
 	  *         type: string
 	*/
@@ -84,7 +84,7 @@ export function run() {
 	  *    description: Create an affect image
 	  *    parameters:
 	  *       - name: image1
-	  *         description: The URL of the message
+	  *         description: The URL of the image
 	  *         required: true
 	  *         type: string
 	*/
@@ -108,11 +108,11 @@ export function run() {
 	 *    description: Create an bed image
 	 *    parameters:
 	 *       - name: image1
-	 *         description: The URL of the message
+	 *         description: The URL of the image
 	 *         required: true
 	 *         type: string
 	 *       - name: image2
-	 *         description: The URL of the message
+	 *         description: The URL of the image
 	 *         required: true
 	 *         type: string
 	 */
@@ -137,7 +137,7 @@ export function run() {
 	  *    description: Create an blur image
 	  *    parameters:
 	  *       - name: image1
-	  *         description: The URL of the message
+	  *         description: The URL of the image
 	  *         required: true
 	  *         type: string
 	*/
@@ -187,7 +187,7 @@ export function run() {
 	  *    description: Create an circle image
 	  *    parameters:
 	  *       - name: image1
-	  *         description: The URL of the message
+	  *         description: The URL of the image
 	  *         required: true
 	  *         type: string
 	*/
@@ -237,7 +237,7 @@ export function run() {
 	  *    description: Create an deepfry image
 	  *    parameters:
 	  *       - name: image1
-	  *         description: The URL of the message
+	  *         description: The URL of the image
 	  *         required: true
 	  *         type: string
 	*/
@@ -262,12 +262,16 @@ export function run() {
 	 *    tags: image
 	 *    parameters:
 	 *       - name: image1
-	 *         description: The URL of the message
+	 *         description: The URL of the image
 	 *         required: true
 	 *         type: string
 	 *       - name: image2
-	 *         description: The URL of the message
+	 *         description: The URL of the image
 	 *         required: true
+	 *         type: string
+	 *       - name: image3
+	 *         description: The URL of the image
+	 *         required: false
 	 *         type: string
 	 */
 	router.get('/distracted', checkImage(2), async (req, res) => {
@@ -292,7 +296,7 @@ export function run() {
 	  *    description: Create an facepalm image
 	  *    parameters:
 	  *       - name: image1
-	  *         description: The URL of the message
+	  *         description: The URL of the image
 	  *         required: true
 	  *         type: string
 	*/
@@ -316,7 +320,7 @@ export function run() {
 	  *    description: Create an greyscale image
 	  *    parameters:
 	  *       - name: image1
-	  *         description: The URL of the message
+	  *         description: The URL of the image
 	  *         required: true
 	  *         type: string
 	*/
@@ -340,7 +344,7 @@ export function run() {
 	  *    description: Create an invert image
 	  *    parameters:
 	  *       - name: image1
-	  *         description: The URL of the message
+	  *         description: The URL of the image
 	  *         required: true
 	  *         type: string
 	*/
@@ -364,7 +368,7 @@ export function run() {
 	  *    description: Create an joke over head image
 	  *    parameters:
 	  *       - name: image1
-	  *         description: The URL of the message
+	  *         description: The URL of the image
 	  *         required: true
 	  *         type: string
 	*/
@@ -388,11 +392,11 @@ export function run() {
 	  *    description: Create an kiss image
 	  *    parameters:
 	  *       - name: image1
-	  *         description: The URL of the message
+	  *         description: The URL of the image
 	  *         required: true
 	  *         type: string
 		*       - name: image2
-	  *         description: The URL of the message
+	  *         description: The URL of the image
 	  *         required: true
 	  *         type: string
 	*/
@@ -444,7 +448,7 @@ export function run() {
 	  *    description: Create an rip image
 	  *    parameters:
 	  *       - name: image1
-	  *         description: The URL of the message
+	  *         description: The URL of the image
 	  *         required: true
 	  *         type: string
 	*/
@@ -468,11 +472,11 @@ export function run() {
 	  *    description: Create an slap image
 	  *    parameters:
 	  *       - name: image1
-	  *         description: The URL of the message
+	  *         description: The URL of the image
 	  *         required: true
 	  *         type: string
 		*       - name: image2
-	  *         description: The URL of the message
+	  *         description: The URL of the image
 	  *         required: true
 	  *         type: string
 	*/
@@ -497,11 +501,11 @@ export function run() {
 	  *    description: Create an spank image
 	  *    parameters:
 	  *       - name: image1
-	  *         description: The URL of the message
+	  *         description: The URL of the image
 	  *         required: true
 	  *         type: string
 		*       - name: image2
-	  *         description: The URL of the message
+	  *         description: The URL of the image
 	  *         required: true
 	  *         type: string
 	*/
@@ -526,7 +530,7 @@ export function run() {
 	  *    description: Create an trigger image
 	  *    parameters:
 	  *       - name: image1
-	  *         description: The URL of the message
+	  *         description: The URL of the image
 	  *         required: true
 	  *         type: string
 	*/
@@ -550,7 +554,7 @@ export function run() {
 	  *    description: Create an wanted image
 	  *    parameters:
 	  *       - name: image1
-	  *         description: The URL of the message
+	  *         description: The URL of the image
 	  *         required: true
 	  *         type: string
 	*/
@@ -574,7 +578,7 @@ export function run() {
 	  *    description: Create an wasted image
 	  *    parameters:
 	  *       - name: image1
-	  *         description: The URL of the message
+	  *         description: The URL of the image
 	  *         required: true
 	  *         type: string
 	*/
@@ -598,11 +602,11 @@ export function run() {
 	  *    description: Create an who would win image
 	  *    parameters:
 	  *       - name: image1
-	  *         description: The URL of the message
+	  *         description: The URL of the image
 	  *         required: true
 	  *         type: string
 		*       - name: image2
-	  *         description: The URL of the message
+	  *         description: The URL of the image
 	  *         required: true
 	  *         type: string
 	*/

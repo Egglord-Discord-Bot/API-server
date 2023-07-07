@@ -44,7 +44,7 @@ export function run() {
 	 * @openapi
 	 * /games/mc:
 	 *  get:
-	 *    description: Get information on a minecraft server.
+	 *    description: Get information on a minecraft server
 	 *    responses:
    *      '200':
    *        schema:
