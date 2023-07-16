@@ -17,7 +17,7 @@ type sendResponseParam = {
   res: Response & time
   userId: null | bigint
   endpoint: string
-  response: any | null
+  response: ((res: Response<any, Record<string, any>>, endpoint: string) => Response<any, Record<string, any>>) | null
 }
 
 interface endpointData {
