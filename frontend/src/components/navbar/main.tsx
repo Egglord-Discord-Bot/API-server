@@ -23,6 +23,9 @@ export default function Main({ user }: Props) {
 						<li className="nav-item">
 							<a className="nav-link active" href="https://discord.gg/8g6zUQu">Discord</a>
 						</li>
+						<li className="nav-item">
+							<Link className="nav-link active" href="/generate">Generate</Link>
+						</li>
 					</ul>
 					<ul className="navbar-nav d-flex">
 						{user == undefined ?
