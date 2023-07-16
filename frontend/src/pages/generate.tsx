@@ -6,6 +6,7 @@ import { useSession } from 'next-auth/react';
 import { useState } from 'react';
 import type { EndpointExtra, EndpointParam } from '../types';
 import type { GetServerSidePropsContext } from 'next';
+import Script from 'next/script';
 import Image from 'next/image';
 import type { ChangeEvent, FormEvent } from 'react';
 interface Props {
@@ -15,7 +16,7 @@ interface Props {
 export default function Home({ endpoints }: Props) {
 	const { data: session, status } = useSession();
 	const [selected, setSelected] = useState<EndpointExtra>(endpoints[0]);
-	const [response, setResponse] = useState<any>();
+	const [response, setResponse] = useState<object | string>();
 	if (status == 'loading') return null;
 
 	function updateParams(e: ChangeEvent) {
@@ -31,7 +32,7 @@ export default function Home({ endpoints }: Props) {
 
 		// Get the users input, convert to URL query params
 		const z = document.querySelectorAll('*[name^="param"]');
-		const params = selected.data?.parameters.map(l => `${l.name}=${(z.item(selected.data?.parameters?.indexOf(l) ?? -1) as HTMLInputElement).value}`).join('&');
+		const params = selected.data?.parameters?.map(l => `${l.name}=${(z.item(selected.data?.parameters?.indexOf(l) ?? -1) as HTMLInputElement).value}`).join('&');
 
 		// Make the actual request if it's data, if it's an image just display the url as image src
 		if (selected.name.startsWith('/api/image')) {
@@ -62,6 +63,9 @@ export default function Home({ endpoints }: Props) {
 											<option value={e.name} key={e.name}>{e.name}</option>
 										))}
 									</select>
+									<div id="passwordHelpBlock" className="form-text">
+										{selected.data?.description}
+									</div>
 								</div>
 							</div>
 							<div id="params">
@@ -72,11 +76,12 @@ export default function Home({ endpoints }: Props) {
 							<button type="submit" className="btn btn-primary">Send</button>
 						</form>
 					</div>
+					<Script src="https://cdn.jsdelivr.net/gh/google/code-prettify@master/loader/run_prettify.js"></Script>
 					<div className="col-lg-6">
 						<h1>Response</h1>
 						{selected.name.startsWith('/api/image') ?
-							<Image src={response} width={512} height={512} alt={selected.name}/> :
-							<code dangerouslySetInnerHTML={{ __html: JSON.stringify(response, null, 4) }}></code>
+							<Image src={response as string} alt={selected.name} width={300} height={300}/> :
+							<pre className="prettyprint">{JSON.stringify(response, null, 4)}</pre >
 						}
 					</div>
 				</div>
