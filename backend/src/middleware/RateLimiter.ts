@@ -5,6 +5,7 @@ import { Utils } from '../utils/Utils';
 import Error from '../utils/Errors';
 import type { User, Endpoint } from '@prisma/client';
 import onFinished from 'on-finished';
+import { createHash } from 'crypto';
 
 type endpointUsage = {
   name: string
@@ -37,34 +38,48 @@ export default class RateLimit {
 	}
 
 	async checkRateLimit(req: Request & time, res: Response & time, next: NextFunction) {
-		// Get the user from the request
-		const user = await this._extractUser(req);
-		if (user === null) return this.sendResponse({ req, res, userId: null, endpoint: req.originalUrl.split('?')[0], response: Error.Unauthorized });
 
-		// Check that the endpoint is valid
-		const endpoint = this.endpointData.find(i => i.name == req.originalUrl.split('?')[0]);
-		if (endpoint == undefined) return this.sendResponse({ req, res, userId: user.id, endpoint: req.originalUrl.split('?')[0], response: Error.MissingEndpoint });
+		// See if the request is coming from the frontend via browser
+		const cookies = req.headers.cookie?.split(';') as Array<string>;
+		const csrfToken = cookies.find(c => c.startsWith(' next-auth.csrf-token'))?.split('=')[1] as string;
+		const tokenHashDelimiter = csrfToken.indexOf('|') !== -1 ? '|' : '%7C';
 
-		// Check if endpoint is blocked
-		if (endpoint.isBlocked) return this.sendResponse({ req, res, userId: user.id, endpoint: endpoint.name, response: Error.DisabledEndpoint });
+		// Validate hashes
+		const [requestToken, requestHash] = csrfToken.split(tokenHashDelimiter);
+		const validHash = createHash('sha256').update(`${requestToken}${process.env.sessionSecret}`).digest('hex');
 
-		// Check if endpoint is premium only or not
-		if (endpoint.premiumOnly && !user.isPremium) return this.sendResponse({ req, res, userId: user.id, endpoint: endpoint.name, response: Error.Unauthorized });
+		// if hashes are not correct then check through usual system (auth header, token etc)
+		if (requestHash !== validHash) {
+			// Get the user from the request
+			const user = await this._extractUser(req);
+			if (user === null) return this.sendResponse({ req, res, userId: null, endpoint: req.originalUrl.split('?')[0], response: Error.Unauthorized });
 
-		// Bypass ratelimit if user is an Admin
-		if (!user.isAdmin) {
-			// Now check if user is rate limited by global rate Limit
-			const isGloballyRateLimited = this._checkGlobalCooldown(user.id);
-			if (isGloballyRateLimited) return this.sendResponse({ req, res, userId: user.id, endpoint: endpoint.name, response: Error.GlobalRateLimit });
+			// Check that the endpoint is valid
+			const endpoint = this.endpointData.find(i => i.name == req.originalUrl.split('?')[0]);
+			if (endpoint == undefined) return this.sendResponse({ req, res, userId: user.id, endpoint: req.originalUrl.split('?')[0], response: Error.MissingEndpoint });
 
-			// Now check if user is rate limited by endpoint
-			const isRateLimitedByEndpoint = await this.checkEndpointUsage(user.id, endpoint.name);
-			if (isRateLimitedByEndpoint) return this.sendResponse({ req, res, userId: user.id, endpoint: endpoint.name, response: Error.RateLimited });
-		} else {
-			// Success
-			this.addEndpoint(user.id, endpoint.name);
-			this.sendResponse({ req, res, userId: user.id, endpoint: endpoint.name, response: null });
+			// Check if endpoint is blocked
+			if (endpoint.isBlocked) return this.sendResponse({ req, res, userId: user.id, endpoint: endpoint.name, response: Error.DisabledEndpoint });
+
+			// Check if endpoint is premium only or not
+			if (endpoint.premiumOnly && !user.isPremium) return this.sendResponse({ req, res, userId: user.id, endpoint: endpoint.name, response: Error.Unauthorized });
+
+			// Bypass ratelimit if user is an Admin
+			if (!user.isAdmin) {
+				// Now check if user is rate limited by global rate Limit
+				const isGloballyRateLimited = this._checkGlobalCooldown(user.id);
+				if (isGloballyRateLimited) return this.sendResponse({ req, res, userId: user.id, endpoint: endpoint.name, response: Error.GlobalRateLimit });
+
+				// Now check if user is rate limited by endpoint
+				const isRateLimitedByEndpoint = await this.checkEndpointUsage(user.id, endpoint.name);
+				if (isRateLimitedByEndpoint) return this.sendResponse({ req, res, userId: user.id, endpoint: endpoint.name, response: Error.RateLimited });
+			} else {
+				// Success
+				this.addEndpoint(user.id, endpoint.name);
+				this.sendResponse({ req, res, userId: user.id, endpoint: endpoint.name, response: null });
+			}
 		}
+
 
 		// User is logged in and not ratelimited at all
 		next();
