@@ -2,6 +2,7 @@ import Header from '../components/header';
 import Footer from '../components/navbar/footer';
 import Navbar from '../components/navbar/main';
 import ParamBuilder from '../components/paramBuilder';
+import Error from '../components/error';
 import { useSession } from 'next-auth/react';
 import { useState } from 'react';
 import type { EndpointExtra, EndpointParam } from '../types';
@@ -11,9 +12,10 @@ import Image from 'next/image';
 import type { ChangeEvent, FormEvent } from 'react';
 interface Props {
   endpoints: Array<EndpointExtra>
+  error?: string
 }
 
-export default function Home({ endpoints }: Props) {
+export default function Home({ endpoints, error }: Props) {
 	const { data: session, status } = useSession();
 	const [selected, setSelected] = useState<EndpointExtra>(endpoints[0]);
 	const [response, setResponse] = useState<object | string>();
@@ -51,6 +53,10 @@ export default function Home({ endpoints }: Props) {
 			<Header />
 			<Navbar user={session?.user} />
 			<div className="container">
+        &nbsp;
+				{error && (
+					<Error text={error} />
+				)}
 				<div className="row">
 					<div className="col-lg-6">
 						<h1>Input</h1>
@@ -64,14 +70,14 @@ export default function Home({ endpoints }: Props) {
 										))}
 									</select>
 									<div id="passwordHelpBlock" className="form-text">
-										{selected.data?.description}
+										{selected?.data?.description}
 									</div>
 								</div>
 							</div>
 							<div id="params">
 								<hr />
 								<h4>Parameters</h4>
-								<ParamBuilder EndpointParam={selected.data?.parameters as EndpointParam[]}/>
+								<ParamBuilder EndpointParam={selected?.data?.parameters as EndpointParam[]}/>
 							</div>
 							<button type="submit" className="btn btn-primary">Send</button>
 						</form>
@@ -79,7 +85,7 @@ export default function Home({ endpoints }: Props) {
 					<Script src="https://cdn.jsdelivr.net/gh/google/code-prettify@master/loader/run_prettify.js"></Script>
 					<div className="col-lg-6">
 						<h1>Response</h1>
-						{selected.name.startsWith('/api/image') ?
+						{selected?.name.startsWith('/api/image') ?
 							<Image src={response as string} alt={selected.name} width={300} height={300}/> :
 							<pre className="prettyprint">{JSON.stringify(response, null, 4)}</pre >
 						}
@@ -103,6 +109,6 @@ export async function getServerSideProps(ctx: GetServerSidePropsContext) {
 		return { props: { endpoints: endpointData.filter((e: EndpointExtra) => e.data != null) } };
 	} catch (err) {
 		console.log(err);
-		return { props: { endpoints: [] } };
+		return { props: { endpoints: [], error: 'API server is currently unavailable' } };
 	}
 }
