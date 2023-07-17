@@ -231,6 +231,33 @@ export function run() {
 	});
 
 	/**
+	 * @openapi
+	 * /image/colour:
+	 *  get:
+	 *    description: Update a users information
+	 *    tags: misc
+	 *    parameters:
+	 *       - name: colour
+	 *         description: The colour of the square
+	 *         required: true
+	 *         type: string
+	 */
+	router.get('/colour', async (req, res) => {
+		const colour = req.query.colour as string;
+		if (!colour) return Error.MissingQuery(res, 'colour');
+
+		try {
+			const img = await Image.square(colour);
+			res.set('Content-Disposition', 'inline; filename=colour.png');
+			res.setHeader('content-type', 'image/png');
+			res.send(img);
+		} catch (err: any) {
+			console.log(err);
+			Error.GenericError(res, err.message);
+		}
+	});
+
+	/**
 	  * @openapi
 	  * /image/deepfry:
 	  *  get:

@@ -1,7 +1,5 @@
 import { Router } from 'express';
 const router = Router();
-// import Puppeteer from 'puppeteer';
-import Image from '../../helpers/Image';
 import Tesseract from 'tesseract.js';
 import axios from 'axios';
 import Error from '../../utils/Errors';
@@ -30,6 +28,43 @@ export function run() {
 
 	/**
 	 * @openapi
+	 * /misc/animal:
+	 *  get:
+	 *    description: Get a link to a picture of an animal
+	 *    tags: misc
+	 *    parameters:
+	 *       - name: name
+	 *         description: The name of animal
+	 *         required: true
+	 *         type: string
+	*/
+	router.get('/animal', async (req, res) => {
+		let name = req.query.name as string;
+
+		// IF no animal was mentioned then do a random animal
+		if (!name) {
+			name = validAnimals[Math.floor(Math.random() * validAnimals.length)];
+		} else if (!validAnimals.includes(name)) {
+			// Make sure the animal specifed is valid
+			return Error.InvalidValue(res, 'name', validAnimals);
+		}
+
+		// Search for animal picture
+		const results = await image_search({
+			query: name, moderate: true,
+			iterations: 2, retries: 2,
+		});
+
+		res.json({ data: results[Math.floor(Math.random() * results.length)].image });
+	});
+
+	router.get('/animal/raw', (_req, res) => {
+		// Just return the array of all valid animals
+		res.json({ data: validAnimals });
+	});
+
+	/**
+	 * @openapi
 	 * /misc/pokemon:
 	 *  get:
 	 *    description: Get information on a pokemon
@@ -48,31 +83,6 @@ export function run() {
 			const advice = await axios.get(`https://courses.cs.washington.edu/courses/cse154/webservices/pokedex/pokedex.php?pokemon=${pokemon}`);
 			res.json({ data: advice.data });
 		} catch (err: any) {
-			Error.GenericError(res, err.message);
-		}
-	});
-
-	/**
-	 * @openapi
-	 * /misc/colour:
-	 *  get:
-	 *    description: Update a users information
-	 *    tags: misc
-	 *    parameters:
-	 *       - name: colour
-	 *         description: The colour of the square
-	 *         required: true
-	 *         type: string
-	 */
-	router.get('/colour', async (req, res) => {
-		const colour = req.query.colour as string;
-		if (!colour) return Error.MissingQuery(res, 'colour');
-
-		try {
-			const img = await Image.square(colour);
-			res.json({ data: img.toString() });
-		} catch (err: any) {
-			console.log(err);
 			Error.GenericError(res, err.message);
 		}
 	});
@@ -115,7 +125,6 @@ export function run() {
 	 */
 	router.get('/random-fact', async (_req, res) => {
 		fs.readFile('./src/assets/JSON/random-facts.json', async (err, data) => {
-
 			if (err) return Error.GenericError(res, err.message);
 
 			const { facts } = JSON.parse(data.toString());
@@ -127,42 +136,15 @@ export function run() {
 
 	/**
 	 * @openapi
-	 * /misc/animal:
-	 *  get:
-	 *    description: Get a link to a picture of an animal
-	 *    tags: misc
-	 */
-	router.get('/animal', async (req, res) => {
-		let name = req.query.name as string;
-
-		// IF no animal was mentioned then do a random animal
-		if (!name) {
-			name = validAnimals[Math.floor(Math.random() * validAnimals.length)];
-		} else if (!validAnimals.includes(name)) {
-			// Make sure the animal specifed is valid
-			return Error.InvalidValue(res, 'name', validAnimals);
-		}
-
-		// Search for animal picture
-		const results = await image_search({
-			query: name, moderate: true,
-			iterations: 2, retries: 2,
-		});
-
-		res.json({ data: results[Math.floor(Math.random() * results.length)].image });
-	});
-
-	router.get('/animal/raw', (_req, res) => {
-		// Just return the array of all valid animals
-		res.json({ data: validAnimals });
-	});
-
-	/**
-	 * @openapi
 	 * /misc/qrcode:
 	 *  get:
 	 *    description: Create a QR code based on the URL
 	 *    tags: misc
+	 *    parameters:
+	 *       - name: url
+	 *         description: The URL for the Qrcode to be created from
+	 *         required: true
+	 *         type: string
 	 */
 	router.get('/qrcode', async (req, res) => {
 		const url = req.query.url as string;
