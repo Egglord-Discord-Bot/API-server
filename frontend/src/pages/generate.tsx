@@ -19,6 +19,7 @@ export default function Home({ endpoints, error }: Props) {
 	const { data: session, status } = useSession();
 	const [selected, setSelected] = useState<EndpointExtra>(endpoints[0]);
 	const [response, setResponse] = useState<object | string>();
+	const [respTime, setRespTime] = useState<number>(0);
 	if (status == 'loading') return null;
 
 	function updateParams(e: ChangeEvent) {
@@ -40,10 +41,12 @@ export default function Home({ endpoints, error }: Props) {
 		if (selected.name.startsWith('/api/image')) {
 			setResponse(`${selected.name}?${params}`);
 		} else {
+			const time = new Date();
 			// Send request
 			const res = await fetch(`${selected.name}?${params}`, {
 				method: 'get',
 			});
+			setRespTime(new Date().getTime() - time.getTime());
 			setResponse(await res.json());
 		}
 	}
@@ -87,8 +90,11 @@ export default function Home({ endpoints, error }: Props) {
 						<h1>Response</h1>
 						{selected?.name.startsWith('/api/image') ?
 							<Image src={response as string} alt={selected.name} width={300} height={300}/> :
-							<pre className="prettyprint">{JSON.stringify(response, null, 4)}</pre >
+							<pre className="prettyprint" style={{ maxHeight: '74vh', overflowY: 'scroll' }}>{JSON.stringify(response, null, 4)}</pre >
 						}
+						{respTime > 0 && (
+							<p className="float-end">Response time: {respTime}ms</p>
+						)}
 					</div>
 				</div>
 			</div>
