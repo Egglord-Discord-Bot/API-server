@@ -1,6 +1,5 @@
 import Header from '../components/header';
-import Sidebar from '../components/navbar/sidebar';
-import AdminNavbar from '../components/navbar/admin';
+import { Sidebar, Admin as AdminNavbar } from '../components/navbar';
 import Error from '../components/error';
 import InfoPill from '../components/dashboard/infoPill';
 import { nFormatter, formatBytes } from '../utils/functions';
