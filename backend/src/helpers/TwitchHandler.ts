@@ -1,5 +1,5 @@
 import CacheHandler from './CacheHandler';
-import type { TwitchRequest, TwitchLivestreamData, TwitchLivestreamRequest, TwitchData, TwitchFollowersRequest } from '../types';
+import type { TwitchRequest, TwitchLivestreamData, TwitchLivestreamRequest, TwitchData, TwitchFollowersRequest } from '../types/socials/Twitch';
 import axios from 'axios';
 
 export default class TwitchHandler extends CacheHandler {

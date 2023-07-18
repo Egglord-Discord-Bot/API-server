@@ -3,14 +3,13 @@ const router = Router();
 import CacheHandler from '../../helpers/CacheHandler';
 import axios from 'axios';
 import { Utils } from '../../utils/Utils';
-import { RedditPost } from '../../types';
+import { RedditPost } from '../../types/socials/Reddit';
 import type { Covid } from '../../utils/responses';
 import { translate } from '@vitalets/google-translate-api';
 import languages from '../../assets/JSON/languages.json';
 import Error from '../../utils/Errors';
 import ud from 'urban-dictionary';
 import { parseString } from 'xml2js';
-// import { getSong } from 'genius-lyrics-api';
 export type redditType = 'hot' | 'new';
 
 type redditChild = {
@@ -74,6 +73,12 @@ export function run() {
 	 *       - name: sub
 	 *         description: The subreddit to get the post from.
 	 *         required: true
+	 *         type: string
+	 *       - name: type
+	 *         description: The subreddit to get the post from.
+	 *         required: false
+	 *         default: new
+	 *         enum: [new, hot, top]
 	 *         type: string
 	 */
 	router.get('/reddit', async (req, res) => {

@@ -2,6 +2,9 @@ import { Router } from 'express';
 import CacheHandler from '../../helpers/CacheHandler';
 import TwitchHandler from '../../helpers/TwitchHandler';
 import TwitterHandler from '../../helpers/TwitterHandler';
+import { GithubUser, GithubRepo } from '../../types/socials/Github';
+import type { SteamResolveVanityURLRawRequest } from '../../types/socials/Steam';
+import { SteamAccount } from '../../types/socials/Steam';
 import Error from '../../utils/Errors';
 import axios from 'axios';
 const router = Router();
@@ -11,6 +14,83 @@ export function run() {
 	const GithubHandler = new CacheHandler();
 	const TwitchCacheHandler = new TwitchHandler();
 	const TwitterCacheHandler = new TwitterHandler();
+
+	/**
+	 * @openapi
+	 * /socials/discord:
+	 *  get:
+	 *    description: Get information on a Discord user
+	 *    tags: social
+	 *    parameters:
+	 *       - name: userId
+	 *         description: The ID of the discord user
+	 *         required: true
+	 *         type: string
+	*/
+	router.get('/discord', async (req, res) => {
+		try {
+			const t = (await axios.get(`https://discord.com/api/v10/users/${req.query.userId}`, {
+				headers: {
+					Authorization: `Bot ${process.env.discordToken}`,
+				},
+			})).data;
+			res.json(t);
+		} catch (err) {
+			if (axios.isAxiosError(err)) {
+				res.json({ error: err.response?.data });
+			} else {
+				console.log(err);
+			}
+		}
+	});
+
+	/**
+	 * @openapi
+	 * /socials/github:
+	 *  get:
+	 *    description: Get information on a Github user or repository
+	 *    tags: social
+	 *    parameters:
+	 *       - name: username
+	 *         description: The username of Github user
+	 *         required: true
+	 *         type: string
+	 *       - name: repo
+	 *         description: The name of the repository, the user owns.
+	 *         required: false
+	 *         type: string
+	*/
+	router.get('/github', async (req, res) => {
+		const username = req.query.username as string;
+		const repo = req.query.repo as string;
+		if (!username) return Error.MissingQuery(res, 'username');
+
+		let sentData = {};
+		if (GithubHandler.data.get(`${username}_${repo}`)) {
+			sentData = GithubHandler.data.get(`${username}_${repo}`) as object;
+		} else {
+			try {
+				// Check repo or just user
+				let obj;
+				if (repo.length == 0) {
+					const { data } = await axios.get(`https://api.github.com/users/${username}`);
+					obj = new GithubUser(data);
+				} else {
+					const { data } = await axios.get(`https://api.github.com/repos/${username}/${repo}`);
+					obj = new GithubRepo(data);
+				}
+
+				// Save data to cache
+				GithubHandler._addData({ id: `${username}_${repo}`, data: obj });
+				sentData = obj;
+			} catch (err: any) {
+				console.log(err);
+				return Error.GenericError(res, err.message);
+			}
+		}
+
+		res.json({ data: sentData });
+	});
 
 	/**
 	 * @openapi
@@ -37,8 +117,8 @@ export function run() {
 		} else {
 			try {
 				// Convert steam username to steam ID
-				const { response } = (await axios.get(`http://api.steampowered.com/ISteamUser/ResolveVanityURL/v0001/?key=${process.env.steam}&vanityurl=${username}`)).data;
-				if (response.message == 'No match') return res.json({ error: 'No steam account with that name' });
+				const { response } = (await axios.get(`http://api.steampowered.com/ISteamUser/ResolveVanityURL/v0001/?key=${process.env.steam}&vanityurl=${username}`)).data as SteamResolveVanityURLRawRequest;
+				if (response.message == 'No match') return Error.GenericError(res, 'No steam account with that name');
 
 				// Fetch player data + VAC bans
 				const [{ data: { response: data1 } }, { data: data2 }] = await Promise.all([
@@ -46,7 +126,7 @@ export function run() {
 					axios.get(`http://api.steampowered.com/ISteamUser/GetPlayerBans/v1/?key=${process.env.steam}&steamids=${response.steamid}`),
 				]);
 
-				data = {
+				data = new SteamAccount({
 					id: data1.players[0].steamid,
 					url: data1.players[0].profileurl,
 					realname: data1.players[0].realname,
@@ -61,7 +141,8 @@ export function run() {
 					},
 					status: ['Offline', 'Online', 'Busy', 'Away', 'Snooze', 'Looking to trade', 'Looking to play'][data1.players[0].personastate],
 					countryCode: data1.players[0].loccountrycode,
-				};
+				});
+
 				SteamHandler._addData({ id: username, data: data });
 			} catch (err: any) {
 				console.log(err);
@@ -71,51 +152,6 @@ export function run() {
 
 		// Return the data
 		res.json({ data: data });
-	});
-
-	/**
-	 * @openapi
-   * /socials/github:
-   *  get:
-   *    description: Get information on a Github user or repository
-   *    tags: social
-   *    parameters:
-	 *       - name: username
-   *         description: The username of Github user
-   *         required: true
-   *         type: string
-   *       - name: repo
-   *         description: The name of the repository, the user owns.
-   *         required: false
-   *         type: string
-  */
-	router.get('/github', async (req, res) => {
-		const username = req.query.username as string;
-		const repo = req.query.repo as string;
-		if (!username) return Error.MissingQuery(res, 'username');
-
-		let sentData = {};
-		if (GithubHandler.data.get(`${username}_${repo}`)) {
-			sentData = GithubHandler.data.get(`${username}_${repo}`) as object;
-		} else {
-			try {
-				// Check repo or just user
-				let data;
-				if (repo.length == 0) {
-					data = (await axios.get(`https://api.github.com/users/${username}`)).data;
-				} else {
-					data = (await axios.get(`https://api.github.com/repos/${username}/${repo}`)).data;
-				}
-
-				// Save data to cache
-				GithubHandler._addData({ id: `${username}_${repo}`, data: data });
-				sentData = data;
-			} catch (err: any) {
-				console.log(err);
-				return Error.GenericError(res, err.message);
-			}
-		}
-		res.json({ data: sentData });
 	});
 
 	/**
@@ -148,6 +184,7 @@ export function run() {
 
 				// Fetch if their streaming + following count
 				const [res2, followerCount] = await Promise.all([TwitchCacheHandler.getStreamByUsername(username), TwitchCacheHandler.getFollowersFromId(twitchData.id)]);
+
 				const data = Object.assign(twitchData,
 					{ followers: followerCount },
 					{ steaming: res2?.viewer_count ? {
