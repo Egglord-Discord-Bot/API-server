@@ -41,7 +41,7 @@ export default class RateLimit {
 
 		// See if the request is coming from the frontend via browser
 		const cookies = req.headers.cookie?.split(';') as Array<string>;
-		const csrfToken = cookies.find(c => c.startsWith('__Host-next-auth.csrf-token') || c.startsWith(' next-auth.csrf-token'))?.split('=')[1] as string;
+		const csrfToken = cookies.map(c => c.trim()).find(c => c.startsWith('__Host-next-auth.csrf-token') || c.startsWith('next-auth.csrf-token'))?.split('=')[1] as string;
 		const tokenHashDelimiter = csrfToken.indexOf('|') !== -1 ? '|' : '%7C';
 
 		// Validate hashes
