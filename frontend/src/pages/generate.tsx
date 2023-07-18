@@ -38,7 +38,7 @@ export default function Home({ endpoints, error }: Props) {
 		const params = selected.data?.parameters?.map(l => `${l.name}=${(z.item(selected.data?.parameters?.indexOf(l) ?? -1) as HTMLInputElement).value}`).join('&');
 
 		// Make the actual request if it's data, if it's an image just display the url as image src
-		if (selected.name.startsWith('/api/image')) {
+		if (selected.name.startsWith('/api/image') || selected.name == '/api/misc/qrcode') {
 			setResponse(`${selected.name}?${params}`);
 		} else {
 			const time = new Date();
@@ -88,7 +88,7 @@ export default function Home({ endpoints, error }: Props) {
 					<Script src="https://cdn.jsdelivr.net/gh/google/code-prettify@master/loader/run_prettify.js"></Script>
 					<div className="col-lg-6">
 						<h1>Response</h1>
-						{selected?.name.startsWith('/api/image') ?
+						{selected?.name.startsWith('/api/image') || selected.name == '/api/misc/qrcode' ?
 							<Image src={response as string} alt={selected.name} width={300} height={300}/> :
 							<pre className="prettyprint" style={{ maxHeight: '74vh', overflowY: 'scroll' }}>{JSON.stringify(response, null, 4)}</pre >
 						}
