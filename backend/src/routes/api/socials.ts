@@ -1,16 +1,14 @@
 import { Router } from 'express';
-import { CacheHandler, TwitchHandler, TwitterHandler } from '../../helpers';
+import { CacheHandler, TwitchHandler, TwitterHandler, SteamHandler } from '../../helpers';
 import { DiscordAccount } from '../../types/socials/Discord';
 import { GithubUser, GithubRepo } from '../../types/socials/Github';
-import type { SteamResolveVanityURLRawRequest } from '../../types/socials/Steam';
-import { SteamAccount } from '../../types/socials/Steam';
 import { Error } from '../../utils';
 import axios from 'axios';
 const router = Router();
 
 export function run() {
 	const DiscordHandler = new CacheHandler();
-	const SteamHandler = new CacheHandler();
+	const SteamCacheHandler = new SteamHandler({ token: process.env.steam as string });
 	const GithubHandler = new CacheHandler();
 	const TwitchCacheHandler = new TwitchHandler();
 	const TwitterCacheHandler = new TwitterHandler();
@@ -126,38 +124,17 @@ export function run() {
 		if (!username) return Error.MissingQuery(res, 'username');
 
 		let data = {};
-		if (SteamHandler.data.get(username)) {
-			data = SteamHandler.data.get(username) as object;
+		if (SteamCacheHandler.data.get(username)) {
+			data = SteamCacheHandler.data.get(username) as object;
 		} else {
 			try {
 				// Convert steam username to steam ID
-				const { response } = (await axios.get(`http://api.steampowered.com/ISteamUser/ResolveVanityURL/v0001/?key=${process.env.steam}&vanityurl=${username}`)).data as SteamResolveVanityURLRawRequest;
-				if (response.message == 'No match') return Error.GenericError(res, 'No steam account with that name');
+				const user = await SteamCacheHandler.getUserByUsername(username);
+				if (user.message == 'No match') return Error.GenericError(res, 'No steam account with that name');
 
 				// Fetch player data + VAC bans
-				const [{ data: { response: data1 } }, { data: data2 }] = await Promise.all([
-					axios.get(`http://api.steampowered.com/ISteamUser/GetPlayerSummaries/v0002/?key=${process.env.steam}&steamids=${response.steamid}`),
-					axios.get(`http://api.steampowered.com/ISteamUser/GetPlayerBans/v1/?key=${process.env.steam}&steamids=${response.steamid}`),
-				]);
-
-				data = new SteamAccount({
-					id: data1.players[0].steamid,
-					url: data1.players[0].profileurl,
-					realname: data1.players[0].realname,
-					avatar: data1.players[0].avatarfull,
-					createdAt: data1.players[0].timecreated,
-					bans: {
-						CommunityBanned: data2.players[0].CommunityBanned,
-						VACBanned: data2.players[0].VACBanned,
-						NumberOfVACBans: data2.players[0].NumberOfVACBans,
-						DaysSinceLastBan: data2.players[0].DaysSinceLastBan,
-						NumberOfGameBans: data2.players[0].NumberOfGameBans,
-					},
-					status: ['Offline', 'Online', 'Busy', 'Away', 'Snooze', 'Looking to trade', 'Looking to play'][data1.players[0].personastate],
-					countryCode: data1.players[0].loccountrycode,
-				});
-
-				SteamHandler._addData({ id: username, data: data });
+				const [playerSum, playerBans] = await Promise.all([SteamCacheHandler.getUserSummariesById(user.steamid), SteamCacheHandler.getUserBansById(user.steamid)]);
+				data = SteamCacheHandler.createAccount(playerSum, playerBans);
 			} catch (err: any) {
 				console.log(err);
 				return Error.GenericError(res, err.message);
