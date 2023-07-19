@@ -4,14 +4,14 @@ import { createRollingFileLogger } from 'simple-node-logger';
 import onFinished from 'on-finished';
 import type { loggerTypes, time } from '../types';
 import type { Request, Response } from 'express';
-import { Utils } from './Utils';
+import Utils from './Utils';
 const log = createRollingFileLogger({
 	logDirectory: './src/utils/logs',
 	fileNamePattern: 'roll-<DATE>.log',
 	dateFormat: 'YYYY.MM.DD',
 });
 
-export class Logger {
+export default class Logger {
 	public static log(content: string, type: loggerTypes = 'log') {
 		const timestamp = `[${moment().format('HH:mm:ss:SSS')}]:`;
 		switch (type) {

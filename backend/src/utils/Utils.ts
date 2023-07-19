@@ -3,12 +3,12 @@ import { join, parse, sep } from 'path';
 import type { Request } from 'express';
 import { decode } from 'next-auth/jwt';
 import type { JWT } from 'next-auth/jwt';
-import { CONSTANTS } from './CONSTANTS';
+import CONSTANTS from './CONSTANTS';
 
 type LabelEnum = { [key: string]: JWT }
 const sessionStore: LabelEnum = {};
 
-export class Utils {
+export default class Utils {
 	public static generateRoutes(directory: string) {
 		const seperator = '/';
 		const results: FileOptions[] = [];
@@ -96,15 +96,6 @@ export class Utils {
 		}
 		if (!sessionToken) return null;
 
-		// Check session from cache
-		/*
-		let session;
-		if (sessionStore[sessionToken]) {
-			session = sessionStore[req.headers.cookie];
-			// Make sure it hasn't expired
-			if (new Date(session?.exp ?? 0).getTime() <= new Date().getTime()) return session;
-		}
-		*/
 		const session = await decode({ token: sessionToken, secret: process.env.sessionSecret as string });
 		if (session == null) return null;
 		sessionStore[sessionToken] = session;

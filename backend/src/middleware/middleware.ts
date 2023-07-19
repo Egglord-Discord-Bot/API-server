@@ -1,6 +1,5 @@
 import type { Request, Response, NextFunction } from 'express';
-import { Utils } from '../utils/Utils';
-import Error from '../utils/Errors';
+import { Utils, Error } from '../utils';
 
 /**
 	* Check if an image was sent with the request

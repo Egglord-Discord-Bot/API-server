@@ -3,7 +3,9 @@ const router = Router();
 import axios from 'axios';
 import R6API from 'r6api.js';
 import { status } from 'minecraft-server-util';
-import Error from '../../utils/Errors';
+import { Error } from '../../utils';
+import type { LOLSummoner, LOLErrorStatus } from '../../types/games/LeagueOfLegends';
+import { R6Account } from '../../types/games/R6';
 const { findByUsername, getRanks, getStats, getProgression } = new R6API({ email: process.env.R6Email, password: process.env.R6Password });
 
 export function run() {
@@ -45,10 +47,6 @@ export function run() {
 	 * /games/mc:
 	 *  get:
 	 *    description: Get information on a minecraft server
-	 *    responses:
-   *      '200':
-   *        schema:
-   *          $ref: '#/components/schemas/User'
 	 *    parameters:
 	 *       - name: ip
 	 *         description: The IP/address of the MC server
@@ -142,7 +140,8 @@ export function run() {
 			const { current, max } = playerRank.seasons[27].regions[region as regionType].boards.pvp_ranked;
 			const { pvp, pve } = playerStats;
 			const { level, xp } = playerGame;
-			res.json({ data: {
+
+			const data = new R6Account({
 				id: player.userId,
 				username: player.username,
 				platform: player.platform,
@@ -158,7 +157,9 @@ export function run() {
 					},
 				},
 				pvp: pvp.general, pve: pve.general, level, xp,
-			} });
+			});
+
+			res.json({ data: data });
 		} catch (err: any) {
 			console.log(err);
 			Error.GenericError(res, err.message);
@@ -167,23 +168,3 @@ export function run() {
 
 	return router;
 }
-
-/**
-  * @openapi
-  * components:
-  *  schemas:
-  *   Minecraft:
-  *    type: object
-  *    properties:
-  *      version:
-  *        name:
-	*         type: string
-	*        protocol:
-	*         type: number
-  *      players:
-	*        online:
-	*         type: number
-	*        max:
-	*         type: number
-  *
-*/

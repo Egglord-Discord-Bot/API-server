@@ -1,11 +1,10 @@
 import { Router } from 'express';
-import CacheHandler from '../../helpers/CacheHandler';
-import TwitchHandler from '../../helpers/TwitchHandler';
-import TwitterHandler from '../../helpers/TwitterHandler';
+import { CacheHandler, TwitchHandler, TwitterHandler } from '../../helpers';
+import { DiscordAccount } from '../../types/socials/Discord';
 import { GithubUser, GithubRepo } from '../../types/socials/Github';
 import type { SteamResolveVanityURLRawRequest } from '../../types/socials/Steam';
 import { SteamAccount } from '../../types/socials/Steam';
-import Error from '../../utils/Errors';
+import { Error } from '../../utils';
 import axios from 'axios';
 const router = Router();
 
@@ -34,7 +33,7 @@ export function run() {
 					Authorization: `Bot ${process.env.discordToken}`,
 				},
 			})).data;
-			res.json(t);
+			res.json({ data: new DiscordAccount(t) });
 		} catch (err) {
 			if (axios.isAxiosError(err)) {
 				res.json({ error: err.response?.data });

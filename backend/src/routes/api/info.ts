@@ -1,13 +1,11 @@
 import { Router } from 'express';
 const router = Router();
-import CacheHandler from '../../helpers/CacheHandler';
+import { CacheHandler } from '../../helpers';
 import axios from 'axios';
-import { Utils } from '../../utils/Utils';
+import { Utils, Error } from '../../utils';
 import { RedditPost } from '../../types/socials/Reddit';
-import type { Covid } from '../../utils/responses';
 import { translate } from '@vitalets/google-translate-api';
 import languages from '../../assets/JSON/languages.json';
-import Error from '../../utils/Errors';
 import ud from 'urban-dictionary';
 import { parseString } from 'xml2js';
 export type redditType = 'hot' | 'new';
@@ -43,7 +41,7 @@ export function run() {
 
 		let data = {};
 		if (CovidHandler.data.get(country)) {
-			data = CovidHandler.data.get(country) as Covid;
+			data = CovidHandler.data.get(country) as object;
 		} else {
 			try {
 				if (country != '/all') {

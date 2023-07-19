@@ -20,6 +20,5 @@ export default class TwitchHandler extends CacheHandler {
 		} catch (err: any) {
 			return err.response.data;
 		}
-
 	}
 }

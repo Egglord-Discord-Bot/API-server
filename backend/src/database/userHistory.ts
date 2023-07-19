@@ -1,4 +1,4 @@
-import { CONSTANTS } from '../utils/CONSTANTS';
+import { CONSTANTS } from '../utils';
 import type { UserHistoryCreateParam, endpointUserUnique, pagination } from '../types/database';
 import client from './client';
 

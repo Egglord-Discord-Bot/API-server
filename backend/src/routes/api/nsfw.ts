@@ -4,7 +4,7 @@ import axios from 'axios';
 import * as tf from '@tensorflow/tfjs-node';
 import * as nsfwjs from 'nsfwjs';
 import type { Tensor3D } from '@tensorflow/tfjs-node';
-import Error from '../../utils/Errors';
+import { Error } from '../../utils';
 
 export function run() {
 	/**

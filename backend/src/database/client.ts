@@ -1,5 +1,5 @@
 import { PrismaClient } from '@prisma/client';
-import { Logger } from '../utils/Logger';
+import { Logger } from '../utils';
 
 const client = new PrismaClient({ errorFormat: 'pretty',
 	log: [

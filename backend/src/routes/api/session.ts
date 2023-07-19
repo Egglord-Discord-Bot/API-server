@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import type Client from '../../helpers/Client';
 import { TokenGenerator, TokenBase } from 'ts-token-generator';
-import { Utils } from '../../utils/Utils';
+import { Utils } from '../../utils';
 const router = Router();
 
 export function run(client: Client) {

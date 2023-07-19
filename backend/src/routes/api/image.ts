@@ -1,8 +1,8 @@
 import { Router } from 'express';
 const router = Router();
 import { checkImage } from '../../middleware/middleware';
-import Error from '../../utils/Errors';
-import Image from '../../helpers/Image';
+import { Error } from '../../utils';
+import { Image } from '../../helpers';
 
 export function run() {
 	/**

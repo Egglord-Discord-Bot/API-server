@@ -1,4 +1,4 @@
-import { CONSTANTS } from '../utils/CONSTANTS';
+import { CONSTANTS } from '../utils';
 import type { User } from '@prisma/client';
 import type { updateUser, createUser, pagination, userUnqiueParam } from '../types/database';
 import client from './client';

@@ -2,7 +2,7 @@ import { Router } from 'express';
 const router = Router();
 import Tesseract from 'tesseract.js';
 import axios from 'axios';
-import Error from '../../utils/Errors';
+import { Error } from '../../utils';
 import * as fs from 'fs';
 import { image_search } from 'duckduckgo-images-api';
 import validAnimals from '../../assets/JSON/animals.json';

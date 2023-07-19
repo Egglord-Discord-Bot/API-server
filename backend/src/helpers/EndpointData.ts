@@ -1,7 +1,6 @@
 import type Client from './Client';
 import { join } from 'path';
-import { Utils } from '../utils/Utils';
-import { Logger } from '../utils/Logger';
+import { Utils, Logger } from '../utils';
 
 export default async function EndpointData(client: Client) {
 	Logger.debug('Checking database for new endpoints');

@@ -1,8 +1,7 @@
 import type { Request, Response, NextFunction } from 'express';
 import type Client from '../helpers/Client';
 import type { time } from '../types';
-import { Utils } from '../utils/Utils';
-import Error from '../utils/Errors';
+import { Utils, Error } from '../utils';
 import type { User, Endpoint } from '@prisma/client';
 import onFinished from 'on-finished';
 import { createHash } from 'crypto';

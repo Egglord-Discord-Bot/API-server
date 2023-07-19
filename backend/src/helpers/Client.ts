@@ -1,4 +1,4 @@
-import type CacheHandler from './CacheHandler';
+import type CacheHandler from './handlers/CacheHandler';
 import UserManager from '../database/User';
 import UserHistoryManager from '../database/userHistory';
 import SystemManager from './SystemManager';
