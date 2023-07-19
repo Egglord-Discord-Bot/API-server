@@ -9,6 +9,7 @@ import axios from 'axios';
 const router = Router();
 
 export function run() {
+	const DiscordHandler = new CacheHandler();
 	const SteamHandler = new CacheHandler();
 	const GithubHandler = new CacheHandler();
 	const TwitchCacheHandler = new TwitchHandler();
@@ -27,20 +28,34 @@ export function run() {
 	 *         type: string
 	*/
 	router.get('/discord', async (req, res) => {
-		try {
-			const t = (await axios.get(`https://discord.com/api/v10/users/${req.query.userId}`, {
-				headers: {
-					Authorization: `Bot ${process.env.discordToken}`,
-				},
-			})).data;
-			res.json({ data: new DiscordAccount(t) });
-		} catch (err) {
-			if (axios.isAxiosError(err)) {
-				res.json({ error: err.response?.data });
-			} else {
-				console.log(err);
+		const userId = req.query.userId as string;
+
+		// validate ID
+		if (!(/(\d{17,20})/g.test(userId))) return Error.GenericError(res, 'Invalid user ID');
+
+		let sentData = {};
+		if (DiscordHandler.data.get(userId)) {
+			sentData = DiscordHandler.data.get(userId) as DiscordAccount;
+		} else {
+			try {
+				const { data } = await axios.get(`https://discord.com/api/v10/users/${req.query.userId}`, {
+					headers: {
+						Authorization: `Bot ${process.env.discordToken}`,
+					},
+				});
+				const user = new DiscordAccount(data);
+				DiscordHandler._addData({ id: `${userId}`, data: user });
+				sentData = user;
+			} catch (err) {
+				if (axios.isAxiosError(err)) {
+					res.json({ error: err.response?.data });
+				} else {
+					console.log(err);
+				}
 			}
 		}
+
+		res.json({ data: sentData });
 	});
 
 	/**
