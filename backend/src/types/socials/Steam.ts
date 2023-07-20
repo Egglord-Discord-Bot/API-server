@@ -35,37 +35,33 @@ export interface SteamAccount {
 }
 
 export interface SteamResolveVanityURLRawRequest {
-  response: {
-    steamid: string,
-    success: number
-    message?: string
-  }
+  steamid: string,
+  success: number
+  message?: string
 }
 
 export interface SteamGetPlayerSummariesRawRequest {
-  response: {
-    players: [
-      {
-      steamid: string
-      communityvisibilitystate: number
-      profilestate: number
-      personaname: string
-      commentpermission: number
-      profileurl: string
-      avatar: string
-      avatarmedium: string
-      avatarfull: string
-      avatarhash: string
-      lastlogoff: number
-      personastate: number
-      realname: string
-      primaryclanid:string
-      timecreated: number
-      personastateflags: number
-      loccountrycode: string
-      }
-    ]
-  }
+  players: [
+    {
+    steamid: string
+    communityvisibilitystate: number
+    profilestate: number
+    personaname: string
+    commentpermission: number
+    profileurl: string
+    avatar: string
+    avatarmedium: string
+    avatarfull: string
+    avatarhash: string
+    lastlogoff: number
+    personastate: number
+    realname: string
+    primaryclanid:string
+    timecreated: number
+    personastateflags: number
+    loccountrycode: string
+    }
+  ]
 }
 
 export interface SteamGetPlayerBansRawRequest {
