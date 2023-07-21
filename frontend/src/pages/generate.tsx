@@ -87,7 +87,7 @@ export default function Home({ endpoints, error }: Props) {
 					<Script src="https://cdn.jsdelivr.net/gh/google/code-prettify@master/loader/run_prettify.js"></Script>
 					<div className="col-lg-6">
 						<h1>Response</h1>
-						{selected?.name.startsWith('/api/image') || selected.name == '/api/misc/qrcode' ?
+						{selected?.name.startsWith('/api/image') || selected?.name == '/api/misc/qrcode' ?
 							<Image src={response as string} alt={selected.name} width={300} height={300}/> :
 							<pre className="prettyprint" style={{ maxHeight: '74vh', overflowY: 'scroll' }}>{JSON.stringify(response, null, 4)}</pre >
 						}
