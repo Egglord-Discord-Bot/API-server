@@ -60,6 +60,7 @@
     "duckduckgo-images-api": "^1.0.5",
     "ejs": "^3.1.8",
     "express": "^4.17.2",
+    "genius-lyrics": "^4.4.3",
     "helmet": "^6.0.0",
     "minecraft-server-util": "^5.4.4",
     "next-auth": "^4.22.1",

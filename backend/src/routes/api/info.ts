@@ -7,6 +7,7 @@ import { RedditPost } from '../../types/socials/Reddit';
 import { translate } from '@vitalets/google-translate-api';
 import languages from '../../assets/JSON/languages.json';
 import ud from 'urban-dictionary';
+import * as geniusLyrics from 'genius-lyrics';
 import { parseString } from 'xml2js';
 export type redditType = 'hot' | 'new';
 
@@ -22,7 +23,7 @@ export function run() {
 	const RedditHandler = new CacheHandler();
 	const NPMHandler = new CacheHandler();
 	const WeatherHandler = new CacheHandler();
-
+	const LyricsFetcher = new geniusLyrics.Client();
 
 	/**
 	  * @openapi
@@ -198,17 +199,17 @@ export function run() {
 	*/
 	router.get('/lyrics', async (req, res) => {
 		// Get text to translate
-		const title = req.query.title;
+		const title = req.query.title as string;
 		if (!title) return Error.MissingQuery(res, 'title');
-		/*
-		const info = await getSong({
-			apiKey: bot.config.api_keys.genius,
-			title: title,
-			artist: '‎',
-			optimizeQuery: true,
+
+		const search = await LyricsFetcher.songs.search(title);
+		const lyrics = await search[0].lyrics();
+		res.json({ data: {
+			name: search[0].title,
+			artist: search[0].artist.name,
+			lyrics: lyrics.split('\n'),
+		},
 		});
-		*/
-		res.json({ data: 'Coming soon' });
 	});
 
 	/**
