@@ -78,9 +78,7 @@ export function run() {
 			}
 		}
 		try {
-			// Valid URL
-			const host = new URL(ip);
-			const response = await status(`${host}`, port ? Number(port) : 25565);
+			const response = await status(ip, port ? Number(port) : 25565);
 			res.json({ data: response });
 		} catch (err: any) {
 			console.log(err);
