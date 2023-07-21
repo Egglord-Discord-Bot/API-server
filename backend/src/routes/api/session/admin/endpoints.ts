@@ -1,12 +1,11 @@
 import { Router } from 'express';
 import type Client from '../../../../helpers/Client';
 import type { swaggerJsdocType } from '../../../../types';
-import { isAdmin } from '../../../../middleware/middleware';
 import swaggerJsdoc from 'swagger-jsdoc';
 const router = Router();
 
 export function run(client: Client) {
-	router.get('/json', isAdmin, async (_req, res) => {
+	router.get('/json', async (_req, res) => {
 		try {
 			const endpoints = await client.EndpointManager.fetchEndpointData();
 			const openapiSpecification = swaggerJsdoc({
