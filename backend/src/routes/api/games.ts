@@ -4,11 +4,14 @@ import axios from 'axios';
 import R6API from 'r6api.js';
 import { status } from 'minecraft-server-util';
 import { Error } from '../../utils';
-import type { LOLSummoner, LOLErrorStatus } from '../../types/games/LeagueOfLegends';
+import { LeagueHandler } from '../../helpers';
 import { R6Account } from '../../types/games/R6';
+import { LOLSummoner, LolActiveGame, validRegions } from '../../types/games/LeagueOfLegends';
 const { findByUsername, getRanks, getStats, getProgression } = new R6API({ email: process.env.R6Email, password: process.env.R6Password });
 
 export function run() {
+	const LeagueCacheHandler = new LeagueHandler({ token: process.env.riotToken as string });
+
 	/**
 	 * @openapi
 	 * /games/fortnite:
@@ -166,5 +169,57 @@ export function run() {
 		}
 	});
 
+	/**
+	 * @openapi
+	 * /games/league-of-legends:
+	 *  get:
+	 *    description: Get information on a league of legends player
+	 *    parameters:
+	 *       - name: name
+	 *         description: The username of the player
+	 *         required: true
+	 *         type: string
+	 *       - name: region
+	 *         description: The region of the user
+	 *         required: true
+	 *         type: string
+	 *         enum: [BR1, EUN1, EUW1, JP1, KR, LA1, LA2, NA1, OC1, PH2, RU, SG2, TH2, TR1, TW2, VN2]
+	*/
+	router.get('/league-of-legends', async (req, res) => {
+		const username = req.query.name as string;
+		const region = req.query.region as string;
+
+		// Validate region input
+		const regionAllowedTypes = ['BR1', 'EUN1', 'EUW1', 'JP1', 'KR', 'LA1', 'LA2', 'NA1', 'OC1', 'PH2', 'RU', 'SG2', 'TH2', 'TR1', 'TW2', 'VN2'];
+		if (!regionAllowedTypes.includes(region)) return Error.InvalidValue(res, 'region', regionAllowedTypes);
+
+		// Fetch summoner details from cache or API (Don't cache activeGame as that can change frequently)
+		let summoner = {} as LOLSummoner;
+		if (LeagueCacheHandler.data.get(`${region}_${username}`)) {
+			summoner = LeagueCacheHandler.data.get(`${region}_${username}`) as LOLSummoner;
+		} else {
+			// Fetch summoner information
+			try {
+				summoner = await LeagueCacheHandler.getSummonerByUsername(region as validRegions, username);
+			} catch (err) {
+				if (axios.isAxiosError(err)) Error.GenericError(res, err.response?.data as string);
+				return console.log(err);
+			}
+		}
+
+		// Fetch active game if summoner is in one.
+		let activeGame = {} as LolActiveGame;
+		try {
+			activeGame = await LeagueCacheHandler.getActiveGameByUsername(region as validRegions, summoner.id);
+		} catch (err) {
+			if (axios.isAxiosError(err)) console.log(err.response?.data);
+		}
+
+		// Create object for showing data
+		const data = LeagueCacheHandler.createAccount(summoner, activeGame.gameId == null ? undefined : activeGame);
+		LeagueCacheHandler._addData({ id: `${summoner.name}`, data: data });
+
+		res.json({ data: data });
+	});
 	return router;
 }
