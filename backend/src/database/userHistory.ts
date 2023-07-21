@@ -150,11 +150,27 @@ export default class userHistoryManager {
 			},
 		});
 
-		for (const [, code] of Object.entries(responseCodes)) {
-			l[code.endpoint] = await client.userHistory.count({
+		for (const [, { endpoint }] of Object.entries(responseCodes)) {
+			l[endpoint] = await client.userHistory.count({
 				where: {
-					endpoint: code.endpoint,
+					endpoint: endpoint,
 					userId: userId,
+				},
+			});
+		}
+		return l;
+	}
+
+	async fetchMostAccessEndpoints() {
+		const l: { [key: string]: number } = {};
+		const endpointName = await client.userHistory.groupBy({
+			by: ['endpoint'],
+		});
+
+		for (const [, { endpoint }] of Object.entries(endpointName)) {
+			l[endpoint] = await client.userHistory.count({
+				where: {
+					endpoint: endpoint,
 				},
 			});
 		}

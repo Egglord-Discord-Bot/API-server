@@ -17,6 +17,7 @@ type countEnum = { [key: string]: number }
 interface Props {
 	responseCode: countEnum
 	monthUsage: countEnum
+	mostAccessedEndpoints: countEnum
 	userCount: number
 	count: number
 	uptime: number
@@ -49,7 +50,27 @@ export default function Admin(data: Props) {
 			},
 		],
 	};
-	const mostAccessEndp = { datasets: [] };
+
+	const top20Endpoints = Object.entries(data.mostAccessedEndpoints).sort((a, b) => b[1] - a[1]).slice(0, 20);
+	const mostAccessEndp = {
+		labels: top20Endpoints.map(u => u[0]),
+		datasets: [
+			{
+				label: 'Accessed',
+				data: top20Endpoints.map(u => u[1]),
+				backgroundColor: [
+					'rgb(255, 159, 64)',
+					'rgb(255, 205, 86)',
+					'rgb(0, 163, 51)',
+					'rgb(54, 162, 235)',
+					'rgb(153, 102, 255)',
+					'rgb(201, 203, 207)',
+					'rgb(0,0,255)',
+				],
+				borderWidth: 1,
+			},
+		],
+	};
 
 	return (
 		<>
@@ -128,7 +149,7 @@ export default function Admin(data: Props) {
 								<div className="col-xl-4 col-lg-5">
 									<div className="card shadow mb-4">
 										<div className="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-											<h6 className="m-0 font-weight-bold text-primary">Most accessed endpoints</h6>
+											<h5 className="m-0 fw-bold text-primary">Top 20 Accessed Endpoints</h5>
 											<div className="dropdown no-arrow">
 												<a className="dropdown-toggle" href="#" role="button" id="dropdownMenuLink"	data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
 													<FontAwesomeIcon icon={faEllipsis} />
@@ -176,11 +197,11 @@ export async function getServerSideProps(ctx: GetServerSidePropsContext) {
 			fetch(`${process.env.BACKEND_URL}api/session/admin/system`, obj),
 			fetch(`${process.env.BACKEND_URL}api/session/admin/history?time=year`, obj),
 		]);
-		const { historyCount, userCount, responseCodes } = await res1.json();
+		const { historyCount, userCount, responseCodes, mostAccessedEndpoints } = await res1.json();
 		const { uptime, current: { memory: { USAGE } } } = await res2.json();
 		const { months } = await res3.json();
 
-		return { props: { count: historyCount, responseCode: responseCodes, userCount, uptime, memoryUsage: USAGE, monthUsage: months } };
+		return { props: { count: historyCount, responseCode: responseCodes, mostAccessedEndpoints, userCount, uptime, memoryUsage: USAGE, monthUsage: months } };
 	} catch (err) {
 		console.log(err);
 		return { props: { count: 0, responseCode: { '0': 0 }, userCount: 0, error: 'API server currently unavailable' } };

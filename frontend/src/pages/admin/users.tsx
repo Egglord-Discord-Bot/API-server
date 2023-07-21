@@ -303,7 +303,7 @@ export async function getServerSideProps(ctx: GetServerSidePropsContext) {
 		};
 
 		const [res1, res2] = await Promise.all([fetch(`${process.env.BACKEND_URL}api/session/admin/users/json`, obj),
-			fetch(`${process.env.BACKEND_URL}api/session/admin/user/history`, obj)]);
+			fetch(`${process.env.BACKEND_URL}api/session/admin/users/history`, obj)]);
 
 
 		const { users, total, admin, premium, block } = await res1.json();

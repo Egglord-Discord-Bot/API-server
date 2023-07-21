@@ -138,6 +138,21 @@ export default class UserManager {
 	}
 
 	/**
+		* Fetch a specific's user total history count
+		* @param {string} name The userId for getting their user history count
+		* @returns An array of users
+	*/
+	async fetchByUsername(name: string) {
+		return client.user.findMany({
+			where: {
+				username: {
+					startsWith: name,
+				},
+			},
+		});
+	}
+
+	/**
     * Extract the user from the request (if any)
     * @param {pagination} page The ID of the user
     * @returns An array of users
