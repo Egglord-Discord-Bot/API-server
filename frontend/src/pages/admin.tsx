@@ -204,6 +204,6 @@ export async function getServerSideProps(ctx: GetServerSidePropsContext) {
 		return { props: { count: historyCount, responseCode: responseCodes, mostAccessedEndpoints, userCount, uptime, memoryUsage: USAGE, monthUsage: months } };
 	} catch (err) {
 		console.log(err);
-		return { props: { count: 0, responseCode: { '0': 0 }, userCount: 0, error: 'API server currently unavailable' } };
+		return { props: { count: 0, responseCode: { '0': 0 }, mostAccessedEndpoints: [], userCount: 0, uptime: 0, memoryUsage: 0, monthUsage: [], error: 'API server currently unavailable' } };
 	}
 }

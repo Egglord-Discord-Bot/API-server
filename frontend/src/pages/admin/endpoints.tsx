@@ -261,6 +261,6 @@ export async function getServerSideProps(ctx: GetServerSidePropsContext) {
 
 		return { props: { endpointData, history, total } };
 	} catch (err) {
-		return { props: { endpointData: [], history: [], error: 'API server currently unavailable' } };
+		return { props: { endpointData: [], history: [], total: 0, error: 'API server currently unavailable' } };
 	}
 }

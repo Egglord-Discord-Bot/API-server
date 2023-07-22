@@ -9,6 +9,7 @@ const log = createRollingFileLogger({
 	logDirectory: './src/utils/logs',
 	fileNamePattern: 'roll-<DATE>.log',
 	dateFormat: 'YYYY.MM.DD',
+	level: 'all',
 });
 
 export default class Logger {

@@ -310,6 +310,6 @@ export async function getServerSideProps(ctx: GetServerSidePropsContext) {
 		const { months } = await res2.json();
 		return { props: { users, total, admin, premium, block, months } };
 	} catch (err) {
-		return { props: { users: [], error: 'API server currently unavailable' } };
+		return { props: { users: [], total: 0, admin: 0, premium: 0, block: 0, months: [], error: 'API server currently unavailable' } };
 	}
 }

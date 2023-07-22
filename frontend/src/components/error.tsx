@@ -5,7 +5,7 @@ interface Props {
 
 export default function ErrorPopup({ text }: Props) {
 	return (
-		<div className="alert alert-danger alert-dismissible fade show" role="alert">
+		<div className="alert alert-danger alert-dismissible fade show" role="alert" style={{ margin: '10px' }}>
 			<strong>Error - {text}!</strong> If this error keeps occurring, please contact <Link href="/contact-us">support</Link>.
 			<button type="button" className="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
 		</div>
