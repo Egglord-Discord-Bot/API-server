@@ -1,9 +1,9 @@
 import Link from 'next/link';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faLaughWink, faTachometerAlt, faChartArea, faUsers, faCog } from '@fortawesome/free-solid-svg-icons';
+import { faLaughWink, faTachometerAlt, faChartArea, faUsers, faCog, faFileLines } from '@fortawesome/free-solid-svg-icons';
 
 interface Props {
-	activeTab: 'dashboard' | 'users' | 'endpoint' | 'system'
+	activeTab: 'dashboard' | 'users' | 'endpoint' | 'system' | 'logs'
 }
 
 export default function Sidebar({ activeTab }: Props) {
@@ -39,6 +39,12 @@ export default function Sidebar({ activeTab }: Props) {
 				<Link className="nav-link" href="/admin/system">
 					<FontAwesomeIcon icon={faChartArea} />
 					<span> System</span>
+				</Link>
+			</li>
+			<li className={`nav-item ${activeTab == 'logs' ? 'active' : ''}`}>
+				<Link className="nav-link" href="/admin/logs">
+					<FontAwesomeIcon icon={faFileLines} />
+					<span> Logs</span>
 				</Link>
 			</li>
 			<li className="nav-item">

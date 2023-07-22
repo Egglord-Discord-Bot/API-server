@@ -71,7 +71,7 @@ export default function AdminEndpoints({ error, logFiles }: Props) {
 		<>
 			<Header />
 			<div className="wrapper">
-				<Sidebar activeTab='endpoint'/>
+				<Sidebar activeTab='logs'/>
 				<div id="content-wrapper" className="d-flex flex-column">
 					<div id="content">
 						<AdminNavbar user={session?.user as User}/>

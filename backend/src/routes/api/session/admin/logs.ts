@@ -19,7 +19,7 @@ export function run() {
 
 		try {
 			const file = fs.readFileSync(`${process.cwd()}/src/utils/logs/${path.basename(name)}`);
-			res.json({ file: file.toString().split('\r\n') });
+			res.json({ file: file.toString().split(/\r?\n/) });
 		} catch (err: any) {
 			Error.GenericError(res, err.message);
 		}

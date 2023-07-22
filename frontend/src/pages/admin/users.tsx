@@ -160,7 +160,7 @@ export default function AdminUsers({ users: userList, error, total, admin, premi
 		<>
 			<Header />
 			<div className="wrapper">
-				<Sidebar activeTab='dashboard'/>
+				<Sidebar activeTab='users'/>
 				<div id="content-wrapper" className="d-flex flex-column">
 					<div id="content">
 						<AdminNavbar user={session?.user as User}/>
