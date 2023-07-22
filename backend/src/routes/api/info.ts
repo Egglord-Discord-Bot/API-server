@@ -202,14 +202,19 @@ export function run() {
 		const title = req.query.title as string;
 		if (!title) return Error.MissingQuery(res, 'title');
 
-		const search = await LyricsFetcher.songs.search(title);
-		const lyrics = await search[0].lyrics();
-		res.json({ data: {
-			name: search[0].title,
-			artist: search[0].artist.name,
-			lyrics: lyrics.split('\n'),
-		},
-		});
+		try {
+			const search = await LyricsFetcher.songs.search(title);
+			const lyrics = await search[0].lyrics();
+			res.json({ data: {
+				name: search[0].title,
+				artist: search[0].artist.name,
+				lyrics: lyrics.split('\n'),
+			},
+			});
+		} catch (err) {
+			console.log(err);
+			Error.GenericError(res, 'An error occured when searching for those lyrics');
+		}
 	});
 
 	/**
