@@ -9,6 +9,7 @@ import type { GetServerSidePropsContext } from 'next';
 import { useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Pie, Line } from 'react-chartjs-2';
+import type { SyntheticEvent } from 'react';
 import { faAnglesLeft, faAnglesRight, faUsers, faBan, faDollarSign, faUserCheck, faSearch, faDownload, faEllipsis } from '@fortawesome/free-solid-svg-icons';
 import { Chart as ChartJS, ArcElement, Tooltip, Legend,	CategoryScale, LinearScale, PointElement, LineElement, Title } from 'chart.js';
 ChartJS.register(ArcElement, Tooltip, Legend, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
@@ -94,6 +95,40 @@ export default function AdminUsers({ users: userList, error: oldError, total, ad
 			el.checked = !!value;
 			const text = document.getElementById(`${userId}_${type}_text`);
 			if (text) text.innerHTML = value ? 'Yes' : 'No';
+		}
+	}
+
+	async function searchByName(e: SyntheticEvent) {
+		const text = (e.target as HTMLInputElement).value;
+
+		if (text.length == 0) {
+			const res = await fetch('/api/session/admin/users', {
+				method: 'get',
+				headers: {
+					'Accept': 'application/json',
+					'Content-Type': 'application/json',
+				},
+			});
+			const data = await res.json();
+			setUsers(data.users);
+			setPage(0);
+			setSortOrder('desc');
+		} else {
+			try {
+				const res = await fetch(`/api/session/admin/users/search?name=${text}`, {
+					method: 'GET',
+					headers: {
+						'Accept': 'application/json',
+						'Content-Type': 'application/json',
+					},
+				});
+				const data = await res.json();
+				setUsers(data.users);
+				setPage(0);
+				setSortOrder('desc');
+			} catch (err) {
+				setError((err as ErrorEvent).message);
+			}
 		}
 	}
 
@@ -207,14 +242,14 @@ export default function AdminUsers({ users: userList, error: oldError, total, ad
 									<h6 className="m-0 font-weight-bold text-primary">Users</h6>
 								</div>
 								<div className="card-body table-responsive">
-									<form	className="d-none d-sm-inline-block form-inline mr-auto ml-md-3 my-2 my-md-0 mw-100">
+									<div className="d-none d-sm-inline-block form-inline mr-auto ml-md-3 my-2 my-md-0 mw-100">
 										<div className="input-group mb-3">
-											<input type="text" className="form-control bg-light border-0 small" placeholder="Search for..." aria-label="Recipient's username" aria-describedby="basic-addon2" />
+											<input type="text" className="form-control bg-light border-0 small" placeholder="Search for..." aria-label="Recipient's username" aria-describedby="basic-addon2" onChange={(e) => searchByName(e)}/>
 											<button className="btn btn-outline-primary" type="button">
 												<FontAwesomeIcon icon={faSearch} />
 											</button>
 										</div>
-									</form>
+									</div>
 									<table className="table" style={{ paddingTop: '10px' }}>
 										<thead>
 											<tr>
