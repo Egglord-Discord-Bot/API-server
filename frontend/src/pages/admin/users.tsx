@@ -6,7 +6,6 @@ import { useSession } from 'next-auth/react';
 import InfoPill from '../../components/dashboard/infoPill';
 import type { User } from '../../types/next-auth';
 import type { GetServerSidePropsContext } from 'next';
-import type { SyntheticEvent } from 'react';
 import { useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Pie, Line } from 'react-chartjs-2';
@@ -32,20 +31,9 @@ export default function AdminUsers({ users: userList, error, total, admin, premi
 	const { data: session, status } = useSession();
 	const [users, setUsers] = useState<Array<User>>(userList);
 	const [page, setPage] = useState(0);
-	const [sort, setSort] = useState<userTitle>(null);
+	const [, setSort] = useState<userTitle>(null);
 	const [sortOrder, setSortOrder] = useState<SortOrder>('ascn');
 	if (status == 'loading') return null;
-
-	function updateDOM(e: SyntheticEvent) {
-		const el = e.target as HTMLInputElement;
-		if (el) {
-			if (el.value.length > 0) {
-				setUsers(userList.filter(i => i.username.startsWith(el.value)));
-			} else {
-				setUsers(userList);
-			}
-		}
-	}
 
 	async function fetchUsers(p: number) {
 		try {
@@ -92,7 +80,7 @@ export default function AdminUsers({ users: userList, error, total, admin, premi
 		if (el) {
 			const value = el.checked;
 			// Fetch endpoint data
-			await fetch('/api/admin/user', {
+			await fetch('/api/session/admin/users', {
 				method: 'PATCH',
 				headers: {
 					'Accept': 'application/json',
