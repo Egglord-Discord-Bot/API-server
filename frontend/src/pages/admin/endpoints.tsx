@@ -11,7 +11,8 @@ import type { SyntheticEvent } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faAnglesLeft, faAnglesRight, faSearch, faDownload, faCircle } from '@fortawesome/free-solid-svg-icons';
 import { useState } from 'react';
-import Script from 'next/script';
+import 'react-tooltip/dist/react-tooltip.css';
+import { Tooltip } from 'react-tooltip';
 
 interface Props {
   endpointData: Array<Endpoint>
@@ -187,6 +188,7 @@ export default function AdminEndpoints({ endpointData, history: h, error, total 
 													<FontAwesomeIcon icon={faSearch} />
 												</span>
 											</div>
+											{history.map(hi => <Tooltip key={hi.id} id={`${hi.id}`} place="top" content={`${hi.responseCode}`} variant="dark" />)}
 											<table className="table">
 												<thead>
 													<tr>
@@ -197,13 +199,15 @@ export default function AdminEndpoints({ endpointData, history: h, error, total 
 														<th scope="col">Delete</th>
 													</tr>
 												</thead>
-												<tbody >
+												<tbody>
 													{history.map(hi => (
 														<tr key={hi.id}>
 															<th scope="row">{hi.userId}</th>
 															<td>{hi.endpoint}</td>
 															<td>{new Date(hi.createdAt).toDateString()} {new Date(hi.createdAt).toLocaleTimeString('en-US')}</td>
-															<td style={{ textAlign: 'center' }} data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title={`${hi.responseCode}`}><FontAwesomeIcon icon={faCircle} style={{ color: getStatusColour(hi.responseCode) }}/></td>
+															<td style={{ textAlign: 'center' }} data-tooltip-id={`${hi.id}`}>
+																<FontAwesomeIcon icon={faCircle} style={{ color: getStatusColour(hi.responseCode) }}/>
+															</td>
 															<td>
 																<input className="form-check-input" type="checkbox" id="flexCheckChecked" onClick={() => deleteEndpoint(hi.id)} />
 															</td>
@@ -237,9 +241,6 @@ export default function AdminEndpoints({ endpointData, history: h, error, total 
 					</div>
 				</div>
 			</div>
-			<Script id="show-banner">
-				{'setInterval(() => {const tooltipTriggerList = document.querySelectorAll(\'[data-bs-toggle=\"tooltip\"]\'); [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl))}, 5000)'}
-			</Script>
 		</>
 	);
 }
