@@ -31,7 +31,7 @@ export default function AdminUsers({ users: userList, error: oldError, total, ad
 	const [users, setUsers] = useState<Array<User>>(userList);
 	const [error, setError] = useState<string|undefined>(oldError);
 	const [page, setPage] = useState(0);
-	const [sortOrder, setSortOrder] = useState<SortOrder>('asc');
+	const [sortOrder, setSortOrder] = useState<SortOrder>('desc');
 	if (status == 'loading') return null;
 
 	async function fetchUsers(p: number) {

@@ -4,17 +4,18 @@ import { isAdmin } from '../../../../middleware/middleware';
 import { Error } from '../../../../utils';
 const router = Router();
 
+type orderList = 'asc' | 'desc' | undefined
 export function run(client: Client) {
 
 	router.get('/', isAdmin, async (req, res) => {
 		const page = req.query.page;
-		const order = req.query.order as string;
+		const order = req.query.order as orderList;
 
 		// If order is present make sure it's only ascend or descend
 		if (order && !['asc', 'desc'].includes(order)) return Error.InvalidValue(res, 'order', ['asc', 'desc']);
 
 		try {
-			const [users, total] = await Promise.all([client.UserManager.fetchUsers({ page: (page && !Number.isNaN(page)) ? Number(page) : 0 }), client.UserManager.fetchCount()]);
+			const [users, total] = await Promise.all([client.UserManager.fetchUsers({ page: (page && !Number.isNaN(page)) ? Number(page) : 0, order }), client.UserManager.fetchCount()]);
 			res.json({ users: users.map(i => ({ ...i, id: `${i.id}` })), total });
 		} catch (err) {
 			console.log(err);
