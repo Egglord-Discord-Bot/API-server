@@ -24,53 +24,49 @@ interface Props {
 	months: countEnum
 }
 type userUpdateEnum = 'block' | 'premium' | 'admin'
-type userTitle = null | 'name' | 'id' | 'join' | 'block' | 'premium' | 'admin'
-type SortOrder = 'ascn' | 'dscn';
+type SortOrder = 'asc' | 'desc';
 
-export default function AdminUsers({ users: userList, error, total, admin, premium, block, months }: Props) {
+export default function AdminUsers({ users: userList, error: oldError, total, admin, premium, block, months }: Props) {
 	const { data: session, status } = useSession();
 	const [users, setUsers] = useState<Array<User>>(userList);
+	const [error, setError] = useState<string|undefined>(oldError);
 	const [page, setPage] = useState(0);
-	const [, setSort] = useState<userTitle>(null);
-	const [sortOrder, setSortOrder] = useState<SortOrder>('ascn');
+	const [sortOrder, setSortOrder] = useState<SortOrder>('asc');
 	if (status == 'loading') return null;
 
 	async function fetchUsers(p: number) {
 		try {
-			const res = await fetch(`/api/session/stats/users?page=${p}`, {
+			const res = await fetch(`/api/session/admin/users?order=${sortOrder}&page=${p}`, {
 				method: 'get',
 				headers: {
 					'Accept': 'application/json',
 					'Content-Type': 'application/json',
 				},
 			});
-
 			const data = await res.json();
 			setUsers(data.users);
 			setPage(p);
 		} catch (err) {
-			return { props: { users: [], error: 'API server currently unavailable' } };
+			setError((err as ErrorEvent).message);
 		}
 	}
 
-	function toggle(name: userTitle) {
-		setSortOrder(sortOrder == 'ascn' ? 'dscn' : 'ascn');
-		switch(name) {
-			case 'name' : {
-				if (sortOrder == 'ascn') {
-					setUsers(userList.sort((a, b) => (a.username ?? '').localeCompare(b.username)));
-				} else {
-					setUsers(userList.sort((a, b) => (a.username ?? '').localeCompare(b.username)));
-				}
-				setSort(name);
-			}
-			case 'id': {
-				if (sortOrder == 'ascn') {
-					setUsers(userList.sort((a, b) => a.id > b.id ? -1 : 1));
-				} else {
-					setUsers(userList.sort((a, b) => a.id < b.id ? -1 : 1));
-				}
-			}
+	async function updateSortOrder() {
+		try {
+			const sort = (sortOrder == 'asc') ? 'desc' : 'asc';
+			const res = await fetch(`/api/session/admin/users?order=${sort}`, {
+				method: 'GET',
+				headers: {
+					'Accept': 'application/json',
+					'Content-Type': 'application/json',
+				},
+			});
+			const data = await res.json();
+			setUsers(data.users);
+			setPage(0);
+			setSortOrder(sort);
+		} catch (err) {
+			setError((err as ErrorEvent).message);
 		}
 	}
 
@@ -222,9 +218,9 @@ export default function AdminUsers({ users: userList, error, total, admin, premi
 									<table className="table" style={{ paddingTop: '10px' }}>
 										<thead>
 											<tr>
-												<th scope="col" onClick={() => toggle('id')}>ID</th>
-												<th onClick={() => toggle('name')}>Name</th>
-												<th>Joined</th>
+												<th scope="col">ID</th>
+												<th>Name</th>
+												<th onClick={() => updateSortOrder()}>Joined</th>
 												<th>Blocked</th>
 												<th>Premium</th>
 												<th>Admin</th>

@@ -157,10 +157,10 @@ export default class UserManager {
     * @param {pagination} page The ID of the user
     * @returns An array of users
   */
-	async fetchUsers({ page }: pagination) {
+	async fetchUsers({ page, order = 'desc' }: pagination & { order?: 'desc' | 'asc' }) {
 		return client.user.findMany({
 			orderBy: {
-				createdAt: 'desc',
+				createdAt: order,
 			},
 			skip: page * CONSTANTS.DbPerPage,
 			take: CONSTANTS.DbPerPage,

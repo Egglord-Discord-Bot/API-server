@@ -1,12 +1,18 @@
 import { Router } from 'express';
 import type Client from '../../../../helpers/Client';
 import { isAdmin } from '../../../../middleware/middleware';
+import { Error } from '../../../../utils';
 const router = Router();
 
 export function run(client: Client) {
 
 	router.get('/', isAdmin, async (req, res) => {
 		const page = req.query.page;
+		const order = req.query.order as string;
+
+		// If order is present make sure it's only ascend or descend
+		if (order && !['asc', 'desc'].includes(order)) return Error.InvalidValue(res, 'order', ['asc', 'desc']);
+
 		try {
 			const [users, total] = await Promise.all([client.UserManager.fetchUsers({ page: (page && !Number.isNaN(page)) ? Number(page) : 0 }), client.UserManager.fetchCount()]);
 			res.json({ users: users.map(i => ({ ...i, id: `${i.id}` })), total });
@@ -46,6 +52,19 @@ export function run(client: Client) {
 			d.setMonth(d.getMonth() - 1);
 		}
 		return res.json({ months });
+	});
+
+	router.get('/search', isAdmin, async (req, res) => {
+		const name = req.query.name as string;
+		if (!name) return Error.MissingQuery(res, 'name');
+
+		try {
+			const users = await client.UserManager.fetchByUsername(name);
+			res.json({ users: users.map(i => ({ ...i, id: `${i.id}` })) });
+		} catch (err) {
+			console.log(err);
+			res.json({ errors: 'dfd' });
+		}
 	});
 
 	router.patch('/', isAdmin, async (req, res) => {
