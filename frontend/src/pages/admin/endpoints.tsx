@@ -45,8 +45,6 @@ export default function AdminEndpoints({ endpointData, history: h, error, total 
 			}
 		}
 	}
-
-
 	async function fetchHistory(p: number) {
 		try {
 			const res = await fetch(`/api/session/stats/history?page=${p}`, {
@@ -65,26 +63,54 @@ export default function AdminEndpoints({ endpointData, history: h, error, total 
 		}
 	}
 
-	async function updateEndpoint(e: SyntheticEvent) {
+	async function updateEndpoint(e: SyntheticEvent, name: string) {
 		const target = e.target as HTMLInputElement;
+		const options = { name: name } as Endpoint;
 
-		// Fetch endpoint data
-		await fetch('/api/admin/endpoint', {
+		// Get option selected
+		switch(target.id) {
+			case 'cooldown':
+				options.cooldown = Number(target.value);
+				break;
+			case 'maxRequests':
+				options.maxRequests = Number(target.value);
+				break;
+			case 'maxRequestper':
+				options.maxRequestper = Number(target.value);
+				break;
+			case 'isBlocked':
+				options.isBlocked = Boolean(target.checked);
+				break;
+			case 'premiumOnly':
+				options.premiumOnly = Boolean(target.checked);
+				break;
+			default:
+				break;
+		}
+
+		// Send request to Database
+		await fetch('/api/session/admin/endpoints', {
 			method: 'PATCH',
 			headers: {
 				'Accept': 'application/json',
 				'Content-Type': 'application/json',
 			},
-			body: JSON.stringify({
-				name: target.id.split('_')[0],
-				isBlocked: target.checked,
-			}),
+			body: JSON.stringify(options),
 		});
 
-		// Update screen
-		target.checked = !!target.checked;
-		const el = document.getElementById(target.id.split('_')[0]);
-		if (el) el.innerHTML = target.checked ? 'Yes' : 'No';
+		// Update premiumOnly checkbox
+		if (typeof options.premiumOnly == 'boolean') {
+  		target.checked = !!target.checked;
+  		const el = document.getElementById(`${name}_premiumOnly`);
+  		if (el) el.innerHTML = target.checked ? 'Yes' : 'No';
+		}
+
+		// Update isBlocked checkbox
+		if (typeof options.isBlocked == 'boolean') {
+			target.checked = !!target.checked;
+			const el = document.getElementById(`${name}_isBlocked`);
+			if (el) el.innerHTML = target.checked ? 'Yes' : 'No';
+		}
 	}
 
 	async function deleteEndpoint(id: number) {
@@ -140,32 +166,41 @@ export default function AdminEndpoints({ endpointData, history: h, error, total 
 														<th scope="col">maxRequests</th>
 														<th scope="col">maxRequestper</th>
 														<th scope="col">Blocked?</th>
+														<th scope="col">Premium?</th>
 													</tr>
 												</thead>
 												<tbody>
-													{endpoints.map(e => (
-														<tr key={e.name}>
-															<th scope="row" className="text-truncate">{e.name}</th>
+													{endpoints.map(endpoint => (
+														<tr key={endpoint.name}>
+															<th scope="row" className="text-truncate">{endpoint.name}</th>
 															<td>
-																<div className="form-outline" style={{ width: '100%' }}>
-																	<input min="500" max="60000" step={500} defaultValue={e.cooldown} type="number" id="typeNumber" className="form-control" />
+																<div className="form-outline">
+																	<input min="500" max="60000" step={500} defaultValue={endpoint.cooldown} type="number" id="cooldown" className="form-control" onChange={(e) => updateEndpoint(e, endpoint.name)} />
 																</div>
 															</td>
 															<td>
-																<div className="form-outline" style={{ width: '100%' }}>
-																	<input min="1" max="60" step={1} defaultValue={e.maxRequests} type="number" id="typeNumber" className="form-control" />
+																<div className="form-outline">
+																	<input min="1" max="60" step={1} defaultValue={endpoint.maxRequests} type="number" id="maxRequests" className="form-control" onChange={(e) => updateEndpoint(e, endpoint.name)} />
 																</div>
 															</td>
 															<td>
-																<div className="form-outline" style={{ width: '100%' }}>
-																	<input min="30000" max="180000" step={500} defaultValue={e.maxRequestper} type="number" id="typeNumber" className="form-control" />
+																<div className="form-outline">
+																	<input min="30000" max="180000" step={500} defaultValue={endpoint.maxRequestper} type="number" id="maxRequestper" className="form-control" onChange={(e) => updateEndpoint(e, endpoint.name)} />
 																</div>
 															</td>
 															<td>
 																<div className="form-check">
-																	<input className="form-check-input" type="checkbox" onClick={updateEndpoint} defaultChecked={e.isBlocked} id={`${e.name}_input`} />
-																	<label className="form-check-label" htmlFor="flexCheckDefault" id={e.name}>
-																		{e.isBlocked ? 'Yes' : 'No'}
+																	<input className="form-check-input" type="checkbox" onClick={(e) => updateEndpoint(e, endpoint.name)} defaultChecked={endpoint.isBlocked} id="isBlocked" />
+																	<label className="form-check-label" htmlFor="flexCheckDefault" id={`${endpoint.name}_isBlocked`}>
+																		{endpoint.isBlocked ? 'Yes' : 'No'}
+																	</label>
+																</div>
+															</td>
+															<td>
+																<div className="form-check">
+																	<input className="form-check-input" type="checkbox" onClick={(e) => updateEndpoint(e, endpoint.name)} defaultChecked={endpoint.premiumOnly} id="premiumOnly" />
+																	<label className="form-check-label" htmlFor="flexCheckDefault" id={`${endpoint.name}_premiumOnly`}>
+																		{endpoint.premiumOnly ? 'Yes' : 'No'}
 																	</label>
 																</div>
 															</td>
@@ -260,7 +295,7 @@ export async function getServerSideProps(ctx: GetServerSidePropsContext) {
 		const { endpoints: endpointData } = await res1.json();
 		const { history, total } = await res2.json();
 
-		return { props: { endpointData, history, total } };
+		return { props: { endpointData: (endpointData as Array<Endpoint>).filter(e => !e.name.startsWith('/api/session/admin')), history, total } };
 	} catch (err) {
 		return { props: { endpointData: [], history: [], total: 0, error: 'API server currently unavailable' } };
 	}

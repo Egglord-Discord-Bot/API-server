@@ -3,9 +3,9 @@ import type { Endpoint } from '@prisma/client';
 import type { createEndpointData, updateEndpointData } from '../types/database';
 
 export default class EndpointManager {
-	size: Array<Endpoint>;
+	cache: Array<Endpoint>;
 	constructor() {
-		this.size = [];
+		this.cache = [];
 
 		// Fetch total count on start up
 		this.fetchEndpointData();
@@ -34,7 +34,7 @@ export default class EndpointManager {
 		* @returns The new endpoint data
 	*/
 	async update(data: updateEndpointData) {
-		return client.endpoint.update({
+		const endpoint = await client.endpoint.update({
 			where: {
 				name: data.name,
 			},
@@ -46,6 +46,9 @@ export default class EndpointManager {
 				premiumOnly: data.premiumOnly != null ? data.premiumOnly : undefined,
 			},
 		});
+		// Update cache aswell
+		await this.fetchEndpointData(true);
+		return endpoint;
 	}
 
 	/**
@@ -62,11 +65,12 @@ export default class EndpointManager {
 	}
 	/**
 		* Fetch an array of endpoint data entries
+		* @param {?boolean} force Ignore cache and force fetch from database
 		* @returns An array of endpoint data entries
 	*/
-	async fetchEndpointData() {
-		if (this.size.length == 0) this.size = await client.endpoint.findMany();
-		return this.size;
+	async fetchEndpointData(force?: boolean) {
+		if (this.cache.length == 0 || force) this.cache = await client.endpoint.findMany();
+		return this.cache;
 	}
 
 	/**
@@ -74,6 +78,6 @@ export default class EndpointManager {
 		* @returns The total number of entries
 	*/
 	async fetchCount() {
-		return this.size.length;
+		return this.cache.length;
 	}
 }

@@ -1,7 +1,9 @@
 import { Router } from 'express';
 import type Client from '../../../../helpers/Client';
 import type { swaggerJsdocType } from '../../../../types';
+import { isAdmin } from '../../../../middleware/middleware';
 import swaggerJsdoc from 'swagger-jsdoc';
+import { Error } from '../../../../utils';
 const router = Router();
 
 export function run(client: Client) {
@@ -28,6 +30,16 @@ export function run(client: Client) {
 		}
 	});
 
+	router.patch('/', isAdmin, async (req, res) => {
+		const { name, cooldown,	maxRequests,	maxRequestper, isBlocked, premiumOnly } = req.body;
+
+		try {
+			const endpoint = await client.EndpointManager.update({ name, cooldown,	maxRequests,	maxRequestper,	isBlocked,	premiumOnly });
+			res.json({ success: `Successfully updated endpoint: ${endpoint.name}` });
+		} catch (err: any) {
+			Error.GenericError(res, err.message);
+		}
+	});
 
 	return router;
 }

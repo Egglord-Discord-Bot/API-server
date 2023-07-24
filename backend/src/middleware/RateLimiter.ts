@@ -29,7 +29,7 @@ export default class RateLimit {
 	endpointData: Array<Endpoint>;
 	client: Client;
 	constructor(client: Client) {
-		this.endpointData = client.EndpointManager.size;
+		this.endpointData = client.EndpointManager.cache;
 		this.userRatelimit = new Map();
 		this.lastChecked = new Date().getTime();
 		this.client = client;
@@ -37,8 +37,6 @@ export default class RateLimit {
 	}
 
 	async checkRateLimit(req: Request & time, res: Response & time, next: NextFunction) {
-
-
 		// Get the user from the request
 		const user = await this._extractUser(req);
 		if (user === null) {

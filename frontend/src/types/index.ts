@@ -4,6 +4,7 @@ export type Endpoint = {
   maxRequests: number
   maxRequestper: number
   isBlocked: boolean
+  premiumOnly: boolean
 }
 
 export type UserHistory = {
