@@ -1,3 +1,6 @@
+import type { GetServerSidePropsContext as GSSPC } from 'next';
+export type GetServerSidePropsContext = GSSPC;
+
 export type Endpoint = {
   name: string
   cooldown: number

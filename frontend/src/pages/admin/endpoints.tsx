@@ -1,18 +1,17 @@
-import Header from '../../components/header';
-import Sidebar from '../../components/navbar/sidebar';
-import AdminNavbar from '../../components/navbar/admin';
-import Error from '../../components/error';
+import { Header, Sidebar, AdminNavbar, Error } from '@/components';
 import { useSession } from 'next-auth/react';
-import type { User } from '../../types/next-auth';
+import { getStatusColour } from '@/utils/functions';
+
+import type { User } from '@/types/next-auth';
 import type { Endpoint, UserHistory } from '@/types';
 import type { GetServerSidePropsContext } from 'next';
-import { getStatusColour } from '@/utils/functions';
 import type { SyntheticEvent } from 'react';
+
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faAnglesLeft, faAnglesRight, faSearch, faDownload, faCircle } from '@fortawesome/free-solid-svg-icons';
 import { useState } from 'react';
-import 'react-tooltip/dist/react-tooltip.css';
 import { Tooltip } from 'react-tooltip';
+import 'react-tooltip/dist/react-tooltip.css';
 
 interface Props {
   endpointData: Array<Endpoint>
@@ -35,15 +34,18 @@ export default function AdminEndpoints({ endpointData, history: h, error, total 
 		}
 	}
 
-	function searchEndpoint(e: SyntheticEvent) {
+	async function searchEndpoint(e: SyntheticEvent) {
 		const el = e.target as HTMLInputElement;
-		if (el) {
-			if (el.value.length >= 1) {
-				setEndpoints(endpoints.filter(i => i.name.startsWith(el.value)));
-			} else {
-				setEndpoints(endpointData);
-			}
-		}
+
+		const res = await fetch(`/api/session/admin/endpoints/search?name=${el.value}`, {
+  			method: 'GET',
+  			headers: {
+  				'Accept': 'application/json',
+  				'Content-Type': 'application/json',
+  			},
+  		});
+		const data = await res.json();
+		setEndpoints(data.endpoints);
 	}
 	async function fetchHistory(p: number) {
 		try {

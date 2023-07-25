@@ -1,17 +1,15 @@
-import Header from '../../components/header';
-import Sidebar from '../../components/navbar/sidebar';
-import AdminNavbar from '../../components/navbar/admin';
-import Error from '../../components/error';
-import { useSession } from 'next-auth/react';
-import InfoPill from '../../components/dashboard/infoPill';
-import type { User } from '../../types/next-auth';
-import type { GetServerSidePropsContext } from 'next';
+import { Header, Sidebar, AdminNavbar, Error, InfoPill } from '@/components';
+
 import { useState } from 'react';
+import { useSession } from 'next-auth/react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Pie, Line } from 'react-chartjs-2';
-import type { SyntheticEvent } from 'react';
 import { faAnglesLeft, faAnglesRight, faUsers, faBan, faDollarSign, faUserCheck, faSearch, faDownload, faEllipsis } from '@fortawesome/free-solid-svg-icons';
 import { Chart as ChartJS, ArcElement, Tooltip, Legend,	CategoryScale, LinearScale, PointElement, LineElement, Title } from 'chart.js';
+
+import type { User } from '@/types/next-auth';
+import type { GetServerSidePropsContext } from 'next';
+import type { SyntheticEvent } from 'react';
 ChartJS.register(ArcElement, Tooltip, Legend, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
 
 type countEnum = { [key: string]: number }

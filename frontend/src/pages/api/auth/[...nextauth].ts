@@ -2,7 +2,7 @@ import NextAuth from 'next-auth';
 import DiscordProvider from 'next-auth/providers/discord';
 import type { NextApiRequest, NextApiResponse } from 'next';
 import type { AuthOptions } from 'next-auth';
-import type { User } from '../../../types/next-auth';
+import type { User } from '@/types/next-auth';
 
 export const AuthOption = {
 	providers: [

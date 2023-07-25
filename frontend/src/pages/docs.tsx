@@ -1,11 +1,10 @@
-import Header from '../components/header';
-import Navbar from '../components/navbar/main';
+import { Header, Navbar } from '@/components';
+
 import { useSession } from 'next-auth/react';
 import Image from 'next/image';
 import Link from 'next/link';
-import type { EndpointExtra, EndpointParam } from '../types';
-import type { GetServerSidePropsContext } from 'next';
 
+import type { EndpointExtra, EndpointParam, GetServerSidePropsContext } from '../types';
 interface Props {
   endpoints: Array<EndpointExtra>
 }

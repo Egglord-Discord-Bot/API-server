@@ -1,16 +1,16 @@
-import Header from '../components/header';
-import { Sidebar, Admin as AdminNavbar } from '../components/navbar';
-import Error from '../components/error';
-import InfoPill from '../components/dashboard/infoPill';
+import { Header, Sidebar, AdminNavbar, Error, InfoPill } from '../components';
+
 import { nFormatter, formatBytes } from '../utils/functions';
 import { Pie, Line } from 'react-chartjs-2';
 import { useSession } from 'next-auth/react';
-import type { User } from '../types/next-auth';
-import type { GetServerSidePropsContext } from 'next';
-import Script from 'next/script';
+import 'react-tooltip/dist/react-tooltip.css';
+import { Tooltip } from 'react-tooltip';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faDownload, faSignal, faUsers, faClock, faMemory, faEllipsis } from '@fortawesome/free-solid-svg-icons';
 import { Chart as ChartJS, ArcElement, Tooltip as t, Legend,	CategoryScale, LinearScale, PointElement, LineElement, Title } from 'chart.js';
+
+import type { User } from '../types/next-auth';
+import type { GetServerSidePropsContext } from '../types';
 ChartJS.register(ArcElement, t, Legend, CategoryScale, LinearScale, PointElement, LineElement, Title);
 
 type countEnum = { [key: string]: number }
@@ -137,8 +137,9 @@ export default function Admin(data: Props) {
 										<div className="card-body">
 											{Object.entries(data.responseCode).sort(([, a], [, b]) => a - b).reverse().map(e => (
 												<>
+													<Tooltip place="top" content={`${e[1]}`} id={`endpoint_${e[0]}`}/>
 													<h4 className="small font-weight-bold">{e[0]} <span className="float-end">{Math.round((e[1] / data.count) * 100)}%</span></h4>
-													<div className="progress mb-4" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title={`${e[1]}`}>
+													<div className="progress mb-4" data-tooltip-id={`endpoint_${e[0]}`}>
 														<div className="progress-bar bg-success" role="progressbar" style={{ width: `${(e[1] / data.count) * 100}%` }}	aria-valuenow={e[1]} aria-valuemin={0} aria-valuemax={data.count}>{e[1]}</div>
 													</div>
 												</>
@@ -176,9 +177,6 @@ export default function Admin(data: Props) {
 					</div>
 				</div>
 			</div>
-			<Script id="show-banner">
-				{'const tooltipTriggerList = document.querySelectorAll(\'[data-bs-toggle=\"tooltip\"]\'); [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl))'}
-			</Script>
 		</>
 	);
 }

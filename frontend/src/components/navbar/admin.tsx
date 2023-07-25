@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { signOut } from 'next-auth/react';
-import type { User } from '../../types/next-auth';
+import type { User } from '@/types/next-auth';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faBell, faFileAlt, faCogs, faSignOutAlt } from '@fortawesome/free-solid-svg-icons';
 

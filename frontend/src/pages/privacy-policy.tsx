@@ -1,5 +1,4 @@
-import Header from '../components/header';
-import { Footer, Navbar } from '../components/navbar';
+import { Header, Footer, Navbar } from '../components';
 import { useSession } from 'next-auth/react';
 import Link from 'next/link';
 

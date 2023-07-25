@@ -1,12 +1,10 @@
-import Header from '../../components/header';
-import Sidebar from '../../components/navbar/sidebar';
-import AdminNavbar from '../../components/navbar/admin';
-import Error from '../../components/error';
+import { Header, Sidebar, AdminNavbar, Error } from '@/components';
 import { useSession } from 'next-auth/react';
+import { useState } from 'react';
+
 import type { User } from '../../types/next-auth';
 import type { GetServerSidePropsContext } from 'next';
 import type { SyntheticEvent } from 'react';
-import { useState } from 'react';
 
 interface Props {
   error: string

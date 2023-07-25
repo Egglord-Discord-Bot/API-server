@@ -1,7 +1,7 @@
 import type { EndpointParam } from '../types';
 
 interface Props {
-  EndpointParam: EndpointParam[]
+  EndpointParam: Array<EndpointParam>
 }
 
 export default function Home({ EndpointParam }: Props) {

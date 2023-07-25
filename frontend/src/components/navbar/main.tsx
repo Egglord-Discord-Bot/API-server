@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { signIn, signOut } from 'next-auth/react';
-import type { User } from '../../types/next-auth';
+import type { User } from '@/types/next-auth';
 
 interface Props {
 	user: User | undefined

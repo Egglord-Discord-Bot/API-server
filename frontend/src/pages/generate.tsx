@@ -1,13 +1,11 @@
-import Header from '../components/header';
-import { Footer, Navbar } from '../components/navbar';
-import ParamBuilder from '../components/paramBuilder';
-import Error from '../components/error';
+import { Header, Footer, Navbar, ParamBuilder, Error } from '@/components';
+
 import { useSession } from 'next-auth/react';
 import { useState } from 'react';
-import type { EndpointExtra, EndpointParam } from '../types';
-import type { GetServerSidePropsContext } from 'next';
 import Script from 'next/script';
 import Image from 'next/image';
+
+import type { EndpointExtra, EndpointParam, GetServerSidePropsContext } from '../types';
 import type { ChangeEvent, FormEvent } from 'react';
 interface Props {
   endpoints: Array<EndpointExtra>

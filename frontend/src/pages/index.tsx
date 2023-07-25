@@ -1,10 +1,9 @@
+import { Header, Footer, Navbar } from '@/components';
+
 import Link from 'next/link';
-import Header from '../components/header';
-import { Footer, Navbar } from '../components/navbar';
-import type { GetServerSidePropsContext } from 'next';
 import { useSession } from 'next-auth/react';
 
-// API basic stats
+import type { GetServerSidePropsContext } from '@/types';
 interface Props {
 	userCount: number
   endpointCount: number

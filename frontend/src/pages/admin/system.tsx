@@ -1,14 +1,8 @@
-import Header from '../../components/header';
-import Sidebar from '../../components/navbar/sidebar';
-import AdminNavbar from '../../components/navbar/admin';
-import Error from '../../components/error';
-import InfoPill from '../../components/dashboard/infoPill';
-import InfoPillProgress from '../../components/dashboard/infoPill-progress';
+import { Header, Sidebar, AdminNavbar, Error, InfoPill, InfoPillProgress } from '@/components';
+
 import { useSession } from 'next-auth/react';
-import type { User } from '../../types/next-auth';
 import { useState, useEffect } from 'react';
-import type { GetServerSidePropsContext } from 'next';
-import { formatBytes } from '../../utils/functions';
+import { formatBytes } from '@/utils/functions';
 import { Line } from 'react-chartjs-2';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faDownload, faMicrochip, faServer, faNetworkWired, faHardDrive } from '@fortawesome/free-solid-svg-icons';
@@ -16,6 +10,8 @@ import TimeAgo from 'javascript-time-ago';
 import en from 'javascript-time-ago/locale/en';
 import { Chart as ChartJS, ArcElement, Tooltip, Legend,	CategoryScale, LinearScale, PointElement, LineElement, Title } from 'chart.js';
 
+import type { User } from '@/types/next-auth';
+import type { GetServerSidePropsContext } from 'next';
 ChartJS.register(ArcElement, Tooltip, Legend, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
 TimeAgo.addDefaultLocale(en);
 
@@ -148,6 +144,15 @@ export default function AdminSystem({ history: h, current: c, error }: Props) {
 										</div>
 										<div className="card-body">
 											<Line data={cpuHistory} options={{
+												plugins: {
+													tooltip: {
+														callbacks: {
+															label: function(label) {
+																return `${label.formattedValue}%`;
+															},
+														},
+													},
+												},
 												scales: {
 													y: {
 														ticks: {
@@ -189,6 +194,15 @@ export default function AdminSystem({ history: h, current: c, error }: Props) {
 										</div>
 										<div className="card-body">
 											<Line data={memoryHistory} options={{
+												plugins: {
+													tooltip: {
+														callbacks: {
+															label: function(label) {
+																return formatBytes(Number(label.formattedValue.replaceAll(',', '')));
+															},
+														},
+													},
+												},
 												scales: {
 													y: {
 														ticks: {

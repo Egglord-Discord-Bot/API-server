@@ -1,25 +1,19 @@
-import Header from '../components/header';
-import Navbar from '../components/navbar/main';
-import Error from '../components/error';
-import type { GetServerSidePropsContext } from 'next';
+import { Header, Navbar, Error } from '@/components';
+
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faEye, faEyeSlash, faAnglesLeft, faAnglesRight, faEllipsis } from '@fortawesome/free-solid-svg-icons';
 import { useSession } from 'next-auth/react';
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
 import { Pie } from 'react-chartjs-2';
 import { useState, useEffect } from 'react';
+
+import type { GetServerSidePropsContext, UserHistory } from '@/types';
 import type { MouseEvent } from 'react';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faEye, faEyeSlash, faAnglesLeft, faAnglesRight, faEllipsis } from '@fortawesome/free-solid-svg-icons';
 ChartJS.register(ArcElement, Tooltip, Legend);
 
-type history = {
-	id: number,
-  userId: string,
-  endpoint: string,
-  createdAt: Date
-}
 type countEnum = { [key: string]: number }
 interface Props {
-	history: Array<history>
+	history: Array<UserHistory>
 	total: number
 	error?: string
 	data: countEnum
@@ -38,7 +32,7 @@ export default function Settings({ history: hList, error, total = 0, data, cooki
 
 	// For paginator
 	const [page, setPage] = useState(0);
-	const [history, setHistory] = useState<Array<history>>(hList);
+	const [history, setHistory] = useState<Array<UserHistory>>(hList);
 	if (status == 'loading') return null;
 
 
