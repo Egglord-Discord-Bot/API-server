@@ -37,7 +37,7 @@ export default function AdminEndpoints({ endpointData, history: h, error, total 
 	async function searchEndpoint(e: SyntheticEvent) {
 		const el = e.target as HTMLInputElement;
 
-		const res = await fetch(`/api/session/admin/endpoints/search?name=${el.value}`, {
+		const res = await fetch(`/api/session/admin/history/search?name=${el.value}`, {
   			method: 'GET',
   			headers: {
   				'Accept': 'application/json',
