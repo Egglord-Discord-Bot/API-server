@@ -81,22 +81,21 @@ export default class RateLimit {
 		} else {
 			// Success
 			this.addEndpoint(user.id, endpoint.name);
-			this.sendResponse({ req, res, userId: user.id, endpoint: endpoint.name, response: null });
 		}
 
-
 		// User is logged in and not ratelimited at all
+		this.sendResponse({ req, res, userId: user.id, endpoint: endpoint.name, response: null });
 		next();
 	}
 
 	private sendResponse({ req, res, userId, endpoint, response }: sendResponseParam) {
+		console.log('test');
 		onFinished(req, () => {
 			req._endTime = new Date().getTime();
 			onFinished(res, async () => {
 				res._endTime = new Date().getTime();
 
 				// Get additional information
-
 				const status = res.statusCode;
 
 				// How long did it take for the page to load
@@ -105,6 +104,7 @@ export default class RateLimit {
 
 
 				// Save to users' history
+				console.log('hello');
 				await this.client.UserHistoryManager.create({ id: userId == null ? null : BigInt(userId), endpoint, responseCode: status, responseTime: response_time });
 			});
 		});

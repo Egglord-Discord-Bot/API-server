@@ -21,8 +21,8 @@ export function run(client: Client) {
 	router.get('/json', isAdmin, async (_req, res) => {
 		const [hisTotal, userTotal, responseCodes, mostAccessedEndpoints] = await Promise.all([client.UserHistoryManager.fetchCount(),
 			client.UserManager.fetchCount(),
-			client.UserHistoryManager.fetchResponseCodeCounts(),
-			client.UserHistoryManager.fetchMostAccessEndpoints(),
+			client.ResponseCodeManager.fetchResponseCodeCounts(),
+			client.EndpointManager.fetchMostAccessEndpoints(),
 		]);
 
 		res.json({ historyCount: hisTotal, userCount: userTotal, responseCodes, mostAccessedEndpoints });

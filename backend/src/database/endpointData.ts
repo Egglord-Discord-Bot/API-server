@@ -13,7 +13,7 @@ export default class EndpointManager {
 
 	/**
 		* Create an endpoint data
-		* @param {createEndpointData} data The data for creating endpoint data
+		* @param {Endpoint} data The data for creating endpoint data
 		* @returns The new endpoint data
 	*/
 	async create(data: createEndpointData) {
@@ -63,6 +63,7 @@ export default class EndpointManager {
 			},
 		});
 	}
+
 	/**
 		* Fetch an array of endpoint data entries
 		* @param {?boolean} force Ignore cache and force fetch from database
@@ -71,6 +72,32 @@ export default class EndpointManager {
 	async fetchEndpointData(force?: boolean) {
 		if (this.cache.length == 0 || force) this.cache = await client.endpoint.findMany();
 		return this.cache;
+	}
+
+	/**
+		* Fetch all history that has name that starts with the param
+		* @param {string} name The name for searching
+		* @returns Array of user history entries
+	*/
+	async fetchEndpointByName(name: string) {
+		return client.endpoint.findMany({
+			where: {
+				name: name,
+			},
+		});
+	}
+
+	async fetchMostAccessEndpoints() {
+		return client.endpoint.findMany({
+			include: {
+				_count: {
+					select: {
+						history: true,
+					},
+				},
+			},
+		});
+
 	}
 
 	/**

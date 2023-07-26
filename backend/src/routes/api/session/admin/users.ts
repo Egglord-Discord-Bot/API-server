@@ -23,7 +23,6 @@ export function run(client: Client) {
 		}
 	});
 
-
 	router.get('/json', isAdmin, async (req, res) => {
 		const page = req.query.page;
 		try {

@@ -8,14 +8,14 @@ export default class CacheHandler {
 	data: Map<string, object>;
 	constructor() {
 		// 6 hours
-		this.timetillSweep = 21_600_000;
+		this.timetillSweep = 6 * 60 * 60 * 1000;
 		this.data = new Map();
 	}
 
 	/**
-	 * Sweep the cache
-	 * @param {string} dataId The map id of the data to delete
-	 * @param {number} [time] How long it should stay in cache for.
+	  * Sweep the cache
+	  * @param {string} dataId The map id of the data to delete
+	  * @param {number} [time] How long it should stay in cache for.
 	*/
 	_sweep(dataId: string, time?: number) {
 		setTimeout(() => {
@@ -24,11 +24,11 @@ export default class CacheHandler {
 	}
 
 	/**
-	 * Sweep the cache
-	 * @param {object} data
-	 * @param {string} data.id The id of the data that will be stored
-	 * @param {object} data.data The actual data being stored
-	 * @param {number} [time] How long it should stay in cache for.
+	  * Sweep the cache
+	  * @param {object} data
+	  * @param {string} data.id The id of the data that will be stored
+	  * @param {object} data.data The actual data being stored
+	  * @param {number} [time] How long it should stay in cache for.
 	*/
 	_addData({ id, data }: addData, time?: number) {
 		this.data.set(id, data);

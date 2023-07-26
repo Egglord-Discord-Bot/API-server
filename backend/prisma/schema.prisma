@@ -26,13 +26,15 @@ model User {
 }
 
 model UserHistory {
-  id            Int     @id   @default(autoincrement())
-  user          User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id            Int         @id   @default(autoincrement())
+  user          User?       @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId        BigInt?
-  endpoint      String
-  responseCode  Int @default(200)
-  responseTime  Int @default(5)
-  createdAt     DateTime @default(now())
+  endpoint      Endpoint?    @relation(fields: [endpointName], references: [name], onDelete: Cascade)
+  endpointName  String?
+  responseCode  ResponseCode  @relation(fields: [statusCode], references: [code], onDelete: Cascade)
+  statusCode    Int         @default(200)
+  responseTime  Int         @default(5)
+  createdAt     DateTime    @default(now())
 }
 
 model Endpoint {
@@ -42,6 +44,12 @@ model Endpoint {
   maxRequestper Int       @default(60000)
   isBlocked     Boolean   @default(false)
   premiumOnly   Boolean   @default(false)
+  history       UserHistory[]
+}
+
+model ResponseCode {
+  code      Int             @id
+  history   UserHistory[]
 }
 
 model systemHistory {

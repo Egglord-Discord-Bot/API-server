@@ -9,9 +9,10 @@ export function run(client: Client) {
 	router.get('/', isAdmin, async (req, res) => {
 		type countEnum = { [key: string]: number }
 		const timeFrame = req.query.time as string;
-		if (!timeFrame) return Error.MissingQuery(res, 'timeFrame');
+		if (!timeFrame) return Error.InvalidValue(res, 'timeFrame', ['year', 'month', 'day']);
 
 		switch (timeFrame) {
+			// Last year
 			case 'year': {
 				const months: countEnum = { 'January': 0, 'February': 0, 'March': 0, 'April': 0, 'May': 0, 'June': 0, 'July': 0, 'August': 0, 'September': 0, 'October': 0, 'November': 0, 'December': 0 };
 				const d = new Date();
@@ -25,6 +26,16 @@ export function run(client: Client) {
 				}
 				return res.json({ months });
 			}
+			// Last 30 days
+			case 'month': {
+				const count = await client.UserHistoryManager.fetchEndpointsbyLast30Days();
+				return res.json({ count });
+			}
+			// last 24hours
+			case 'day': {
+				const count = await client.UserHistoryManager.fetchEndpointsbyLast24hours();
+				return res.json({ count });
+			}
 			default:
 				return res.json({ months: [] });
 		}
@@ -35,8 +46,8 @@ export function run(client: Client) {
 		if (!name) return Error.MissingQuery(res, 'name');
 
 		try {
-			const endpoints = await client.UserHistoryManager.fetchEndpointByName(name);
-			res.json({ endpoints: endpoints.map(i => ({ ...i, userId: `${i.userId}` })) });
+			const endpoints = await client.EndpointManager.fetchEndpointByName(name);
+			res.json({ endpoints: endpoints });
 		} catch (err: any) {
 			Error.GenericError(res, err.message);
 		}
@@ -44,7 +55,7 @@ export function run(client: Client) {
 
 	router.get('/responseCode', isAdmin, async (_req, res) => {
 		try {
-			const history = await client.UserHistoryManager.fetchResponseCodeCounts();
+			const history = await client.ResponseCodeManager.fetchResponseCodeCounts();
 			res.json({ history: history });
 		} catch (err) {
 			console.log(err);

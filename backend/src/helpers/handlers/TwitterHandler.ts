@@ -10,9 +10,11 @@ export default class TwitchHandler extends CacheHandler {
 
 	async fetchUser(username: string) {
 		try {
-			const { data } = await axios.get(`https://api.twitter.com/1.1/users/show.json?screen_name=${username}`, {
+			const { data } = await axios.get(`https://api.twitter.com/2/users/by?screen_name=${username}`, {
 				headers: {
-					'authorization': `Bearer ${process.env.twitterBearerToken}`,
+					'User-Agent': 'v2UserLookupJS',
+					'Authorization': `Bearer ${process.env.twitterBearerToken}`,
+					'Content-Type': 'application/json',
 				},
 			});
 

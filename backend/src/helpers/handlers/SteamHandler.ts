@@ -15,8 +15,8 @@ export default class SteamHandler extends CacheHandler {
 	}
 
 	/**
-   * Function for getting the steam ID of the steam account
-   * @param {string} username The username of the steam account
+    * Function for getting the steam ID of the steam account
+    * @param {string} username The username of the steam account
   */
 	async getUserByUsername(username: string) {
 		const { data } = await axios.get(`http://api.steampowered.com/ISteamUser/ResolveVanityURL/v0001/?key=${this.token}&vanityurl=${username}`);
@@ -24,8 +24,8 @@ export default class SteamHandler extends CacheHandler {
 	}
 
 	/**
-   * Function for getting some basic information of a steam account
-   * @param {string} steamId The Id of the steam account
+    * Function for getting some basic information of a steam account
+    * @param {string} steamId The Id of the steam account
   */
 	async getUserSummariesById(steamId: string) {
 		const { data } = await axios.get(`http://api.steampowered.com/ISteamUser/GetPlayerSummaries/v0002/?key=${this.token}&steamids=${steamId}`);
@@ -33,8 +33,8 @@ export default class SteamHandler extends CacheHandler {
 	}
 
 	/**
-   * Function for getting a users ban status for steam services
-   * @param {string} steamId The Id of the steam account
+    * Function for getting a users ban status for steam services
+    * @param {string} steamId The Id of the steam account
   */
 	async getUserBansById(steamId: string) {
 		const { data } = await axios.get(`http://api.steampowered.com/ISteamUser/GetPlayerBans/v1/?key=${this.token}&steamids=${steamId}`);
@@ -42,9 +42,9 @@ export default class SteamHandler extends CacheHandler {
 	}
 
 	/**
-   * Create a clean object based on information given
-   * @param {SteamGetPlayerSummariesRawRequest} playerSum The basic information of a steam account
-   * @param {SteamGetPlayerBansRawRequest} playerbans The users ban status data
+    * Create a clean object based on information given
+    * @param {SteamGetPlayerSummariesRawRequest} playerSum The basic information of a steam account
+    * @param {SteamGetPlayerBansRawRequest} playerbans The users ban status data
   */
 	createAccount(playerSum: SteamGetPlayerSummariesRawRequest, playerbans: SteamGetPlayerBansRawRequest) {
 		return new SteamAccount({

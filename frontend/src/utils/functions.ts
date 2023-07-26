@@ -38,3 +38,10 @@ export function getStatusColour(code: number) {
 			return 'red';
 	}
 }
+
+export async function sendRequest(path: string) {
+	const res = await fetch(`/api/${path}`, {
+		method: 'get',
+	});
+	return res.json();
+}

@@ -1,40 +1,49 @@
 import { Header, Navbar, Error } from '@/components';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faEye, faEyeSlash, faAnglesLeft, faAnglesRight, faEllipsis } from '@fortawesome/free-solid-svg-icons';
+import { faEye, faEyeSlash, faAnglesLeft, faAnglesRight, faEllipsis, faCircle } from '@fortawesome/free-solid-svg-icons';
 import { useSession } from 'next-auth/react';
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
 import { Pie } from 'react-chartjs-2';
 import { useState, useEffect } from 'react';
+import { getStatusColour, sendRequest } from '@/utils/functions';
 
-import type { GetServerSidePropsContext, UserHistory } from '@/types';
+import type { UserHistory } from '@/types';
 import type { MouseEvent } from 'react';
+import { Tooltip as ReactToolTip } from 'react-tooltip';
+import 'react-tooltip/dist/react-tooltip.css';
 ChartJS.register(ArcElement, Tooltip, Legend);
 
-type countEnum = { [key: string]: number }
-interface Props {
-	history: Array<UserHistory>
-	total: number
-	error?: string
-	data: countEnum
-	cookie: string
-}
-
-export default function Settings({ history: hList, error, total = 0, data, cookie }: Props) {
+export default function Settings() {
 	const { data: session, status } = useSession();
 
 	// Fot toggle visibility of token + update token when regenerated
 	const [canSee, setCanSee] = useState(true);
 	const [token, setToken] = useState('');
-	useEffect(() => {
-		setToken(session?.user.token as string);
-	}, [status, session?.user.token]);
-
-	// For paginator
 	const [page, setPage] = useState(0);
-	const [history, setHistory] = useState<Array<UserHistory>>(hList);
-	if (status == 'loading') return null;
+	const [total, setTotal] = useState(0);
+	const [history, setHistory] = useState<Array<UserHistory>>([]);
+	const [graph, setGraph] = useState({});
 
+	useEffect(() => {
+		// set token
+		setToken(session?.user.token as string);
+
+		// Fetch user's history
+		(async () => {
+			const t = await sendRequest('session/history');
+			setHistory(t.history);
+			setTotal(t.total);
+		})();
+
+		// Fetch users graph
+		(async () => {
+			const t = await sendRequest('session/history/graph');
+			setGraph(t.data);
+		})();
+
+	}, [status, session?.user.token]);
+	if (status == 'loading') return null;
 
 	// Put their token in their clipboard
 	function copyUserToken(e: MouseEvent<HTMLButtonElement>) {
@@ -48,8 +57,28 @@ export default function Settings({ history: hList, error, total = 0, data, cooki
 		copyText.setSelectionRange(0, 99999);
 
 		// Copy the text inside the text field
-		console.log(navigator);
-		navigator.clipboard.writeText(copyText.value);
+		if (navigator.clipboard && window.isSecureContext) {
+			navigator.clipboard.writeText(copyText.value);
+		} else {
+			// Use the 'out of viewport hidden text area' trick
+			const textArea = document.createElement('textarea');
+			textArea.value = copyText.value;
+
+			// Move textarea out of the viewport so it's not visible
+			textArea.style.position = 'absolute';
+			textArea.style.left = '-999999px';
+
+			document.body.prepend(textArea);
+			textArea.select();
+
+			try {
+				document.execCommand('copy');
+			} catch (error: any) {
+				console.error(error);
+			} finally {
+				textArea.remove();
+			}
+		}
 
 		// Alert the copied text
 		alert('Token has been copied');
@@ -87,7 +116,6 @@ export default function Settings({ history: hList, error, total = 0, data, cooki
 				headers: {
 					'Accept': 'application/json',
 					'Content-Type': 'application/json',
-					'cookie': cookie,
 				},
 			});
 			setToken((await res.json()).token);
@@ -98,11 +126,11 @@ export default function Settings({ history: hList, error, total = 0, data, cooki
 
 	// Create data for pie chart
 	const graphData = {
-		labels: Object.keys(data),
+		labels: Object.keys(graph),
 		datasets: [
 			{
 				label: 'Accessed',
-				data: Object.values(data),
+				data: Object.values(graph),
 				backgroundColor: [
 					'rgb(255, 159, 64)',
 					'rgb(255, 205, 86)',
@@ -122,9 +150,6 @@ export default function Settings({ history: hList, error, total = 0, data, cooki
 			<Header />
 			<Navbar user={session?.user}/>
 			<div className="container-fluid" style={{ padding:'1%' }}>
-				{error && (
-					<Error text={error} />
-				)}
 				<div className="row">
 					<form className="form-inline">
 						<h5>Your token:</h5>
@@ -175,20 +200,25 @@ export default function Settings({ history: hList, error, total = 0, data, cooki
 								</a>
 							</div>
 							<div className="card-body collapse show" id="collapseTwo">
+								{history.map(hi => <ReactToolTip key={hi.id} id={`${hi.id}`} place="top" content={`${hi.statusCode}`} variant="dark" />)}
 								<table className="table" style={{ maxHeight:'400px' }}>
 									<thead>
 										<tr>
 											<th scope="col">#</th>
 											<th scope="col">Endpoint:</th>
 											<th scope="col">Accessed on:</th>
+											<th scope="col" style={{ textAlign: 'center' }}>Status</th>
 										</tr>
 									</thead>
 									<tbody>
 										{history.map(_ => (
 											<tr key={_.id}>
 												<td scope="row">{(page * 50) + history.indexOf(_) + 1}</td>
-												<td>{_.endpoint}</td>
+												<td>{_.endpointName}</td>
 												<td>{new Date(_.createdAt).toLocaleString('en-GB', { timeZone: 'UTC' })}</td>
+												<td style={{ textAlign: 'center' }} data-tooltip-id={`${_.id}`}>
+													<FontAwesomeIcon icon={faCircle} style={{ color: getStatusColour(_.statusCode) }}/>
+												</td>
 											</tr>
 										))}
 									</tbody>
@@ -218,24 +248,4 @@ export default function Settings({ history: hList, error, total = 0, data, cooki
 			</div>
 		</>
 	);
-}
-
-// Fetch basic API usage
-export async function getServerSideProps(ctx: GetServerSidePropsContext) {
-	try {
-		const obj = {
-			method: 'get',
-			headers: {
-				'cookie': ctx.req.headers.cookie as string,
-			},
-		};
-		// Fetch data from API
-		const [res1, res2] = await Promise.all([fetch(`${process.env.BACKEND_URL}api/session/history`, obj), fetch(`${process.env.BACKEND_URL}api/session/history/graph`, obj)]);
-		const [{ history, total }, { data }] = await Promise.all([res1.json(), res2.json()]);
-
-		return { props: { history, total, data, cookie: ctx.req.headers.cookie as string } };
-	} catch (err) {
-		return { props: { history: [], error: 'API server currently unavailable' } };
-	}
-
 }

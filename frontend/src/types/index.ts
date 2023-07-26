@@ -8,15 +8,25 @@ export type Endpoint = {
   maxRequestper: number
   isBlocked: boolean
   premiumOnly: boolean
+  _count?: {
+    history: number
+  }
+}
+
+export type ResponseCode = {
+  code: number
+  _count: {
+    history: number
+  }
 }
 
 export type UserHistory = {
   id: number
   user: string
   userId: string
-  endpoint: string
+  endpointName: string
   createdAt: Date
-  responseCode: number
+  statusCode: number
   responseTime: number
 }
 

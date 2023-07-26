@@ -2,19 +2,27 @@ import { Header, Footer, Navbar } from '@/components';
 
 import Link from 'next/link';
 import { useSession } from 'next-auth/react';
-
-import type { GetServerSidePropsContext } from '@/types';
+import { useEffect, useState } from 'react';
+import { sendRequest } from '@/utils/functions';
 interface Props {
 	userCount: number
   endpointCount: number
-  totalAPIUsage: number
+  historyCount: number
 }
 
-
-export default function Home({ userCount, endpointCount, totalAPIUsage }: Props) {
+export default function Home() {
 	const { data: session, status } = useSession();
-	if (status == 'loading') return null;
+	const [data, setData] = useState<Props>({ userCount: 0, endpointCount: 0, historyCount: 0 });
 
+	useEffect(() => {
+		(async () => {
+			const t = await sendRequest('session/stats');
+			console.log(t);
+			setData(t);
+		})();
+	}, []);
+
+	if (status == 'loading') return null;
 	return (
 		<>
 			<Header />
@@ -39,21 +47,21 @@ export default function Home({ userCount, endpointCount, totalAPIUsage }: Props)
 							<div className="col-lg-3 col-md-6">
 								<div className="count-box">
 									<i className="bi bi-emoji-smile"></i>
-									<span data-purecounter-start="0" data-purecounter-end={userCount} data-purecounter-duration="1" className="purecounter">{userCount}</span>
+									<span data-purecounter-start="0" data-purecounter-end={data.userCount} data-purecounter-duration="1" className="purecounter">{data.userCount}</span>
 									<p>API Users</p>
 								</div>
 							</div>
 							<div className="col-lg-3 col-md-6 mt-5 mt-lg-0">
 								<div className="count-box">
 									<i className="bi bi-hdd"></i>
-									<span data-purecounter-start="0" data-purecounter-end={endpointCount} data-purecounter-duration="1" className="purecounter">{endpointCount}</span>
+									<span data-purecounter-start="0" data-purecounter-end={data.endpointCount} data-purecounter-duration="1" className="purecounter">{data.endpointCount}</span>
 									<p>Total API endpoints</p>
 								</div>
 							</div>
 							<div className="col-lg-3 col-md-6 mt-5 mt-lg-0">
 								<div className="count-box">
 									<i className="bi bi-hdd"></i>
-									<span data-purecounter-start="0" data-purecounter-end={totalAPIUsage} data-purecounter-duration="1" className="purecounter">{totalAPIUsage}</span>
+									<span data-purecounter-start="0" data-purecounter-end={data.historyCount} data-purecounter-duration="1" className="purecounter">{data.historyCount}</span>
 									<p>API requests recieved</p>
 								</div>
 							</div>
@@ -66,20 +74,4 @@ export default function Home({ userCount, endpointCount, totalAPIUsage }: Props)
 			<Footer />
 		</>
 	);
-}
-
-// Fetch basic API usage
-export async function getServerSideProps(ctx: GetServerSidePropsContext) {
-	try {
-		const res = await fetch(`${process.env.BACKEND_URL}api/session/stats`, {
-			method: 'get',
-			headers: {
-				'cookie': ctx.req.headers.cookie as string,
-			},
-		});
-		const data = await res.json();
-		return { props: { userCount: data.userCount, endpointCount: data.endpointCount, totalAPIUsage: data.historyCount } };
-	} catch (err) {
-		return { props: { userCount: 0, endpointCount: 0, totalAPIUsage: 0 } };
-	}
 }

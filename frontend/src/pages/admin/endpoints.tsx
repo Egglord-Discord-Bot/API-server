@@ -1,4 +1,4 @@
-import { Header, Sidebar, AdminNavbar, Error } from '@/components';
+import { Header, Sidebar, AdminNavbar, Error, InfoPill } from '@/components';
 import { useSession } from 'next-auth/react';
 import { getStatusColour } from '@/utils/functions';
 
@@ -8,7 +8,7 @@ import type { GetServerSidePropsContext } from 'next';
 import type { SyntheticEvent } from 'react';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faAnglesLeft, faAnglesRight, faSearch, faDownload, faCircle } from '@fortawesome/free-solid-svg-icons';
+import { faAnglesLeft, faAnglesRight, faSearch, faDownload, faCircle, faCalendar, faCalendarDays, faCalendarWeek, faClock } from '@fortawesome/free-solid-svg-icons';
 import { useState } from 'react';
 import { Tooltip } from 'react-tooltip';
 import 'react-tooltip/dist/react-tooltip.css';
@@ -30,14 +30,14 @@ export default function AdminEndpoints({ endpointData, history: h, error, total 
 	function updateDOM(e: SyntheticEvent) {
 		const el = e.target as HTMLInputElement;
 		if (el) {
-			setHistory(history.filter(i => i.endpoint.startsWith(el.value)));
+			setHistory(history.filter(i => i.endpointName.startsWith(el.value)));
 		}
 	}
 
 	async function searchEndpoint(e: SyntheticEvent) {
 		const el = e.target as HTMLInputElement;
 
-		const res = await fetch(`/api/session/admin/history/search?name=${el.value}`, {
+		const res = await fetch(`/api/session/admin/history/search?name=/api/${el.value}`, {
   			method: 'GET',
   			headers: {
   				'Accept': 'application/json',
@@ -148,6 +148,34 @@ export default function AdminEndpoints({ endpointData, history: h, error, total 
 								</a>
 							</div>
 							<div className="row">
+								<div className="col-xl-3 col-md-6 mb-4">
+									<InfoPill title={'Last year'} text={'sadjfbfd'} icon={faCalendar}/>
+								</div>
+								<div className="col-xl-3 col-md-6 mb-4">
+									<InfoPill title={'Last 30 days'} text={'sdfds'} icon={faCalendarWeek}/>
+								</div>
+								<div className="col-xl-3 col-md-6 mb-4">
+									<InfoPill title={'Last 7 days'} text={'8'} icon={faCalendarDays}/>
+								</div>
+								<div className="col-xl-3 col-md-6 mb-4">
+									<InfoPill title={'Last 24 hours'} text={'8'} icon={faClock} />
+								</div>
+							</div>
+							<div className="row">
+								<div className="col-xl-3 col-md-6 mb-4">
+									<InfoPill title={'Last year'} text={'sadjfbfd'} icon={faCalendar}/>
+								</div>
+								<div className="col-xl-3 col-md-6 mb-4">
+									<InfoPill title={'Last 30 days'} text={'sdfds'} icon={faCalendarWeek}/>
+								</div>
+								<div className="col-xl-3 col-md-6 mb-4">
+									<InfoPill title={'Last 7 days'} text={'8'} icon={faCalendarDays}/>
+								</div>
+								<div className="col-xl-3 col-md-6 mb-4">
+									<InfoPill title={'Last 24 hours'} text={'8'} icon={faClock} />
+								</div>
+							</div>
+							<div className="row">
 								<div className="col-xl-6 col-lg-12">
 									<div className="card shadow mb-4">
 										<div className="card-header py-3 d-flex flex-row align-items-center justify-content-between">
@@ -225,7 +253,7 @@ export default function AdminEndpoints({ endpointData, history: h, error, total 
 													<FontAwesomeIcon icon={faSearch} />
 												</span>
 											</div>
-											{history.map(hi => <Tooltip key={hi.id} id={`${hi.id}`} place="top" content={`${hi.responseCode}`} variant="dark" />)}
+											{history.map(hi => <Tooltip key={hi.id} id={`${hi.id}`} place="top" content={`${hi.statusCode}`} variant="dark" />)}
 											<table className="table">
 												<thead>
 													<tr>
@@ -240,10 +268,10 @@ export default function AdminEndpoints({ endpointData, history: h, error, total 
 													{history.map(hi => (
 														<tr key={hi.id}>
 															<th scope="row">{hi.userId}</th>
-															<td>{hi.endpoint}</td>
+															<td>{hi.endpointName}</td>
 															<td>{new Date(hi.createdAt).toDateString()} {new Date(hi.createdAt).toLocaleTimeString('en-US')}</td>
 															<td style={{ textAlign: 'center' }} data-tooltip-id={`${hi.id}`}>
-																<FontAwesomeIcon icon={faCircle} style={{ color: getStatusColour(hi.responseCode) }}/>
+																<FontAwesomeIcon icon={faCircle} style={{ color: getStatusColour(hi.statusCode) }}/>
 															</td>
 															<td>
 																<input className="form-check-input" type="checkbox" id="flexCheckChecked" onClick={() => deleteEndpoint(hi.id)} />

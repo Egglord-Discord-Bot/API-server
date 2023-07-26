@@ -18,19 +18,56 @@ export default class userHistoryManager {
 	*/
 	async create(data: UserHistoryCreateParam) {
 		this.size++;
+		console.log(data);
 		if (data.id == null) {
 			return client.userHistory.create({
 				data: {
-					endpoint: data.endpoint,
-					responseCode: data.responseCode,
+					endpoint: {
+						connectOrCreate: {
+							where: {
+								name: data.endpoint,
+							},
+							create: {
+								name: data.endpoint,
+							},
+						},
+					},
+					responseCode: {
+						connectOrCreate: {
+							where: {
+								code: data.responseCode,
+							},
+							create: {
+								code: data.responseCode,
+							},
+						},
+					},
 					responseTime: data.responseTime,
 				},
 			});
 		} else {
 			return client.userHistory.create({
 				data: {
-					endpoint: data.endpoint,
-					responseCode: data.responseCode,
+					endpoint: {
+						connectOrCreate: {
+							where: {
+								name: data.endpoint,
+							},
+							create: {
+								name: data.endpoint,
+							},
+						},
+					},
+					responseCode: {
+						connectOrCreate: {
+							where: {
+								code: data.responseCode,
+							},
+							create: {
+								code: data.responseCode,
+							},
+						},
+					},
 					responseTime: data.responseTime,
 					user: {
 						connect: { id: data.id 	},
@@ -61,7 +98,7 @@ export default class userHistoryManager {
 	async fetchEndpointUsagePerUser({ id: userId, endpoint, page }: UserHistoryCreateParam & pagination) {
 		return client.userHistory.findMany({
 			where: {
-				endpoint, userId,
+				endpointName: endpoint, userId,
 			},
 			skip: page * CONSTANTS.DbPerPage,
 			take: CONSTANTS.DbPerPage,
@@ -102,41 +139,6 @@ export default class userHistoryManager {
 	}
 
 	/**
-		* Fetch all history that has name that starts with the param
-		* @param {string} name The name for searching
-		* @returns Array of user history entries
-	*/
-	async fetchEndpointByName(name: string) {
-		return client.userHistory.findMany({
-			where: {
-				endpoint: {
-					startsWith: name,
-				},
-			},
-		});
-	}
-
-	/**
-		* Fetch counts of all entries based on response code
-		* @returns Object of responseCode and total count
-	*/
-	async fetchResponseCodeCounts() {
-		const l: { [key: string]: number } = {};
-		const responseCodes = await client.userHistory.groupBy({
-			by: ['responseCode'],
-		});
-
-		for (const [, code] of Object.entries(responseCodes)) {
-			l[code.responseCode] = await client.userHistory.count({
-				where: {
-					responseCode: code.responseCode,
-				},
-			});
-		}
-		return l;
-	}
-
-	/**
 		* Fetch a specific's user total history count
 		* @param {bigint} userId The userId for getting their user history count
 		* @returns The total number of entries by a user
@@ -144,33 +146,17 @@ export default class userHistoryManager {
 	async fetchEndpointCountByUser(userId: bigint) {
 		const l: { [key: string]: number } = {};
 		const responseCodes = await client.userHistory.groupBy({
-			by: ['endpoint'],
+			by: ['endpointName'],
 			where: {
 				userId: userId,
 			},
 		});
 
-		for (const [, { endpoint }] of Object.entries(responseCodes)) {
-			l[endpoint] = await client.userHistory.count({
+		for (const [, { endpointName }] of Object.entries(responseCodes)) {
+			l[endpointName ?? ''] = await client.userHistory.count({
 				where: {
-					endpoint: endpoint,
+					endpointName: endpointName,
 					userId: userId,
-				},
-			});
-		}
-		return l;
-	}
-
-	async fetchMostAccessEndpoints() {
-		const l: { [key: string]: number } = {};
-		const endpointName = await client.userHistory.groupBy({
-			by: ['endpoint'],
-		});
-
-		for (const [, { endpoint }] of Object.entries(endpointName)) {
-			l[endpoint] = await client.userHistory.count({
-				where: {
-					endpoint: endpoint,
 				},
 			});
 		}
@@ -188,6 +174,36 @@ export default class userHistoryManager {
 				createdAt: {
 					gte: new Date(year, month, 1),
 					lte: new Date(year, month + 1, 0),
+				},
+			},
+		});
+	}
+
+	/**
+		* Fetch the total number of request in the last 30 days
+		* @returns number
+	*/
+	async fetchEndpointsbyLast30Days() {
+		const daysAgo30 = Date.now() - (30 * 24 * 60 * 60 * 1000);
+		return client.userHistory.count({
+			where: {
+				createdAt: {
+					gte: new Date(daysAgo30).toISOString(),
+				},
+			},
+		});
+	}
+
+	/**
+		* Fetch the total number of request in the last 24 hours
+		* @returns number
+	*/
+	async fetchEndpointsbyLast24hours() {
+		const hoursAgo24 = Date.now() - (24 * 60 * 60 * 1000);
+		return client.userHistory.count({
+			where: {
+				createdAt: {
+					gte: new Date(hoursAgo24).toISOString(),
 				},
 			},
 		});

@@ -8,6 +8,7 @@ export function run(client: Client) {
 	router.get('/', async (_req, res) => {
 		try {
 			const [users, endpoints, endpointUsage] = await Promise.all([client.UserManager.fetchCount(), client.EndpointManager.fetchCount(), client.UserHistoryManager.fetchCount()]);
+			console.log(users, endpoints, endpointUsage);
 			res.json({
 				userCount: users,
 				endpointCount: endpoints,

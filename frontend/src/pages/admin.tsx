@@ -10,14 +10,14 @@ import { faDownload, faSignal, faUsers, faClock, faMemory, faEllipsis } from '@f
 import { Chart as ChartJS, ArcElement, Tooltip as t, Legend,	CategoryScale, LinearScale, PointElement, LineElement, Title } from 'chart.js';
 
 import type { User } from '../types/next-auth';
-import type { GetServerSidePropsContext } from '../types';
+import type { GetServerSidePropsContext, Endpoint, ResponseCode } from '../types';
 ChartJS.register(ArcElement, t, Legend, CategoryScale, LinearScale, PointElement, LineElement, Title);
 
 type countEnum = { [key: string]: number }
 interface Props {
-	responseCode: countEnum
+	responseCode: Array<ResponseCode>
 	monthUsage: countEnum
-	mostAccessedEndpoints: countEnum
+	mostAccessedEndpoints: Array<Endpoint>
 	userCount: number
 	count: number
 	uptime: number
@@ -51,13 +51,13 @@ export default function Admin(data: Props) {
 		],
 	};
 
-	const top20Endpoints = Object.entries(data.mostAccessedEndpoints).sort((a, b) => b[1] - a[1]).slice(0, 20);
+	const top20Endpoints = data.mostAccessedEndpoints.sort((a, b) =>(a._count?.history ?? 0) - (b._count?.history ?? 0));
 	const mostAccessEndp = {
-		labels: top20Endpoints.map(u => u[0]),
+		labels: top20Endpoints.map(u => u.name),
 		datasets: [
 			{
 				label: 'Accessed',
-				data: top20Endpoints.map(u => u[1]),
+				data: top20Endpoints.map(u => u._count?.history),
 				backgroundColor: [
 					'rgb(255, 159, 64)',
 					'rgb(255, 205, 86)',
@@ -135,12 +135,12 @@ export default function Admin(data: Props) {
 											<h5 className="m-0 fw-bold text-primary">API Responses Code</h5>
 										</div>
 										<div className="card-body">
-											{Object.entries(data.responseCode).sort(([, a], [, b]) => a - b).reverse().map(e => (
+											{data.responseCode.sort((a, b) => a._count.history - b._count.history).reverse().map(e => (
 												<>
-													<Tooltip place="top" content={`${e[1]}`} id={`endpoint_${e[0]}`}/>
-													<h4 className="small font-weight-bold">{e[0]} <span className="float-end">{Math.round((e[1] / data.count) * 100)}%</span></h4>
-													<div className="progress mb-4" data-tooltip-id={`endpoint_${e[0]}`}>
-														<div className="progress-bar bg-success" role="progressbar" style={{ width: `${(e[1] / data.count) * 100}%` }}	aria-valuenow={e[1]} aria-valuemin={0} aria-valuemax={data.count}>{e[1]}</div>
+													<Tooltip place="top" content={`${e._count.history}`} id={`endpoint_${e.code}`}/>
+													<h4 className="small font-weight-bold">{e.code} <span className="float-end">{(e._count.history / data.count) * 100}%</span></h4>
+													<div className="progress mb-4" data-tooltip-id={`endpoint_${e.code}`}>
+														<div className="progress-bar bg-success" role="progressbar" style={{ width: `${(e._count.history / data.count) * 100}%` }}	aria-valuenow={e._count.history} aria-valuemin={0} aria-valuemax={data.count}>{e._count.history}</div>
 													</div>
 												</>
 											))}

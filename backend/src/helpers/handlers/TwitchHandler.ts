@@ -10,8 +10,8 @@ export default class TwitchHandler extends CacheHandler {
 	}
 
 	/**
-	 * Function for fetching basic information on user
-	 * @param {string} login The username to search
+	  * Function for fetching basic information on user
+	  * @param {string} login The username to search
 	*/
 	async getUserByUsername(login: string): Promise<TwitchData> {
 		const user = await this.request('/users', { login }) as TwitchRequest;
@@ -19,8 +19,8 @@ export default class TwitchHandler extends CacheHandler {
 	}
 
 	/**
-	 * Function for checking if user is streaming
-	 * @param {string} username The username to search
+	  * Function for checking if user is streaming
+	  * @param {string} username The username to search
 	*/
 	async getStreamByUsername(username: string): Promise<TwitchLivestreamData> {
 		const stream = await this.request('/streams', { user_login: username }) as TwitchLivestreamRequest;
@@ -28,9 +28,9 @@ export default class TwitchHandler extends CacheHandler {
 	}
 
 	/**
-	 * Function for fetching data from twitch API
-	 * @param {string} endpoint the endpoint of the twitch API to request
-	 * @param {object} queryParams The query sent to twitch API
+	  * Function for fetching data from twitch API
+	  * @param {string} endpoint the endpoint of the twitch API to request
+	  * @param {object} queryParams The query sent to twitch API
 	*/
 	async request(endpoint: string, queryParams = {}): Promise<TwitchRequest | TwitchLivestreamRequest | TwitchFollowersRequest | undefined> {
 		const qParams = new URLSearchParams(queryParams);
@@ -60,8 +60,8 @@ export default class TwitchHandler extends CacheHandler {
 	}
 
 	/**
-	 * Function for fetching follower data from user
-	 * @param {string} id the ID of the user
+	  * Function for fetching follower data from user
+	  * @param {string} id the ID of the user
 	*/
 	async getFollowersFromId(id: string): Promise<number> {
 		const followers = await this.request('/users/follows', { to_id: id }) as TwitchFollowersRequest;
@@ -69,10 +69,14 @@ export default class TwitchHandler extends CacheHandler {
 	}
 
 	/**
-	 * Function for fetching access_token to interact with the twitch API
+	  * Function for fetching access_token to interact with the twitch API
 	*/
-	async refreshTokens() {
+	private async refreshTokens() {
 		const { data } = await axios.post(`https://id.twitch.tv/oauth2/token?client_id=${process.env.twitchId as string}&client_secret=${process.env.twitchSecret as string}&grant_type=client_credentials`);
 		this.access_token = data.access_token;
+	}
+
+	createAccount() {
+
 	}
 }

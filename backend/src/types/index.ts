@@ -19,7 +19,6 @@ export type getLines = {
 	maxWidth: number
 }
 
-
 export type ParamAPIEndpoint = {
 	name?: string
 	description?: string

@@ -55,7 +55,7 @@ export function run(client: Client) {
 			const [history, total] = await Promise.all([client.UserHistoryManager.fetchEndpointUsagesPerUser({ userId: BigInt(ses.user.id), page: (page && !Number.isNaN(page)) ? Number(page) : 0 }),
 				client.UserHistoryManager.fetchCountByUserId(BigInt(ses.user.id))]);
 
-			res.json({ history: history.map(h => ({ ...h, userId: '' })), total });
+			res.json({ history: history.map(h => ({ ...h, userId: `${ses.user.id}` })), total });
 		} else {
 			res.json({ history: [], total: 0 });
 		}
