@@ -63,5 +63,13 @@ export function run(client: Client) {
 			res.json({ error: 'Error deleting endpoint' });
 		}
 	});
+
+	router.get('/download', isAdmin, async (_req, res) => {
+		const history = await client.UserHistoryManager.fetchAll();
+		res.setHeader('Content-Type', 'application/json');
+		res.setHeader('Content-disposition', 'attachment; filename=history.json');
+		res.send({ history: history.map(i => ({ ...i, userId: `${i.userId}` })) });
+	});
+
 	return router;
 }

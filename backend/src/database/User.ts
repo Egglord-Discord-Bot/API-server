@@ -166,4 +166,12 @@ export default class UserManager {
 			take: CONSTANTS.DbPerPage,
 		});
 	}
+
+	/**
+		* Extract the user from the request (if any)
+		* @returns An array of users
+	*/
+	async fetchAll() {
+		return client.user.findMany();
+	}
 }

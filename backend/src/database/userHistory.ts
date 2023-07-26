@@ -214,4 +214,8 @@ export default class userHistoryManager {
 			},
 		});
 	}
+
+	async fetchAll() {
+		return client.userHistory.findMany();
+	}
 }

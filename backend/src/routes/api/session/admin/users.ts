@@ -80,5 +80,12 @@ export function run(client: Client) {
 		}
 	});
 
+	router.get('/download', isAdmin, async (_req, res) => {
+		const users = await client.UserManager.fetchAll();
+		res.setHeader('Content-Type', 'application/json');
+		res.setHeader('Content-disposition', 'attachment; filename=users.json');
+		res.send({ users: users.map(i => ({ ...i, id: `${i.id}` })) });
+	});
+
 	return router;
 }
