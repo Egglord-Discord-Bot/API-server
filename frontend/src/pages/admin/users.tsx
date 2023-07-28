@@ -1,4 +1,5 @@
-import { Header, Sidebar, AdminNavbar, Error, InfoPill } from '@/components';
+import { Error, InfoPill } from '@/components';
+import AdminLayout from '@/layouts/Admin';
 
 import { useState } from 'react';
 import { useSession } from 'next-auth/react';
@@ -31,7 +32,7 @@ export default function AdminUsers({ users: userList, error: oldError, total, ad
 	const [error, setError] = useState<string|undefined>(oldError);
 	const [page, setPage] = useState(0);
 	const [sortOrder, setSortOrder] = useState<SortOrder>('desc');
-	if (status == 'loading') return null;
+	if (status == 'loading' || session == null) return null;
 
 	async function fetchUsers(p: number) {
 		try {
@@ -174,138 +175,129 @@ export default function AdminUsers({ users: userList, error: oldError, total, ad
 	};
 
 	return (
-		<>
-			<Header />
-			<div className="wrapper">
-				<Sidebar activeTab='users'/>
-				<div id="content-wrapper" className="d-flex flex-column">
-					<div id="content">
-						<AdminNavbar user={session?.user as User}/>
-						<div className="container-fluid" style={{ overflowY: 'scroll', maxHeight: 'calc(100vh - 64px)' }}>
-							{error && (
-								<Error text={error} />
-							)}
+		<AdminLayout user={session.user}>
+			<div className="container-fluid" style={{ overflowY: 'scroll', maxHeight: 'calc(100vh - 64px)' }}>
+				{error && (
+					<Error text={error} />
+				)}
 							&nbsp;
-							<div className="d-sm-flex align-items-center justify-content-between mb-4">
-								<h1 className="h3 mb-0 text-gray-800">User Dashboard</h1>
-								<a href="#" className="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm">
-									<FontAwesomeIcon icon={faDownload} /> Generate Report
+				<div className="d-sm-flex align-items-center justify-content-between mb-4">
+					<h1 className="h3 mb-0 text-gray-800">User Dashboard</h1>
+					<a href="#" className="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm">
+						<FontAwesomeIcon icon={faDownload} /> Generate Report
+					</a>
+				</div>
+				<div className="row">
+					<div className="col-xl-3 col-md-6 mb-4">
+						<InfoPill title={'Total Users'} text={`${total}`} icon={faUsers} />
+					</div>
+					<div className="col-xl-3 col-md-6 mb-4">
+						<InfoPill title={'Blocked users'} text={`${block}`} icon={faBan} />
+					</div>
+					<div className="col-xl-3 col-md-6 mb-4">
+						<InfoPill title={'Premium users'} text={`${premium}`} icon={faDollarSign} />
+					</div>
+					<div className="col-xl-3 col-md-6 mb-4">
+						<InfoPill title={'Admin users'} text={`${admin}`} icon={faUserCheck} />
+					</div>
+				</div>
+				<div className="row">
+					<div className="col-xl-8 col-lg-7">
+						<div className="card shadow mb-4">
+							<div className="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+								<h4 className="m-0 font-weight-bold text-primary">User Growth</h4>
+								<a type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseExample">
+									<FontAwesomeIcon icon={faEllipsis} />
 								</a>
 							</div>
-							<div className="row">
-								<div className="col-xl-3 col-md-6 mb-4">
-									<InfoPill title={'Total Users'} text={`${total}`} icon={faUsers} />
-								</div>
-								<div className="col-xl-3 col-md-6 mb-4">
-									<InfoPill title={'Blocked users'} text={`${block}`} icon={faBan} />
-								</div>
-								<div className="col-xl-3 col-md-6 mb-4">
-									<InfoPill title={'Premium users'} text={`${premium}`} icon={faDollarSign} />
-								</div>
-								<div className="col-xl-3 col-md-6 mb-4">
-									<InfoPill title={'Admin users'} text={`${admin}`} icon={faUserCheck} />
-								</div>
+							<div className="card-body collapse show" id="collapseOne">
+								<Line data={userJoinData} />
 							</div>
-							<div className="row">
-								<div className="col-xl-8 col-lg-7">
-									<div className="card shadow mb-4">
-										<div className="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-											<h4 className="m-0 font-weight-bold text-primary">User Growth</h4>
-											<a type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseExample">
-												<FontAwesomeIcon icon={faEllipsis} />
-											</a>
-										</div>
-										<div className="card-body collapse show" id="collapseOne">
-											<Line data={userJoinData} />
-										</div>
-									</div>
-								</div>
-								<div className="col-xl-4 col-lg-5">
-									<div className="card shadow">
-										<div className="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-											<h4 className="m-0 font-weight-bold text-primary">User Make-up</h4>
-											<a type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseExample">
-												<FontAwesomeIcon icon={faEllipsis} />
-											</a>
-										</div>
-										<div className="card-body collapse show" id="collapseOne">
-											<Pie data={graphData} />
-										</div>
-									</div>
-								</div>
+						</div>
+					</div>
+					<div className="col-xl-4 col-lg-5">
+						<div className="card shadow">
+							<div className="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+								<h4 className="m-0 font-weight-bold text-primary">User Make-up</h4>
+								<a type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseExample">
+									<FontAwesomeIcon icon={faEllipsis} />
+								</a>
 							</div>
-							&nbsp;
-							<div className="card shadow mb-4">
-								<div className="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-									<h6 className="m-0 font-weight-bold text-primary">Users</h6>
-								</div>
-								<div className="card-body table-responsive">
-									<div className="d-none d-sm-inline-block form-inline mr-auto ml-md-3 my-2 my-md-0 mw-100">
-										<div className="input-group mb-3">
-											<input type="text" className="form-control bg-light border-0 small" placeholder="Search for..." aria-label="Recipient's username" aria-describedby="basic-addon2" onChange={(e) => searchByName(e)}/>
-											<button className="btn btn-outline-primary" type="button">
-												<FontAwesomeIcon icon={faSearch} />
-											</button>
-										</div>
-									</div>
-									<table className="table" style={{ paddingTop: '10px' }}>
-										<thead>
-											<tr>
-												<th scope="col">ID</th>
-												<th>Name</th>
-												<th onClick={() => updateSortOrder()}>Joined</th>
-												<th>Blocked</th>
-												<th>Premium</th>
-												<th>Admin</th>
-											</tr>
-										</thead>
-										<tbody>
-											{users.map(u => (
-												<tr key={u.id}>
-													<th scope="row">{u.id}</th>
-													<th>{u.username}#{u.discriminator}</th>
-													<th>{new Date(u.createdAt).toLocaleString('en-US')}</th>
-													<td>
-														<input className="form-check-input" type="checkbox" onChange={() => updateUser('block', u.id)} id={`${u.id}_block`} defaultChecked={u.isBlocked} />
-														<span id={`${u.id}_block_text`}>{u.isBlocked ? 'Yes' : 'No'}</span>
-													</td>
-													<td>
-														<input className="form-check-input" type="checkbox" onChange={() => updateUser('premium', u.id)} id={`${u.id}_premium`} defaultChecked={u.isPremium} />
-														<span id={`${u.id}_premium_text`}>{u.isPremium ? 'Yes' : 'No'}</span>
-													</td>
-													<td>
-														<input className="form-check-input" type="checkbox" onChange={() => updateUser('admin', u.id)} id={`${u.id}_admin`} defaultChecked={u.isAdmin} />
-														<span id={`${u.id}_admin_text`}>{u.isAdmin ? 'Yes' : 'No'}</span>
-													</td>
-												</tr>
-											))}
-										</tbody>
-									</table>
-									<nav aria-label="Page navigation example">
-										<p style={{ display: 'inline' }}>Showing results {(page < 1 ? 0 : page) * 50} - {(page * 50) + (users.length < 50 ? users.length : 50)} of {total}</p>
-										<ul className="pagination justify-content-center">
-											<li className="page-item">
-												<a className="page-link" onClick={() => fetchUsers(page == 0 ? page : page - 1)} href="#">
-													<FontAwesomeIcon icon={faAnglesLeft} />
-												</a>
-											</li>
-											<li className="page-item">
-												<p className="page-link">{page}</p>
-											</li>
-											<li className="page-item">
-												<a className="page-link" onClick={() => fetchUsers(users.length >= 50 ? page + 1 : page)} href="#">
-													<FontAwesomeIcon icon={faAnglesRight} />
-												</a>
-											</li>
-										</ul>
-									</nav>
-								</div>
+							<div className="card-body collapse show" id="collapseOne">
+								<Pie data={graphData} />
 							</div>
 						</div>
 					</div>
 				</div>
+							&nbsp;
+				<div className="card shadow mb-4">
+					<div className="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+						<h6 className="m-0 font-weight-bold text-primary">Users</h6>
+					</div>
+					<div className="card-body table-responsive">
+						<div className="d-none d-sm-inline-block form-inline mr-auto ml-md-3 my-2 my-md-0 mw-100">
+							<div className="input-group mb-3">
+								<input type="text" className="form-control bg-light border-0 small" placeholder="Search for..." aria-label="Recipient's username" aria-describedby="basic-addon2" onChange={(e) => searchByName(e)}/>
+								<button className="btn btn-outline-primary" type="button">
+									<FontAwesomeIcon icon={faSearch} />
+								</button>
+							</div>
+						</div>
+						<table className="table" style={{ paddingTop: '10px' }}>
+							<thead>
+								<tr>
+									<th scope="col">ID</th>
+									<th>Name</th>
+									<th onClick={() => updateSortOrder()}>Joined</th>
+									<th>Blocked</th>
+									<th>Premium</th>
+									<th>Admin</th>
+								</tr>
+							</thead>
+							<tbody>
+								{users.map(u => (
+									<tr key={u.id}>
+										<th scope="row">{u.id}</th>
+										<th>{u.username}#{u.discriminator}</th>
+										<th>{new Date(u.createdAt).toLocaleString('en-US')}</th>
+										<td>
+											<input className="form-check-input" type="checkbox" onChange={() => updateUser('block', u.id)} id={`${u.id}_block`} defaultChecked={u.isBlocked} />
+											<span id={`${u.id}_block_text`}>{u.isBlocked ? 'Yes' : 'No'}</span>
+										</td>
+										<td>
+											<input className="form-check-input" type="checkbox" onChange={() => updateUser('premium', u.id)} id={`${u.id}_premium`} defaultChecked={u.isPremium} />
+											<span id={`${u.id}_premium_text`}>{u.isPremium ? 'Yes' : 'No'}</span>
+										</td>
+										<td>
+											<input className="form-check-input" type="checkbox" onChange={() => updateUser('admin', u.id)} id={`${u.id}_admin`} defaultChecked={u.isAdmin} />
+											<span id={`${u.id}_admin_text`}>{u.isAdmin ? 'Yes' : 'No'}</span>
+										</td>
+									</tr>
+								))}
+							</tbody>
+						</table>
+						<nav aria-label="Page navigation example">
+							<p style={{ display: 'inline' }}>Showing results {(page < 1 ? 0 : page) * 50} - {(page * 50) + (users.length < 50 ? users.length : 50)} of {total}</p>
+							<ul className="pagination justify-content-center">
+								<li className="page-item">
+									<a className="page-link" onClick={() => fetchUsers(page == 0 ? page : page - 1)} href="#">
+										<FontAwesomeIcon icon={faAnglesLeft} />
+									</a>
+								</li>
+								<li className="page-item">
+									<p className="page-link">{page}</p>
+								</li>
+								<li className="page-item">
+									<a className="page-link" onClick={() => fetchUsers(users.length >= 50 ? page + 1 : page)} href="#">
+										<FontAwesomeIcon icon={faAnglesRight} />
+									</a>
+								</li>
+							</ul>
+						</nav>
+					</div>
+				</div>
 			</div>
-		</>
+		</AdminLayout>
 	);
 }
 

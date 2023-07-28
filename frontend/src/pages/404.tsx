@@ -1,4 +1,4 @@
-import { Header, Footer, Navbar } from '../components';
+import MainLayout from '../layouts/Main';
 
 import Link from 'next/link';
 import { useSession } from 'next-auth/react';
@@ -8,9 +8,7 @@ export default function FourZeroFour() {
 	if (status == 'loading') return null;
 
 	return (
-		<>
-			<Header />
-			<Navbar user={session?.user} />
+		<MainLayout user={session?.user}>
 			<div className="page-wrap d-flex flex-row align-items-center" style={{ backgroundColor:'#f1f6fe', height: '84vh' }}>
 				<div className="container">
 					<div className="row justify-content-center align-middle">
@@ -22,7 +20,6 @@ export default function FourZeroFour() {
 					</div>
 				</div>
 			</div>
-			<Footer />
-		</>
+		</MainLayout>
 	);
 }

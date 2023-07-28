@@ -1,4 +1,5 @@
-import { Header, Sidebar, AdminNavbar, Error, InfoPill, InfoPillProgress } from '@/components';
+import { Error, InfoPill, InfoPillProgress } from '@/components';
+import AdminLayout from '@/layouts/Admin';
 
 import { useSession } from 'next-auth/react';
 import { useState, useEffect } from 'react';
@@ -10,7 +11,6 @@ import TimeAgo from 'javascript-time-ago';
 import en from 'javascript-time-ago/locale/en';
 import { Chart as ChartJS, ArcElement, Tooltip, Legend,	CategoryScale, LinearScale, PointElement, LineElement, Title } from 'chart.js';
 
-import type { User } from '@/types/next-auth';
 import type { GetServerSidePropsContext } from 'next';
 ChartJS.register(ArcElement, Tooltip, Legend, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
 TimeAgo.addDefaultLocale(en);
@@ -63,7 +63,7 @@ export default function AdminSystem({ history: h, current: c, error }: Props) {
 
 		return () => clearInterval(timer);
 	}, []);
-	if (status == 'loading') return null;
+	if (status == 'loading' || session == null) return null;
 
 	// Set CPU history data
 	const cpuHistory = {
@@ -92,144 +92,135 @@ export default function AdminSystem({ history: h, current: c, error }: Props) {
 	};
 
 	return (
-		<>
-			<Header />
-			<div className="wrapper">
-				<Sidebar activeTab='system'/>
-				<div id="content-wrapper" className="d-flex flex-column">
-					<div id="content">
-						<AdminNavbar user={session?.user as User}/>
-						<div className="container-fluid" style={{ overflowY: 'scroll', maxHeight: 'calc(100vh - 64px)', minHeight: 'calc(100vh - 64px)' }}>
-							{error && (
-								<Error text={error} />
-							)}
-							&nbsp;
-							<div className="d-sm-flex align-items-center justify-content-between mb-4">
-								<h1 className="h3 mb-0 text-gray-800">System Dashboard</h1>
-								<a href="#" className="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm">
-									<FontAwesomeIcon icon={faDownload} /> Generate Report
-								</a>
-							</div>
-							<div className="row">
-								<div className="col-xl-3 col-md-6 mb-4">
-									<InfoPill title={'CPU Usage'} text={`${current.cpu}%`} icon={faMicrochip}/>
-								</div>
-								<div className="col-xl-3 col-md-6 mb-4">
-									<InfoPillProgress title={'RAM usage'} text={`${formatBytes(current.memory.USAGE)}/${formatBytes(current.memory.MAX)}`} icon={faServer} max={current.memory.MAX} current={history[0]?.memoryUsage}/>
-								</div>
-								<div className="col-xl-3 col-md-6 mb-4">
-									<InfoPill title={'Network'} text={formatBytes(0)} icon={faNetworkWired}/>
-								</div>
-								<div className="col-xl-3 col-md-6 mb-4">
-									<InfoPillProgress title={'Disk Usage'} text={`${formatBytes(current.disk.total - current.disk.free)}/${formatBytes(current.disk.total)}`} icon={faHardDrive} max={current.disk.total} current={current.disk.total - current.disk.free}/>
-								</div>
-							</div>
-							<div className="row" style={{ height: '100%' }}>
-								<div className="col-lg-6">
-									<div className="card shadow mb-4">
-										<div className="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-											<h5 className="mb-0 mr-3 fw-bold text-gray-800">Total CPU usage</h5>
-											<div className="dropdown no-arrow">
-												<a className="dropdown-toggle" href="#" role="button" id="dropdownMenuLink"	data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-													<i className="fas fa-ellipsis-v fa-sm fa-fw text-gray-400"></i>
-												</a>
-												<div className="dropdown-menu dropdown-menu-right shadow animated--fade-in"	aria-labelledby="dropdownMenuLink">
-													<div className="dropdown-header">Dropdown Header:</div>
-													<a className="dropdown-item" href="#">Action</a>
-													<a className="dropdown-item" href="#">Another action</a>
-													<div className="dropdown-divider"></div>
-													<a className="dropdown-item" href="#">Something else here</a>
-												</div>
-											</div>
-										</div>
-										<div className="card-body">
-											<Line data={cpuHistory} options={{
-												plugins: {
-													tooltip: {
-														callbacks: {
-															label: function(label) {
-																return `${label.formattedValue}%`;
-															},
-														},
-													},
-												},
-												scales: {
-													y: {
-														ticks: {
-															callback: function(label) {
-																return `${label}%`;
-															},
-														},
-														beginAtZero: true,
-													},
-													x: {
-														ticks: {
-															callback: function(value) {
-																const date = memoryHistory.labels[value as number];
-																return new TimeAgo('en-US').format(new Date().getTime() - (new Date().getTime() - new Date(date).getTime()));
-															},
-														},
-													},
-												},
-											}} />
-										</div>
+		<AdminLayout user={session.user}>
+			<div className="container-fluid" style={{ overflowY: 'scroll', maxHeight: 'calc(100vh - 64px)', minHeight: 'calc(100vh - 64px)' }}>
+				{error && (
+					<Error text={error} />
+				)}
+				&nbsp;
+				<div className="d-sm-flex align-items-center justify-content-between mb-4">
+					<h1 className="h3 mb-0 text-gray-800">System Dashboard</h1>
+					<a href="#" className="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm">
+						<FontAwesomeIcon icon={faDownload} /> Generate Report
+					</a>
+				</div>
+				<div className="row">
+					<div className="col-xl-3 col-md-6 mb-4">
+						<InfoPill title={'CPU Usage'} text={`${current.cpu}%`} icon={faMicrochip}/>
+					</div>
+					<div className="col-xl-3 col-md-6 mb-4">
+						<InfoPillProgress title={'RAM usage'} text={`${formatBytes(current.memory.USAGE)}/${formatBytes(current.memory.MAX)}`} icon={faServer} max={current.memory.MAX} current={history[0]?.memoryUsage}/>
+					</div>
+					<div className="col-xl-3 col-md-6 mb-4">
+						<InfoPill title={'Network'} text={formatBytes(0)} icon={faNetworkWired}/>
+					</div>
+					<div className="col-xl-3 col-md-6 mb-4">
+						<InfoPillProgress title={'Disk Usage'} text={`${formatBytes(current.disk.total - current.disk.free)}/${formatBytes(current.disk.total)}`} icon={faHardDrive} max={current.disk.total} current={current.disk.total - current.disk.free}/>
+					</div>
+				</div>
+				<div className="row" style={{ height: '100%' }}>
+					<div className="col-lg-6">
+						<div className="card shadow mb-4">
+							<div className="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+								<h5 className="mb-0 mr-3 fw-bold text-gray-800">Total CPU usage</h5>
+								<div className="dropdown no-arrow">
+									<a className="dropdown-toggle" href="#" role="button" id="dropdownMenuLink"	data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+										<i className="fas fa-ellipsis-v fa-sm fa-fw text-gray-400"></i>
+									</a>
+									<div className="dropdown-menu dropdown-menu-right shadow animated--fade-in"	aria-labelledby="dropdownMenuLink">
+										<div className="dropdown-header">Dropdown Header:</div>
+										<a className="dropdown-item" href="#">Action</a>
+										<a className="dropdown-item" href="#">Another action</a>
+										<div className="dropdown-divider"></div>
+										<a className="dropdown-item" href="#">Something else here</a>
 									</div>
 								</div>
-								<div className="col-lg-6">
-									<div className="card shadow mb-4">
-										<div className="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-											<h5 className="mb-0 mr-3 fw-bold text-gray-800">Total memory usage</h5>
-											<div className="dropdown no-arrow">
-												<a className="dropdown-toggle" href="#" role="button" id="dropdownMenuLink"	data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-													<i className="fas fa-ellipsis-v fa-sm fa-fw text-gray-400"></i>
-												</a>
-												<div className="dropdown-menu dropdown-menu-right shadow animated--fade-in"	aria-labelledby="dropdownMenuLink">
-													<div className="dropdown-header">Dropdown Header:</div>
-													<a className="dropdown-item" href="#">Action</a>
-													<a className="dropdown-item" href="#">Another action</a>
-													<div className="dropdown-divider"></div>
-													<a className="dropdown-item" href="#">Something else here</a>
-												</div>
-											</div>
-										</div>
-										<div className="card-body">
-											<Line data={memoryHistory} options={{
-												plugins: {
-													tooltip: {
-														callbacks: {
-															label: function(label) {
-																return formatBytes(Number(label.formattedValue.replaceAll(',', '')));
-															},
-														},
-													},
+							</div>
+							<div className="card-body">
+								<Line data={cpuHistory} options={{
+									plugins: {
+										tooltip: {
+											callbacks: {
+												label: function(label) {
+													return `${label.formattedValue}%`;
 												},
-												scales: {
-													y: {
-														ticks: {
-															callback: function(label) {
-																return formatBytes(label as number);
-															},
-														},
-													},
-													x: {
-														ticks: {
-															callback: function(value) {
-																const date = memoryHistory.labels[value as number];
-																return new TimeAgo('en-US').format(new Date().getTime() - (new Date().getTime() - new Date(date).getTime()));
-															},
-														},
-													},
+											},
+										},
+									},
+									scales: {
+										y: {
+											ticks: {
+												callback: function(label) {
+													return `${label}%`;
 												},
-											}} />
-										</div>
+											},
+											beginAtZero: true,
+										},
+										x: {
+											ticks: {
+												callback: function(value) {
+													const date = memoryHistory.labels[value as number];
+													return new TimeAgo('en-US').format(new Date().getTime() - (new Date().getTime() - new Date(date).getTime()));
+												},
+											},
+										},
+									},
+								}} />
+							</div>
+						</div>
+					</div>
+					<div className="col-lg-6">
+						<div className="card shadow mb-4">
+							<div className="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+								<h5 className="mb-0 mr-3 fw-bold text-gray-800">Total memory usage</h5>
+								<div className="dropdown no-arrow">
+									<a className="dropdown-toggle" href="#" role="button" id="dropdownMenuLink"	data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+										<i className="fas fa-ellipsis-v fa-sm fa-fw text-gray-400"></i>
+									</a>
+									<div className="dropdown-menu dropdown-menu-right shadow animated--fade-in"	aria-labelledby="dropdownMenuLink">
+										<div className="dropdown-header">Dropdown Header:</div>
+										<a className="dropdown-item" href="#">Action</a>
+										<a className="dropdown-item" href="#">Another action</a>
+										<div className="dropdown-divider"></div>
+										<a className="dropdown-item" href="#">Something else here</a>
 									</div>
 								</div>
+							</div>
+							<div className="card-body">
+								<Line data={memoryHistory} options={{
+									plugins: {
+										tooltip: {
+											callbacks: {
+												label: function(label) {
+													return formatBytes(Number(label.formattedValue.replaceAll(',', '')));
+												},
+											},
+										},
+									},
+									scales: {
+										y: {
+											ticks: {
+												callback: function(label) {
+													return formatBytes(label as number);
+												},
+											},
+										},
+										x: {
+											ticks: {
+												callback: function(value) {
+													const date = memoryHistory.labels[value as number];
+													return new TimeAgo('en-US').format(new Date().getTime() - (new Date().getTime() - new Date(date).getTime()));
+												},
+											},
+										},
+									},
+								}} />
 							</div>
 						</div>
 					</div>
 				</div>
 			</div>
-		</>
+		</AdminLayout>
 	);
 }
 

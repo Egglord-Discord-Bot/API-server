@@ -1,4 +1,4 @@
-import { Header, Footer, Navbar } from '../components';
+import MainLayout from '@/layouts/Main';
 import { useSession } from 'next-auth/react';
 import Link from 'next/link';
 
@@ -11,9 +11,7 @@ export default function TermsServices({ domain }: Props) {
 	if (status == 'loading') return null;
 
 	return (
-		<>
-			<Header />
-			<Navbar user={session?.user} />
+		<MainLayout user={session?.user}>
 			<div className="container">
 				<h1>Terms of Service</h1>
 				<div id="terms">
@@ -46,8 +44,7 @@ export default function TermsServices({ domain }: Props) {
           These terms and conditions are governed by and construed in accordance with the laws of England and you irrevocably submit to the exclusive jurisdiction of the courts in that State or location.
 				</div>
 			</div>
-			<Footer />
-		</>
+		</MainLayout>
 	);
 }
 

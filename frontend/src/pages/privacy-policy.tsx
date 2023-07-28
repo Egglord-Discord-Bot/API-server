@@ -1,4 +1,4 @@
-import { Header, Footer, Navbar } from '../components';
+import MainLayout from '@/layouts/Main';
 import { useSession } from 'next-auth/react';
 import Link from 'next/link';
 
@@ -11,9 +11,7 @@ export default function PrivacyPolicy({ domain }: Props) {
 	if (status == 'loading') return null;
 
 	return (
-		<>
-			<Header />
-			<Navbar user={session?.user} />
+		<MainLayout user={session?.user}>
 			<div className="container">
 				<h1>Privacy Policy</h1>
 				<p>Your privacy is important to us. It is Team Egglord policy to respect your privacy regarding any information we may collect from you across our website, <Link href={domain}>{domain}</Link>, and other sites we own and operate.</p>
@@ -73,8 +71,7 @@ export default function PrivacyPolicy({ domain }: Props) {
 				</div>
 				<p>This policy is effective as of 29 May 2023.</p>
 			</div>
-			<Footer />
-		</>
+		</MainLayout>
 	);
 }
 

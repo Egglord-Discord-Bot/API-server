@@ -1,4 +1,5 @@
-import { Header, Sidebar, AdminNavbar, Error, InfoPill } from '../components';
+import { InfoPill } from '../components';
+import AdminLayout from '../layouts/Admin';
 
 import { nFormatter, formatBytes } from '../utils/functions';
 import { Pie, Line } from 'react-chartjs-2';
@@ -51,7 +52,7 @@ export default function Admin(data: Props) {
 		],
 	};
 
-	const top20Endpoints = data.mostAccessedEndpoints.sort((a, b) =>(a._count?.history ?? 0) - (b._count?.history ?? 0));
+	const top20Endpoints = data.mostAccessedEndpoints.filter(e => e._count?.history ?? 0 > 0).sort((a, b) =>(a._count?.history ?? 0) - (b._count?.history ?? 0));
 	const mostAccessEndp = {
 		labels: top20Endpoints.map(u => u.name),
 		datasets: [
@@ -73,111 +74,99 @@ export default function Admin(data: Props) {
 	};
 
 	return (
-		<>
-			<Header />
-			<div className="wrapper">
-				<Sidebar activeTab='dashboard'/>
-				<div id="content-wrapper" className="d-flex flex-column">
-					<div id="content">
-						<AdminNavbar user={session?.user as User}/>
-						<div className="container-fluid" style={{ overflowY: 'scroll', maxHeight: 'calc(100vh - 64px)' }}>
-							{data.error && (
-								<Error text={data.error} />
-							)}
-							&nbsp;
-							<div className="d-sm-flex align-items-center justify-content-between mb-4">
-								<h1 className="h3 mb-0 text-gray-800">Admin Dashboard</h1>
-								<a href="#" className="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm">
-									<FontAwesomeIcon icon={faDownload} /> Generate Report
-								</a>
+		<AdminLayout user={session?.user as User}>
+			<div className="container-fluid" style={{ overflowY: 'scroll', maxHeight: 'calc(100vh - 64px)' }}>
+				&nbsp;
+				<div className="d-sm-flex align-items-center justify-content-between mb-4">
+					<h1 className="h3 mb-0 text-gray-800">Admin Dashboard</h1>
+					<a href="#" className="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm">
+						<FontAwesomeIcon icon={faDownload} /> Generate Report
+					</a>
+				</div>
+				<div className="row">
+					<div className="col-xl-3 col-md-6 mb-4">
+						<InfoPill title={'Total Requests'} text={nFormatter(data.count, 2)} icon={faSignal}/>
+					</div>
+					<div className="col-xl-3 col-md-6 mb-4">
+						<InfoPill title={'Total users'} text={nFormatter(data.userCount, 2)} icon={faUsers}/>
+					</div>
+					<div className="col-xl-3 col-md-6 mb-4">
+						<InfoPill title={'Uptime'} text={new Date(data.uptime * 1000).toISOString().slice(11, 19)} icon={faClock}/>
+					</div>
+					<div className="col-xl-3 col-md-6 mb-4">
+						<InfoPill title={'Memory Usage'} text={formatBytes(data.memoryUsage)} icon={faMemory}/>
+					</div>
+				</div>
+				<div className="row">
+					<div className="col-xl-8 col-lg-7">
+						<div className="card shadow mb-4">
+							<div className="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+								<h5 className="m-0 fw-bold text-primary">Total API usage (Year)</h5>
+								<div className="dropdown no-arrow">
+									<a className="dropdown-toggle" href="#" role="button" id="dropdownMenuLink"	data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+										<FontAwesomeIcon icon={faEllipsis} />
+									</a>
+									<div className="dropdown-menu dropdown-menu-end shadow animated--fade-in"	aria-labelledby="dropdownMenuLink">
+										<a className="dropdown-item" href="#">Month</a>
+										<a className="dropdown-item" href="#">Day</a>
+										<div className="dropdown-divider"></div>
+										<a className="dropdown-item" href="#" role="button" data-bs-toggle="collapse" data-bs-target="#collapseHistoryAcc">Collapse</a>
+									</div>
+								</div>
 							</div>
-							<div className="row">
-								<div className="col-xl-3 col-md-6 mb-4">
-									<InfoPill title={'Total Requests'} text={nFormatter(data.count, 2)} icon={faSignal}/>
-								</div>
-								<div className="col-xl-3 col-md-6 mb-4">
-									<InfoPill title={'Total users'} text={nFormatter(data.userCount, 2)} icon={faUsers}/>
-								</div>
-								<div className="col-xl-3 col-md-6 mb-4">
-									<InfoPill title={'Uptime'} text={new Date(data.uptime * 1000).toISOString().slice(11, 19)} icon={faClock}/>
-								</div>
-								<div className="col-xl-3 col-md-6 mb-4">
-									<InfoPill title={'Memory Usage'} text={formatBytes(data.memoryUsage)} icon={faMemory}/>
+							<div className="card-body">
+								<div id="collapseHistoryAcc" className="accordion-collapse collapse show" aria-labelledby="headingOne" data-bs-parent="#accordionExample">
+									<div className="accordion-body">
+										<Line data={historyAccessed} />
+									</div>
+					 			</div>
+							</div>
+						</div>
+						<div className="card shadow mb-4">
+							<div className="card-header py-3" style={{ height: '100%' }}>
+								<h5 className="m-0 fw-bold text-primary">API Responses Code</h5>
+							</div>
+							<div className="card-body">
+								{data.responseCode.sort((a, b) => a._count.history - b._count.history).reverse().map(e => (
+									<>
+										<Tooltip place="top" content={`${e._count.history}`} id={`endpoint_${e.code}`}/>
+										<h4 className="small font-weight-bold">{e.code} <span className="float-end">{(e._count.history / data.count) * 100}%</span></h4>
+										<div className="progress mb-4" data-tooltip-id={`endpoint_${e.code}`}>
+											<div className="progress-bar bg-success" role="progressbar" style={{ width: `${(e._count.history / data.count) * 100}%` }}	aria-valuenow={e._count.history} aria-valuemin={0} aria-valuemax={data.count}>{e._count.history}</div>
+										</div>
+									</>
+								))}
+							</div>
+						</div>
+					</div>
+					<div className="col-xl-4 col-lg-5">
+						<div className="card shadow mb-4">
+							<div className="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+								<h5 className="m-0 fw-bold text-primary">Top 20 Accessed Endpoints</h5>
+								<div className="dropdown no-arrow">
+									<a className="dropdown-toggle" href="#" role="button" id="dropdownMenuLink"	data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+										<FontAwesomeIcon icon={faEllipsis} />
+									</a>
+									<div className="dropdown-menu dropdown-menu-right shadow animated--fade-in" aria-labelledby="dropdownMenuLink">
+										<a className="dropdown-item" href="#">Action</a>
+										<a className="dropdown-item" href="#">Another action</a>
+										<div className="dropdown-divider"></div>
+										<a className="dropdown-item" href="#" role="button" data-bs-toggle="collapse" data-bs-target="#collapseMostAccessEnd">Collapse</a>
+									</div>
 								</div>
 							</div>
-							<div className="row">
-								<div className="col-xl-8 col-lg-7">
-									<div className="card shadow mb-4">
-										<div className="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-											<h5 className="m-0 fw-bold text-primary">Total API usage (Year)</h5>
-											<div className="dropdown no-arrow">
-												<a className="dropdown-toggle" href="#" role="button" id="dropdownMenuLink"	data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-													<FontAwesomeIcon icon={faEllipsis} />
-												</a>
-												<div className="dropdown-menu dropdown-menu-end shadow animated--fade-in"	aria-labelledby="dropdownMenuLink">
-													<a className="dropdown-item" href="#">Month</a>
-													<a className="dropdown-item" href="#">Day</a>
-													<div className="dropdown-divider"></div>
-													<a className="dropdown-item" href="#" role="button" data-bs-toggle="collapse" data-bs-target="#collapseHistoryAcc">Collapse</a>
-												</div>
-											</div>
-										</div>
-										<div className="card-body">
-											<div id="collapseHistoryAcc" className="accordion-collapse collapse show" aria-labelledby="headingOne" data-bs-parent="#accordionExample">
-												<div className="accordion-body">
-													<Line data={historyAccessed} />
-												</div>
-										 </div>
-										</div>
+							<div className="card-body">
+								<div id="collapseMostAccessEnd" className="accordion-collapse collapse show" aria-labelledby="headingOne" data-bs-parent="#accordionExample">
+									<div className="accordion-body">
+										<Pie data={mostAccessEndp} />
 									</div>
-									<div className="card shadow mb-4">
-										<div className="card-header py-3" style={{ height: '100%' }}>
-											<h5 className="m-0 fw-bold text-primary">API Responses Code</h5>
-										</div>
-										<div className="card-body">
-											{data.responseCode.sort((a, b) => a._count.history - b._count.history).reverse().map(e => (
-												<>
-													<Tooltip place="top" content={`${e._count.history}`} id={`endpoint_${e.code}`}/>
-													<h4 className="small font-weight-bold">{e.code} <span className="float-end">{(e._count.history / data.count) * 100}%</span></h4>
-													<div className="progress mb-4" data-tooltip-id={`endpoint_${e.code}`}>
-														<div className="progress-bar bg-success" role="progressbar" style={{ width: `${(e._count.history / data.count) * 100}%` }}	aria-valuenow={e._count.history} aria-valuemin={0} aria-valuemax={data.count}>{e._count.history}</div>
-													</div>
-												</>
-											))}
-										</div>
-									</div>
-								</div>
-								<div className="col-xl-4 col-lg-5">
-									<div className="card shadow mb-4">
-										<div className="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-											<h5 className="m-0 fw-bold text-primary">Top 20 Accessed Endpoints</h5>
-											<div className="dropdown no-arrow">
-												<a className="dropdown-toggle" href="#" role="button" id="dropdownMenuLink"	data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-													<FontAwesomeIcon icon={faEllipsis} />
-												</a>
-												<div className="dropdown-menu dropdown-menu-right shadow animated--fade-in" aria-labelledby="dropdownMenuLink">
-													<a className="dropdown-item" href="#">Action</a>
-													<a className="dropdown-item" href="#">Another action</a>
-													<div className="dropdown-divider"></div>
-													<a className="dropdown-item" href="#" role="button" data-bs-toggle="collapse" data-bs-target="#collapseMostAccessEnd">Collapse</a>
-												</div>
-											</div>
-										</div>
-										<div className="card-body">
-											<div id="collapseMostAccessEnd" className="accordion-collapse collapse show" aria-labelledby="headingOne" data-bs-parent="#accordionExample">
-												<div className="accordion-body">
-													<Pie data={mostAccessEndp} />
-												</div>
-										 </div>
-										</div>
-									</div>
-								</div>
+					 			</div>
 							</div>
 						</div>
 					</div>
 				</div>
 			</div>
-		</>
+		</AdminLayout>
 	);
 }
 

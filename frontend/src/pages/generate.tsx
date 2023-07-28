@@ -1,4 +1,5 @@
-import { Header, Footer, Navbar, ParamBuilder, Error } from '@/components';
+import { ParamBuilder, Error } from '@/components';
+import MainLayout from '@/layouts/Main';
 
 import { useSession } from 'next-auth/react';
 import { useState } from 'react';
@@ -49,9 +50,7 @@ export default function Home({ endpoints, error }: Props) {
 	}
 
 	return (
-		<>
-			<Header />
-			<Navbar user={session?.user} />
+		<MainLayout user={session?.user}>
 			<div className="container">
         &nbsp;
 				{error && (
@@ -95,8 +94,7 @@ export default function Home({ endpoints, error }: Props) {
 					</div>
 				</div>
 			</div>
-			<Footer />
-		</>
+		</MainLayout>
 	);
 }
 

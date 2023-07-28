@@ -1,4 +1,4 @@
-import { Header, Navbar } from '@/components';
+import MainLayout from '../layouts/Main';
 
 import { useSession } from 'next-auth/react';
 import Image from 'next/image';
@@ -24,9 +24,7 @@ export default function Docs({ endpoints }: Props) {
 
 
 	return (
-		<>
-			<Header />
-			<Navbar user={session?.user}/>
+		<MainLayout user={session?.user}>
 			<section className="vh-100" style={{ 'backgroundColor': '#eee', maxHeight: '94vh', overflowY: 'scroll' }}>
 				<div className="container h-100">
 					<div className="row d-flex justify-content-center align-items-center h-100">
@@ -150,7 +148,7 @@ export default function Docs({ endpoints }: Props) {
 					</div>
 				</div>
 			</section>
-		</>
+		</ MainLayout>
 	);
 }
 
