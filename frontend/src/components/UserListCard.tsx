@@ -22,9 +22,11 @@ export default function UserCard({ total }: Props) {
 		fetchUsers(page);
 	}, [page]);
 
-	async function fetchUsers(p: number) {
+	async function fetchUsers(p: number, order?: SortOrder, type?: sortType) {
+		if (order == undefined) order = sortOrder;
+		if (type == undefined) type = sortType;
 		try {
-			const res = await fetch(`/api/session/admin/users?order=${sortOrder}&page=${p}`, {
+			const res = await fetch(`/api/session/admin/users?orderDir=${order}&page=${p}&orderType=${type}`, {
 				method: 'get',
 				headers: {
 					'Accept': 'application/json',
@@ -43,33 +45,13 @@ export default function UserCard({ total }: Props) {
 			// Type has changed so set type to selected and direction to desc
 			setSortType(type);
 			setSortOrder('desc');
-			const res = await fetch(`/api/session/admin/users?orderDir=desc&orderType=${type}`, {
-				method: 'GET',
-				headers: {
-					'Accept': 'application/json',
-					'Content-Type': 'application/json',
-				},
-			});
-			const data = await res.json();
-			setUsers(data.users);
+			fetchUsers(page, 'desc', type);
 		} else {
 			// Type hasn't changed so just change direction
-			try {
-				const sort = (sortOrder == 'asc') ? 'desc' : 'asc';
-				setSortOrder(sort);
-				setSortType(type);
-				const res = await fetch(`/api/session/admin/users?orderDir=${sort}&orderType=${sortType}`, {
-					method: 'GET',
-					headers: {
-						'Accept': 'application/json',
-						'Content-Type': 'application/json',
-					},
-				});
-				const data = await res.json();
-				setUsers(data.users);
-			} catch (err) {
-				console.log(err);
-			}
+			const sort = (sortOrder == 'asc') ? 'desc' : 'asc';
+			setSortType(type);
+			setSortOrder(sort);
+			fetchUsers(page, sort, type);
 		}
 	}
 
