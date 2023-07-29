@@ -1,7 +1,14 @@
 import { CONSTANTS } from '../utils';
 import type { User } from '@prisma/client';
-import type { updateUser, createUser, pagination, userUnqiueParam } from '../types/database';
+import type { updateUser, createUser, userUnqiueParam, fetchUsersParam } from '../types/database';
 import client from './client';
+
+interface ExtendedUser extends User {
+	_count?: {
+		history: number
+	}
+}
+
 
 export default class UserManager {
 	size: number;
@@ -143,13 +150,13 @@ export default class UserManager {
 		* @returns An array of users
 	*/
 	async fetchByUsername(name: string) {
-		return client.user.findMany({
+		return this._removeToken(await client.user.findMany({
 			where: {
 				username: {
 					startsWith: name,
 				},
 			},
-		});
+		}));
 	}
 
 	/**
@@ -157,14 +164,40 @@ export default class UserManager {
     * @param {pagination} page The ID of the user
     * @returns An array of users
   */
-	async fetchUsers({ page, order }: pagination & { order?: 'desc' | 'asc' }) {
-		return client.user.findMany({
-			orderBy: {
-				createdAt: order == undefined ? 'desc' : order,
-			},
-			skip: page * CONSTANTS.DbPerPage,
-			take: CONSTANTS.DbPerPage,
-		});
+	async fetchUsers({ page, orderDir = 'desc', orderType = 'joinedAt', includeHistory = true }: fetchUsersParam) {
+		let users = [];
+		if (orderType == 'requests') {
+			users = await client.user.findMany({
+				orderBy: {
+					history: {
+						_count: orderDir,
+					},
+				},
+				skip: page * CONSTANTS.DbPerPage,
+				take: CONSTANTS.DbPerPage,
+				include: {
+					_count: {
+						select: { history: includeHistory },
+					},
+				},
+			});
+		} else {
+			users = await client.user.findMany({
+				orderBy: {
+					createdAt: orderDir,
+				},
+				skip: page * CONSTANTS.DbPerPage,
+				take: CONSTANTS.DbPerPage,
+				include: {
+					_count: {
+						select: { history: includeHistory },
+					},
+				},
+			});
+		}
+
+		// Remove the tokens and then return
+		return this._removeToken(users);
 	}
 
 	/**
@@ -173,5 +206,14 @@ export default class UserManager {
 	*/
 	async fetchAll() {
 		return client.user.findMany();
+	}
+
+	/**
+		* Extract the user from the request (if any)
+		* @param {Array<User>} users The ID of the user
+		* @returns An array of users
+	*/
+	private _removeToken(users: Array<ExtendedUser>) {
+		return users.map(u => ({ ...u, token: '' }));
 	}
 }

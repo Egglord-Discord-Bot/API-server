@@ -89,7 +89,6 @@ export default class RateLimit {
 	}
 
 	private sendResponse({ req, res, userId, endpoint, response }: sendResponseParam) {
-		console.log('test');
 		onFinished(req, () => {
 			req._endTime = new Date().getTime();
 			onFinished(res, async () => {
@@ -104,7 +103,6 @@ export default class RateLimit {
 
 
 				// Save to users' history
-				console.log('hello');
 				await this.client.UserHistoryManager.create({ id: userId == null ? null : BigInt(userId), endpoint, responseCode: status, responseTime: response_time });
 			});
 		});

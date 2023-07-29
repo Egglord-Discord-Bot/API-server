@@ -46,8 +46,8 @@ export function run(client: Client) {
 		if (!name) return Error.MissingQuery(res, 'name');
 
 		try {
-			const endpoints = await client.EndpointManager.fetchEndpointByName(name);
-			res.json({ endpoints: endpoints });
+			const endpoints = await client.UserHistoryManager.fetchHistoryByName(name);
+			res.json({ endpoints: endpoints.map(i => ({ ...i, userId: `${i.userId}` })) });
 		} catch (err: any) {
 			Error.GenericError(res, err.message);
 		}

@@ -87,5 +87,23 @@ export function run(client: Client) {
 		}
 	});
 
+	router.get('/stats', async (_req, res) => {
+		try {
+			const [users, endpoints, endpointUsage] = await Promise.all([client.UserManager.fetchCount(), client.EndpointManager.fetchCount(), client.UserHistoryManager.fetchCount()]);
+			console.log(users, endpoints, endpointUsage);
+			res.json({
+				userCount: users,
+				endpointCount: endpoints,
+				historyCount: endpointUsage,
+			});
+		} catch (err) {
+			res.json({
+				userCount: 0,
+				endpointCount: 0,
+				historyCount: 0,
+			});
+		}
+	});
+
 	return router;
 }

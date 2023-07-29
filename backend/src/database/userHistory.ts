@@ -220,6 +220,21 @@ export default class userHistoryManager {
 
 	/**
 		* Fetch a specific's user total history count
+		* @param {string} name The name of the endpoint
+		* @returns The total number of entries by a user
+	*/
+	async fetchHistoryByName(name: string) {
+		return client.userHistory.findMany({
+			where: {
+				endpointName: {
+					startsWith: name,
+				},
+			},
+		});
+	}
+
+	/**
+		* Fetch a specific's user total history count
 		* @param {bigint} userId The userId for getting their user history count
 		* @returns The total number of entries by a user
 	*/

@@ -9,6 +9,9 @@ export interface User {
   isAdmin: boolean
   isBlocked: boolean
   isPremium: boolean
+  _count?: {
+    history: number
+  }
 }
 
 declare module 'next-auth/jwt' {

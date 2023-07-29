@@ -42,6 +42,10 @@ export function getStatusColour(code: number) {
 export async function sendRequest(path: string) {
 	const res = await fetch(`/api/${path}`, {
 		method: 'get',
+		headers: {
+			'Accept': 'application/json',
+			'Content-Type': 'application/json',
+		},
 	});
 	return res.json();
 }

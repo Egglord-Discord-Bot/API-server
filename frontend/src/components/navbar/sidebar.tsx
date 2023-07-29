@@ -8,7 +8,7 @@ interface Props {
 
 export default function Sidebar({ activeTab }: Props) {
 	return (
-		<ul className="navbar-nav bg-primary sidebar sidebar-dark accordion" id="accordionSidebar" style={{ color: 'white' }}>
+		<ul className="navbar-nav bg-primary sidebar sidebar-dark accordion" id="accordionSidebar" style={{ color: 'white', minHeight: '100vh' }}>
 			<Link className="sidebar-brand d-flex align-items-center justify-content-center" href="/" style={{ color: 'white' }}>
 				<div className="sidebar-brand-icon rotate-n-15">
 					<FontAwesomeIcon icon={faLaughWink} />

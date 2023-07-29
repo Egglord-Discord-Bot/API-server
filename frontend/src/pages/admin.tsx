@@ -4,7 +4,6 @@ import AdminLayout from '../layouts/Admin';
 import { nFormatter, formatBytes } from '../utils/functions';
 import { Pie, Line } from 'react-chartjs-2';
 import { useSession } from 'next-auth/react';
-import 'react-tooltip/dist/react-tooltip.css';
 import { Tooltip } from 'react-tooltip';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faDownload, faSignal, faUsers, faClock, faMemory, faEllipsis } from '@fortawesome/free-solid-svg-icons';
@@ -99,7 +98,7 @@ export default function Admin(data: Props) {
 				</div>
 				<div className="row">
 					<div className="col-xl-8 col-lg-7">
-						<div className="card shadow mb-4">
+						<div className="card shadow">
 							<div className="card-header py-3 d-flex flex-row align-items-center justify-content-between">
 								<h5 className="m-0 fw-bold text-primary">Total API usage (Year)</h5>
 								<div className="dropdown no-arrow">
@@ -122,25 +121,9 @@ export default function Admin(data: Props) {
 					 			</div>
 							</div>
 						</div>
-						<div className="card shadow mb-4">
-							<div className="card-header py-3" style={{ height: '100%' }}>
-								<h5 className="m-0 fw-bold text-primary">API Responses Code</h5>
-							</div>
-							<div className="card-body">
-								{data.responseCode.sort((a, b) => a._count.history - b._count.history).reverse().map(e => (
-									<>
-										<Tooltip place="top" content={`${e._count.history}`} id={`endpoint_${e.code}`}/>
-										<h4 className="small font-weight-bold">{e.code} <span className="float-end">{(e._count.history / data.count) * 100}%</span></h4>
-										<div className="progress mb-4" data-tooltip-id={`endpoint_${e.code}`}>
-											<div className="progress-bar bg-success" role="progressbar" style={{ width: `${(e._count.history / data.count) * 100}%` }}	aria-valuenow={e._count.history} aria-valuemin={0} aria-valuemax={data.count}>{e._count.history}</div>
-										</div>
-									</>
-								))}
-							</div>
-						</div>
 					</div>
 					<div className="col-xl-4 col-lg-5">
-						<div className="card shadow mb-4">
+						<div className="card shadow">
 							<div className="card-header py-3 d-flex flex-row align-items-center justify-content-between">
 								<h5 className="m-0 fw-bold text-primary">Top 20 Accessed Endpoints</h5>
 								<div className="dropdown no-arrow">
@@ -163,6 +146,22 @@ export default function Admin(data: Props) {
 					 			</div>
 							</div>
 						</div>
+					</div>
+				</div>
+				<div className="card shadow mb-4">
+					<div className="card-header py-3" style={{ height: '100%' }}>
+						<h5 className="m-0 fw-bold text-primary">API Responses Code</h5>
+					</div>
+					<div className="card-body">
+						{data.responseCode.sort((a, b) => a._count.history - b._count.history).reverse().map(e => (
+							<>
+								<Tooltip place="top" content={`${e._count.history}`} id={`endpoint_${e.code}`}/>
+								<h4 className="small font-weight-bold">{e.code} <span className="float-end">{(e._count.history / data.count) * 100}%</span></h4>
+								<div className="progress mb-4" data-tooltip-id={`endpoint_${e.code}`}>
+									<div className="progress-bar bg-success" role="progressbar" style={{ width: `${(e._count.history / data.count) * 100}%` }}	aria-valuenow={e._count.history} aria-valuemin={0} aria-valuemax={data.count}>{e._count.history}</div>
+								</div>
+							</>
+						))}
 					</div>
 				</div>
 			</div>

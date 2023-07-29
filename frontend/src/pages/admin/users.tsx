@@ -1,21 +1,17 @@
-import { Error, InfoPill } from '@/components';
+import { Error, InfoPill, UserListCard, CollapsibleCard } from '@/components';
 import AdminLayout from '@/layouts/Admin';
 
-import { useState } from 'react';
 import { useSession } from 'next-auth/react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Pie, Line } from 'react-chartjs-2';
-import { faAnglesLeft, faAnglesRight, faUsers, faBan, faDollarSign, faUserCheck, faSearch, faDownload, faEllipsis } from '@fortawesome/free-solid-svg-icons';
+import { faUsers, faBan, faDollarSign, faUserCheck, faDownload } from '@fortawesome/free-solid-svg-icons';
 import { Chart as ChartJS, ArcElement, Tooltip, Legend,	CategoryScale, LinearScale, PointElement, LineElement, Title } from 'chart.js';
 
-import type { User } from '@/types/next-auth';
 import type { GetServerSidePropsContext } from 'next';
-import type { SyntheticEvent } from 'react';
 ChartJS.register(ArcElement, Tooltip, Legend, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
 
 type countEnum = { [key: string]: number }
 interface Props {
-	users: Array<User>
 	error?: string
 	total: number
 	admin: number
@@ -23,113 +19,10 @@ interface Props {
 	block: number
 	months: countEnum
 }
-type userUpdateEnum = 'block' | 'premium' | 'admin'
-type SortOrder = 'asc' | 'desc';
 
-export default function AdminUsers({ users: userList, error: oldError, total, admin, premium, block, months }: Props) {
+export default function AdminUsers({ error, total, admin, premium, block, months }: Props) {
 	const { data: session, status } = useSession();
-	const [users, setUsers] = useState<Array<User>>(userList);
-	const [error, setError] = useState<string|undefined>(oldError);
-	const [page, setPage] = useState(0);
-	const [sortOrder, setSortOrder] = useState<SortOrder>('desc');
 	if (status == 'loading' || session == null) return null;
-
-	async function fetchUsers(p: number) {
-		try {
-			const res = await fetch(`/api/session/admin/users?order=${sortOrder}&page=${p}`, {
-				method: 'get',
-				headers: {
-					'Accept': 'application/json',
-					'Content-Type': 'application/json',
-				},
-			});
-			const data = await res.json();
-			setUsers(data.users);
-			setPage(p);
-		} catch (err) {
-			setError((err as ErrorEvent).message);
-		}
-	}
-
-	async function updateSortOrder() {
-		try {
-			const sort = (sortOrder == 'asc') ? 'desc' : 'asc';
-			const res = await fetch(`/api/session/admin/users?order=${sort}`, {
-				method: 'GET',
-				headers: {
-					'Accept': 'application/json',
-					'Content-Type': 'application/json',
-				},
-			});
-			const data = await res.json();
-			setUsers(data.users);
-			setPage(0);
-			setSortOrder(sort);
-		} catch (err) {
-			setError((err as ErrorEvent).message);
-		}
-	}
-
-	async function updateUser(type: userUpdateEnum, userId: string) {
-		// Get the type and what value it should be
-		const el = document.getElementById(`${userId}_${type}`) as HTMLInputElement | null;
-		if (el) {
-			const value = el.checked;
-			// Fetch endpoint data
-			await fetch('/api/session/admin/users', {
-				method: 'PATCH',
-				headers: {
-					'Accept': 'application/json',
-					'Content-Type': 'application/json',
-				},
-				body: JSON.stringify({
-					userId: userId,
-					isAdmin: (type == 'admin' ? value : undefined),
-					isBlocked: (type == 'block' ? value : undefined),
-					isPremium: (type == 'premium' ? value : undefined),
-				}),
-			});
-
-			// Update DOM
-			el.checked = !!value;
-			const text = document.getElementById(`${userId}_${type}_text`);
-			if (text) text.innerHTML = value ? 'Yes' : 'No';
-		}
-	}
-
-	async function searchByName(e: SyntheticEvent) {
-		const text = (e.target as HTMLInputElement).value;
-
-		if (text.length == 0) {
-			const res = await fetch('/api/session/admin/users', {
-				method: 'get',
-				headers: {
-					'Accept': 'application/json',
-					'Content-Type': 'application/json',
-				},
-			});
-			const data = await res.json();
-			setUsers(data.users);
-			setPage(0);
-			setSortOrder('desc');
-		} else {
-			try {
-				const res = await fetch(`/api/session/admin/users/search?name=${text}`, {
-					method: 'GET',
-					headers: {
-						'Accept': 'application/json',
-						'Content-Type': 'application/json',
-					},
-				});
-				const data = await res.json();
-				setUsers(data.users);
-				setPage(0);
-				setSortOrder('desc');
-			} catch (err) {
-				setError((err as ErrorEvent).message);
-			}
-		}
-	}
 
 	// Create data for pie chart
 	const graphData = {
@@ -174,18 +67,45 @@ export default function AdminUsers({ users: userList, error: oldError, total, ad
 		],
 	};
 
+	// Allow admin to download user JSON file
+	async function download() {
+		try {
+			await fetch('/api/session/admin/users/download', {
+				method: 'get',
+				headers: {
+					'Accept': 'application/json',
+					'Content-Type': 'application/json',
+				},
+			}).then((response) => response.blob())
+				.then((blob) => {
+					// Create blob link to download
+					const url = window.URL.createObjectURL(new Blob([blob]));
+					const link = document.createElement('a');
+					link.href = url;
+					link.setAttribute('download', 'users.json');
+
+					// Add to page, click and then remove from page
+					document.body.appendChild(link);
+					link.click();
+					link.parentNode?.removeChild(link);
+				});
+		} catch (err) {
+			console.log(err);
+		}
+	}
+
 	return (
 		<AdminLayout user={session.user}>
 			<div className="container-fluid" style={{ overflowY: 'scroll', maxHeight: 'calc(100vh - 64px)' }}>
 				{error && (
 					<Error text={error} />
 				)}
-							&nbsp;
+				&nbsp;
 				<div className="d-sm-flex align-items-center justify-content-between mb-4">
 					<h1 className="h3 mb-0 text-gray-800">User Dashboard</h1>
-					<a href="#" className="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm">
+					<button className="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm" onClick={() => download()}>
 						<FontAwesomeIcon icon={faDownload} /> Generate Report
-					</a>
+					</button>
 				</div>
 				<div className="row">
 					<div className="col-xl-3 col-md-6 mb-4">
@@ -202,100 +122,18 @@ export default function AdminUsers({ users: userList, error: oldError, total, ad
 					</div>
 				</div>
 				<div className="row">
-					<div className="col-xl-8 col-lg-7">
-						<div className="card shadow mb-4">
-							<div className="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-								<h4 className="m-0 font-weight-bold text-primary">User Growth</h4>
-								<a type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseExample">
-									<FontAwesomeIcon icon={faEllipsis} />
-								</a>
-							</div>
-							<div className="card-body collapse show" id="collapseOne">
-								<Line data={userJoinData} />
-							</div>
-						</div>
+					<div className="col-xl-8 col-lg-7" style={{ paddingBottom: '12px' }}>
+						<CollapsibleCard id={'user_growth'} header={<h4 className="m-0 font-weight-bold text-primary">User Growth</h4>}>
+							<Line data={userJoinData} options={{ responsive: true, maintainAspectRatio: false, aspectRatio:2 }} style={{ height: '400px' }}/>
+						</CollapsibleCard>
 					</div>
-					<div className="col-xl-4 col-lg-5">
-						<div className="card shadow">
-							<div className="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-								<h4 className="m-0 font-weight-bold text-primary">User Make-up</h4>
-								<a type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseExample">
-									<FontAwesomeIcon icon={faEllipsis} />
-								</a>
-							</div>
-							<div className="card-body collapse show" id="collapseOne">
-								<Pie data={graphData} />
-							</div>
-						</div>
+					<div className="col-xl-4 col-lg-5" style={{ paddingBottom: '12px' }}>
+						<CollapsibleCard id={'User_Make-up'} header={<h4 className="m-0 font-weight-bold text-primary">User Make-up</h4>}>
+							<Pie data={graphData} style={{ maxHeight: '400px' }} />
+						</CollapsibleCard>
 					</div>
 				</div>
-							&nbsp;
-				<div className="card shadow mb-4">
-					<div className="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-						<h6 className="m-0 font-weight-bold text-primary">Users</h6>
-					</div>
-					<div className="card-body table-responsive">
-						<div className="d-none d-sm-inline-block form-inline mr-auto ml-md-3 my-2 my-md-0 mw-100">
-							<div className="input-group mb-3">
-								<input type="text" className="form-control bg-light border-0 small" placeholder="Search for..." aria-label="Recipient's username" aria-describedby="basic-addon2" onChange={(e) => searchByName(e)}/>
-								<button className="btn btn-outline-primary" type="button">
-									<FontAwesomeIcon icon={faSearch} />
-								</button>
-							</div>
-						</div>
-						<table className="table" style={{ paddingTop: '10px' }}>
-							<thead>
-								<tr>
-									<th scope="col">ID</th>
-									<th>Name</th>
-									<th onClick={() => updateSortOrder()}>Joined</th>
-									<th>Blocked</th>
-									<th>Premium</th>
-									<th>Admin</th>
-								</tr>
-							</thead>
-							<tbody>
-								{users.map(u => (
-									<tr key={u.id}>
-										<th scope="row">{u.id}</th>
-										<th>{u.username}#{u.discriminator}</th>
-										<th>{new Date(u.createdAt).toLocaleString('en-US')}</th>
-										<td>
-											<input className="form-check-input" type="checkbox" onChange={() => updateUser('block', u.id)} id={`${u.id}_block`} defaultChecked={u.isBlocked} />
-											<span id={`${u.id}_block_text`}>{u.isBlocked ? 'Yes' : 'No'}</span>
-										</td>
-										<td>
-											<input className="form-check-input" type="checkbox" onChange={() => updateUser('premium', u.id)} id={`${u.id}_premium`} defaultChecked={u.isPremium} />
-											<span id={`${u.id}_premium_text`}>{u.isPremium ? 'Yes' : 'No'}</span>
-										</td>
-										<td>
-											<input className="form-check-input" type="checkbox" onChange={() => updateUser('admin', u.id)} id={`${u.id}_admin`} defaultChecked={u.isAdmin} />
-											<span id={`${u.id}_admin_text`}>{u.isAdmin ? 'Yes' : 'No'}</span>
-										</td>
-									</tr>
-								))}
-							</tbody>
-						</table>
-						<nav aria-label="Page navigation example">
-							<p style={{ display: 'inline' }}>Showing results {(page < 1 ? 0 : page) * 50} - {(page * 50) + (users.length < 50 ? users.length : 50)} of {total}</p>
-							<ul className="pagination justify-content-center">
-								<li className="page-item">
-									<a className="page-link" onClick={() => fetchUsers(page == 0 ? page : page - 1)} href="#">
-										<FontAwesomeIcon icon={faAnglesLeft} />
-									</a>
-								</li>
-								<li className="page-item">
-									<p className="page-link">{page}</p>
-								</li>
-								<li className="page-item">
-									<a className="page-link" onClick={() => fetchUsers(users.length >= 50 ? page + 1 : page)} href="#">
-										<FontAwesomeIcon icon={faAnglesRight} />
-									</a>
-								</li>
-							</ul>
-						</nav>
-					</div>
-				</div>
+				<UserListCard total={total}/>
 			</div>
 		</AdminLayout>
 	);
@@ -311,14 +149,13 @@ export async function getServerSideProps(ctx: GetServerSidePropsContext) {
 			},
 		};
 
-		const [res1, res2] = await Promise.all([fetch(`${process.env.BACKEND_URL}api/session/admin/users/json`, obj),
+		const [res1, res2] = await Promise.all([fetch(`${process.env.BACKEND_URL}api/session/admin/users/stats`, obj),
 			fetch(`${process.env.BACKEND_URL}api/session/admin/users/history`, obj)]);
 
-
-		const { users, total, admin, premium, block } = await res1.json();
+		const { total, admin, premium, block } = await res1.json();
 		const { months } = await res2.json();
-		return { props: { users, total, admin, premium, block, months } };
+		return { props: { total, admin, premium, block, months } };
 	} catch (err) {
-		return { props: { users: [], total: 0, admin: 0, premium: 0, block: 0, months: [], error: 'API server currently unavailable' } };
+		return { props: { total: 0, admin: 0, premium: 0, block: 0, months: [], error: 'API server currently unavailable' } };
 	}
 }

@@ -20,6 +20,13 @@ export type createUser = {
 	email?: string
 }
 
+export type fetchUsersParam = {
+	orderDir: 'asc' | 'desc' | undefined
+	orderType: 'joinedAt' | 'requests' | undefined
+	includeHistory?: boolean
+} & pagination
+
+
 export type userUnqiueParam = {
 	id?: bigint
 	token?: string
@@ -44,6 +51,7 @@ export type createEndpointData = {
 	maxRequests?: number
 	maxRequestper?: number
 	premiumOnly?: boolean
+	isValid?: boolean
 }
 
 export type updateEndpointData = {
@@ -53,6 +61,7 @@ export type updateEndpointData = {
 	maxRequestper?: number
 	isBlocked?: boolean
 	premiumOnly?: boolean
+	isValid?: boolean
 }
 
 /* MISC */
