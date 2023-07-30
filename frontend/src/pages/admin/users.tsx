@@ -70,25 +70,30 @@ export default function AdminUsers({ error, total, admin, premium, block, months
 	// Allow admin to download user JSON file
 	async function download() {
 		try {
-			await fetch('/api/session/admin/users/download', {
+			const res = await fetch('/api/session/admin/users/download', {
 				method: 'get',
 				headers: {
 					'Accept': 'application/json',
 					'Content-Type': 'application/json',
 				},
-			}).then((response) => response.blob())
-				.then((blob) => {
-					// Create blob link to download
-					const url = window.URL.createObjectURL(new Blob([blob]));
-					const link = document.createElement('a');
-					link.href = url;
-					link.setAttribute('download', 'users.json');
+			});
+			const data = await res.json();
+			const obj = Object.assign(data, { total, admin, premium, block, userGrowthChart: months });
+			const str = JSON.stringify(obj);
+			const bytes = new TextEncoder().encode(str);
+			const blob = new Blob([bytes], {
+				type: 'application/json;charset=utf-8',
+			});
+			// Create blob link to download
+			const url = window.URL.createObjectURL(new Blob([blob]));
+			const link = document.createElement('a');
+			link.href = url;
+			link.setAttribute('download', 'users.json');
 
-					// Add to page, click and then remove from page
-					document.body.appendChild(link);
-					link.click();
-					link.parentNode?.removeChild(link);
-				});
+			// Add to page, click and then remove from page
+			document.body.appendChild(link);
+			link.click();
+			link.parentNode?.removeChild(link);
 		} catch (err) {
 			console.log(err);
 		}
