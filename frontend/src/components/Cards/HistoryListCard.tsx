@@ -22,7 +22,7 @@ export default function HistoryListCard() {
 	}, [page]);
 
 	async function deleteEndpoint(id: number) {
-		await fetch('/api/admin/history', {
+		await fetch('/api/session/admin/history', {
 			method: 'DELETE',
 			headers: {
 				'Accept': 'application/json',
