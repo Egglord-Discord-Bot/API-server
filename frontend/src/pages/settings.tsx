@@ -1,5 +1,4 @@
-import { Header, Navbar, Error } from '@/components';
-
+import { Header, Navbar } from '@/components';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEye, faEyeSlash, faAnglesLeft, faAnglesRight, faEllipsis, faCircle } from '@fortawesome/free-solid-svg-icons';
 import { useSession } from 'next-auth/react';
@@ -73,7 +72,7 @@ export default function Settings() {
 
 			try {
 				document.execCommand('copy');
-			} catch (error: any) {
+			} catch (error) {
 				console.error(error);
 			} finally {
 				textArea.remove();

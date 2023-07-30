@@ -4,9 +4,30 @@ import { isAdmin } from '../../../../middleware/middleware';
 import { Error } from '../../../../utils';
 const router = Router();
 
+type orderList = 'asc' | 'desc' | undefined
+type orderType = 'accessedAt' | 'statusCode' | undefined
+
 export function run(client: Client) {
 
 	router.get('/', isAdmin, async (req, res) => {
+		const page = req.query.page;
+		const orderDir = req.query.orderDir as orderList;
+		const orderType = req.query.orderType as orderType;
+
+		// If order is present make sure it's only ascend or descend
+		if (orderDir && !['asc', 'desc'].includes(orderDir)) return Error.InvalidValue(res, 'orderDir', ['asc', 'desc']);
+
+		try {
+			const [history, total] = await Promise.all([client.UserHistoryManager.fetchHistory({ page: (page && !Number.isNaN(page)) ? Number(page) : 0, orderDir, orderType }),
+				client.UserHistoryManager.fetchCount()]);
+			res.json({ history: history.map(i => ({ ...i, userId: `${i.userId}` })), total });
+		} catch (err) {
+			console.log(err);
+			res.json({ history: [] });
+		}
+	});
+
+	router.get('/growth', isAdmin, async (req, res) => {
 		type countEnum = { [key: string]: number }
 		const timeFrame = req.query.time as string;
 		if (!timeFrame) return Error.InvalidValue(res, 'timeFrame', ['year', 'month', 'day']);
@@ -46,8 +67,8 @@ export function run(client: Client) {
 		if (!name) return Error.MissingQuery(res, 'name');
 
 		try {
-			const endpoints = await client.UserHistoryManager.fetchHistoryByName(name);
-			res.json({ endpoints: endpoints.map(i => ({ ...i, userId: `${i.userId}` })) });
+			const history = await client.UserHistoryManager.fetchHistoryByName(name);
+			res.json({ history: history.map(i => ({ ...i, userId: `${i.userId}` })) });
 		} catch (err: any) {
 			Error.GenericError(res, err.message);
 		}
@@ -56,7 +77,7 @@ export function run(client: Client) {
 	router.get('/responseCode', isAdmin, async (_req, res) => {
 		try {
 			const history = await client.ResponseCodeManager.fetchResponseCodeCounts();
-			res.json({ history: history });
+			res.json({ history });
 		} catch (err) {
 			console.log(err);
 			res.json({ history: [] });

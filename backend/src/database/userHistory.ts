@@ -1,5 +1,6 @@
 import { CONSTANTS } from '../utils';
-import type { UserHistoryCreateParam, endpointUserUnique, pagination } from '../types/database';
+import type { UserHistoryCreateParam, endpointUserUnique, pagination, fetchHistoryParam } from '../types/database';
+import type { UserHistory } from '@prisma/client';
 import client from './client';
 
 export default class userHistoryManager {
@@ -18,63 +19,34 @@ export default class userHistoryManager {
 	*/
 	async create(data: UserHistoryCreateParam) {
 		this.size++;
-		console.log(data);
-		if (data.id == null) {
-			return client.userHistory.create({
-				data: {
-					endpoint: {
-						connectOrCreate: {
-							where: {
-								name: data.endpoint,
-							},
-							create: {
-								name: data.endpoint,
-							},
+		return client.userHistory.create({
+			data: {
+				endpoint: {
+					connectOrCreate: {
+						where: {
+							name: data.endpoint,
 						},
-					},
-					responseCode: {
-						connectOrCreate: {
-							where: {
-								code: data.responseCode,
-							},
-							create: {
-								code: data.responseCode,
-							},
+						create: {
+							name: data.endpoint,
 						},
-					},
-					responseTime: data.responseTime,
-				},
-			});
-		} else {
-			return client.userHistory.create({
-				data: {
-					endpoint: {
-						connectOrCreate: {
-							where: {
-								name: data.endpoint,
-							},
-							create: {
-								name: data.endpoint,
-							},
-						},
-					},
-					responseCode: {
-						connectOrCreate: {
-							where: {
-								code: data.responseCode,
-							},
-							create: {
-								code: data.responseCode,
-							},
-						},
-					},
-					responseTime: data.responseTime,
-					user: {
-						connect: { id: data.id 	},
 					},
 				},
-			});
-		}
+				responseCode: {
+					connectOrCreate: {
+						where: {
+							code: data.responseCode,
+						},
+						create: {
+							code: data.responseCode,
+						},
+					},
+				},
+				responseTime: data.responseTime,
+				user: data.id == null ? undefined : {
+					connect: { id: data.id },
+				},
+			},
+		});
 	}
 
 	/**
@@ -82,7 +54,7 @@ export default class userHistoryManager {
 		* @param {number} id The id of the endpoint
 		* @returns The deleted endpoint history
 	*/
-	async delete(id: number) {
+	async delete(id: number): Promise<UserHistory> {
 		this.size--;
 		return client.userHistory.delete({
 			where: { id },
@@ -91,11 +63,12 @@ export default class userHistoryManager {
 
 	/**
 		* Fetch all the times the user accessed the endpoint
-		* @param {string} data.id The user
+		* @param {bigint} data.id The user
 		* @param {string} data.endpoint The endpoint
+		* @param {number} data.page The endpoint
 		* @returns Record of user used the endpoint
 	*/
-	async fetchEndpointUsagePerUser({ id: userId, endpoint, page }: UserHistoryCreateParam & pagination) {
+	async fetchEndpointUsagePerUser({ id: userId, endpoint, page }: UserHistoryCreateParam & pagination): Promise<UserHistory[]> {
 		return client.userHistory.findMany({
 			where: {
 				endpointName: endpoint, userId,
@@ -107,10 +80,11 @@ export default class userHistoryManager {
 
 	/**
 		* Fetch a specific user's history
-		* @param {number} userId The userId for getting their user history
+		* @param {bigint} data.userId The userId for getting their user history
+		* @param {number} data.page The endpoint
 		* @returns Array if user history entries based on userId
 	*/
-	async fetchEndpointUsagesPerUser({ userId, page }: endpointUserUnique & pagination) {
+	async fetchEndpointUsagesPerUser({ userId, page }: endpointUserUnique & pagination): Promise<UserHistory[]> {
 		return client.userHistory.findMany({
 			orderBy: {
 				createdAt: 'desc',
@@ -125,10 +99,10 @@ export default class userHistoryManager {
 
 	/**
 		* Fetch all history
-		* @param {pagination} page The page number to fetch
+		* @param {pagination} data.page The page number to fetch
 		* @returns Array of user history entries
 	*/
-	async fetchAllEndpointUsage({ page }: pagination) {
+	async fetchAllEndpointUsage({ page }: pagination): Promise<UserHistory[]> {
 		return client.userHistory.findMany({
 			orderBy: {
 				createdAt: 'desc',
@@ -223,12 +197,15 @@ export default class userHistoryManager {
 		* @param {string} name The name of the endpoint
 		* @returns The total number of entries by a user
 	*/
-	async fetchHistoryByName(name: string) {
+	async fetchHistoryByName(name: string): Promise<UserHistory[]> {
 		return client.userHistory.findMany({
 			where: {
 				endpointName: {
 					startsWith: name,
 				},
+			},
+			orderBy: {
+				createdAt: 'desc',
 			},
 		});
 	}
@@ -246,7 +223,37 @@ export default class userHistoryManager {
 		});
 	}
 
-	async fetchAll() {
+	/**
+		* Fetch a list of the userHistory based on the params
+		* @param {fetchUsersParam} filters The filters to fetch users
+		* @param {number} filters.page The page index
+		* @param {string} filters.orderDir The direction of sort
+		* @param {string} filters.orderType The property to sort by
+		* @returns An array of userHistory
+	*/
+	async fetchHistory({ page, orderDir = 'desc', orderType = 'accessedAt' }: fetchHistoryParam): Promise<UserHistory[]> {
+		let history = [];
+		if (orderType == 'statusCode') {
+			history = await client.userHistory.findMany({
+				orderBy: {
+					statusCode: orderDir,
+				},
+				skip: page * CONSTANTS.DbPerPage,
+				take: CONSTANTS.DbPerPage,
+			});
+		} else {
+			history = await client.userHistory.findMany({
+				orderBy: {
+					createdAt: orderDir,
+				},
+				skip: page * CONSTANTS.DbPerPage,
+				take: CONSTANTS.DbPerPage,
+			});
+		}
+		return history;
+	}
+
+	async fetchAll(): Promise<UserHistory[]> {
 		return client.userHistory.findMany();
 	}
 }

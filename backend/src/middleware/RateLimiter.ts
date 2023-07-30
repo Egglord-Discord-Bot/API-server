@@ -53,6 +53,9 @@ export default class RateLimit {
 
 				// if hashes are not correct then check through usual system (auth header, token etc)
 				if (requestHash !== validHash) return this.sendResponse({ req, res, userId: null, endpoint: req.originalUrl.split('?')[0], response: Error.Unauthorized });
+
+				// Success show them the data
+				this.sendResponse({ req, res, userId: null, endpoint: req.originalUrl.split('?')[0], response: null });
 				return next();
 			} else {
 				return this.sendResponse({ req, res, userId: null, endpoint: req.originalUrl.split('?')[0], response: Error.Unauthorized });

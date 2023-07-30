@@ -26,7 +26,6 @@ export type fetchUsersParam = {
 	includeHistory?: boolean
 } & pagination
 
-
 export type userUnqiueParam = {
 	id?: bigint
 	token?: string
@@ -43,6 +42,11 @@ export type UserHistoryCreateParam = {
 export type endpointUserUnique = {
 	userId: bigint
 }
+
+export type fetchHistoryParam = {
+	orderDir: 'asc' | 'desc' | undefined
+	orderType: 'accessedAt' | 'statusCode' | undefined
+} & pagination
 
 /* ENDPOINT DATA TYPES */
 export type createEndpointData = {

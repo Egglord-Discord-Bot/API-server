@@ -1,4 +1,4 @@
-import Modal from './Modal';
+import { Modal, CollapsibleCard } from '../index';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faAnglesLeft, faAnglesRight, faPenToSquare, faSearch, faBan, faDollarSign, faUserCheck, faChevronUp, faChevronDown } from '@fortawesome/free-solid-svg-icons';
 import { useState, useEffect } from 'react';
@@ -16,7 +16,7 @@ export default function UserCard({ total }: Props) {
 	const [page, setPage] = useState(0);
 	const [users, setUsers] = useState<Array<User>>([]);
 	const [sortOrder, setSortOrder] = useState<SortOrder>('desc');
-	const [sortType, setSortType] = useState<sortType>();
+	const [sortType, setSortType] = useState<sortType>('joinedAt');
 
 	useEffect(() => {
 		fetchUsers(page);
@@ -35,6 +35,7 @@ export default function UserCard({ total }: Props) {
 			});
 			const data = await res.json();
 			setUsers(data.users);
+			setPage(p);
 		} catch (err) {
 			console.log(err);
 		}
@@ -73,11 +74,8 @@ export default function UserCard({ total }: Props) {
 	}
 
 	return (
-		<div className="card shadow mb-4">
-			<div className="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-				<h6 className="m-0 font-weight-bold text-primary">Users</h6>
-			</div>
-			<div className="card-body table-responsive">
+		<CollapsibleCard id="UserList" header={<h6 className="m-0 font-weight-bold text-primary">Users</h6>}>
+			<div className="table-responsive">
 				<div className="form-inline mr-auto my-2 my-md-0 mw-100 col-lg-6">
 					<div className="input-group mb-3">
 						<input type="text" className="form-control bg-light border-0 small" placeholder="Search for..." aria-label="Recipient's username" aria-describedby="basic-addon2" onChange={(e) => searchByName(e)}/>
@@ -121,12 +119,12 @@ export default function UserCard({ total }: Props) {
 									{u.isAdmin && (
 										<FontAwesomeIcon icon={faUserCheck} style={{ color: '#198754' }} data-tooltip-id={`${index}_isAdminTooltip`}/>
 									)}
-                  &nbsp;
+                &nbsp;
 									<Tooltip place="top" content={'Premium'} id={`${index}_isPremiumTooltip`} />
 									{u.isPremium && (
 										<FontAwesomeIcon icon={faDollarSign} style={{ color: '#ffc107' }} data-tooltip-id={`${index}_isPremiumTooltip`} />
 									)}
-                  &nbsp;
+                &nbsp;
 									<Tooltip place="top" content={'Blocked'} id={`${index}_isBlockedTooltip`} />
 									{u.isBlocked && (
 										<FontAwesomeIcon icon={faBan} style={{ color: '#dc3545' }} data-tooltip-id={`${index}_isBlockedTooltip`} />
@@ -147,21 +145,21 @@ export default function UserCard({ total }: Props) {
 					<p style={{ display: 'inline' }}>Showing results {(page < 1 ? 0 : page) * 50} - {(page * 50) + (users.length < 50 ? users.length : 50)} of {total}</p>
 					<ul className="pagination justify-content-center">
 						<li className="page-item">
-							<a className="page-link" onClick={() => setPage(page == 0 ? page : page - 1)} href="#">
+							<button className="page-link" onClick={() => setPage(page == 0 ? page : page - 1)}>
 								<FontAwesomeIcon icon={faAnglesLeft} />
-							</a>
+							</button>
 						</li>
 						<li className="page-item">
 							<p className="page-link">{page}</p>
 						</li>
 						<li className="page-item">
-							<a className="page-link" onClick={() => setPage(users.length >= 50 ? page + 1 : page)} href="#">
+							<button className="page-link" onClick={() => setPage(users.length >= 50 ? page + 1 : page)}>
 								<FontAwesomeIcon icon={faAnglesRight} />
-							</a>
+							</button>
 						</li>
 					</ul>
 				</nav>
 			</div>
-		</div>
+		</CollapsibleCard>
 	);
 }

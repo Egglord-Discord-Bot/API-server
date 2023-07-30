@@ -17,7 +17,7 @@ export function run(client: Client) {
 		const orderType = req.query.orderType as orderType;
 
 		// If order is present make sure it's only ascend or descend
-		if (orderDir && !['asc', 'desc'].includes(orderDir)) return Error.InvalidValue(res, 'order', ['asc', 'desc']);
+		if (orderDir && !['asc', 'desc'].includes(orderDir)) return Error.InvalidValue(res, 'orderDir', ['asc', 'desc']);
 
 		try {
 			const [users, total] = await Promise.all([client.UserManager.fetchUsers({ page: (page && !Number.isNaN(page)) ? Number(page) : 0, orderDir, orderType }), client.UserManager.fetchCount()]);

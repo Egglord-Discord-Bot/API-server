@@ -1,4 +1,4 @@
-import { InfoPill } from '../components';
+import { InfoPill, CollapsibleCard } from '../components';
 import AdminLayout from '../layouts/Admin';
 
 import { nFormatter, formatBytes } from '../utils/functions';
@@ -6,7 +6,7 @@ import { Pie, Line } from 'react-chartjs-2';
 import { useSession } from 'next-auth/react';
 import { Tooltip } from 'react-tooltip';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faDownload, faSignal, faUsers, faClock, faMemory, faEllipsis } from '@fortawesome/free-solid-svg-icons';
+import { faDownload, faSignal, faUsers, faClock, faMemory } from '@fortawesome/free-solid-svg-icons';
 import { Chart as ChartJS, ArcElement, Tooltip as t, Legend,	CategoryScale, LinearScale, PointElement, LineElement, Title } from 'chart.js';
 
 import type { User } from '../types/next-auth';
@@ -72,15 +72,37 @@ export default function Admin(data: Props) {
 		],
 	};
 
+	async function download() {
+		try {
+			const str = JSON.stringify(data);
+			const bytes = new TextEncoder().encode(str);
+			const blob = new Blob([bytes], {
+				type: 'application/json;charset=utf-8',
+			});
+			// Create blob link to download
+			const url = window.URL.createObjectURL(new Blob([blob]));
+			const link = document.createElement('a');
+			link.href = url;
+			link.setAttribute('download', 'admin.json');
+
+			// Add to page, click and then remove from page
+			document.body.appendChild(link);
+			link.click();
+			link.parentNode?.removeChild(link);
+		} catch (err) {
+			console.log(err);
+		}
+	}
+
 	return (
 		<AdminLayout user={session?.user as User}>
 			<div className="container-fluid" style={{ overflowY: 'scroll', maxHeight: 'calc(100vh - 64px)' }}>
 				&nbsp;
 				<div className="d-sm-flex align-items-center justify-content-between mb-4">
 					<h1 className="h3 mb-0 text-gray-800">Admin Dashboard</h1>
-					<a href="#" className="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm">
+					<button className="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm" onClick={() => download()}>
 						<FontAwesomeIcon icon={faDownload} /> Generate Report
-					</a>
+					</button>
 				</div>
 				<div className="row">
 					<div className="col-xl-3 col-md-6 mb-4">
@@ -97,55 +119,15 @@ export default function Admin(data: Props) {
 					</div>
 				</div>
 				<div className="row">
-					<div className="col-xl-8 col-lg-7">
-						<div className="card shadow">
-							<div className="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-								<h5 className="m-0 fw-bold text-primary">Total API usage (Year)</h5>
-								<div className="dropdown no-arrow">
-									<a className="dropdown-toggle" href="#" role="button" id="dropdownMenuLink"	data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-										<FontAwesomeIcon icon={faEllipsis} />
-									</a>
-									<div className="dropdown-menu dropdown-menu-end shadow animated--fade-in"	aria-labelledby="dropdownMenuLink">
-										<a className="dropdown-item" href="#">Month</a>
-										<a className="dropdown-item" href="#">Day</a>
-										<div className="dropdown-divider"></div>
-										<a className="dropdown-item" href="#" role="button" data-bs-toggle="collapse" data-bs-target="#collapseHistoryAcc">Collapse</a>
-									</div>
-								</div>
-							</div>
-							<div className="card-body">
-								<div id="collapseHistoryAcc" className="accordion-collapse collapse show" aria-labelledby="headingOne" data-bs-parent="#accordionExample">
-									<div className="accordion-body">
-										<Line data={historyAccessed} />
-									</div>
-					 			</div>
-							</div>
-						</div>
+					<div className="col-xl-8 col-lg-12" style={{ paddingBottom: '12px' }}>
+						<CollapsibleCard id={'Total_API_usage'} header={<h5 className="m-0 fw-bold text-primary">Total API usage (Year)</h5>}>
+							<Line data={historyAccessed} options={{ responsive: true, maintainAspectRatio: false, aspectRatio:2 }} style={{ height: '400px' }}/>
+						</CollapsibleCard>
 					</div>
-					<div className="col-xl-4 col-lg-5">
-						<div className="card shadow">
-							<div className="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-								<h5 className="m-0 fw-bold text-primary">Top 20 Accessed Endpoints</h5>
-								<div className="dropdown no-arrow">
-									<a className="dropdown-toggle" href="#" role="button" id="dropdownMenuLink"	data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-										<FontAwesomeIcon icon={faEllipsis} />
-									</a>
-									<div className="dropdown-menu dropdown-menu-right shadow animated--fade-in" aria-labelledby="dropdownMenuLink">
-										<a className="dropdown-item" href="#">Action</a>
-										<a className="dropdown-item" href="#">Another action</a>
-										<div className="dropdown-divider"></div>
-										<a className="dropdown-item" href="#" role="button" data-bs-toggle="collapse" data-bs-target="#collapseMostAccessEnd">Collapse</a>
-									</div>
-								</div>
-							</div>
-							<div className="card-body">
-								<div id="collapseMostAccessEnd" className="accordion-collapse collapse show" aria-labelledby="headingOne" data-bs-parent="#accordionExample">
-									<div className="accordion-body">
-										<Pie data={mostAccessEndp} />
-									</div>
-					 			</div>
-							</div>
-						</div>
+					<div className="col-xl-4 col-lg-12" style={{ paddingBottom: '12px' }}>
+						<CollapsibleCard id={'Top_20_Accessed'} header={<h5 className="m-0 fw-bold text-primary">Top 20 Accessed Endpoints</h5>}>
+							<Pie data={mostAccessEndp} options={{ responsive: true }} style={{ maxHeight: '400px' }}/>
+						</CollapsibleCard>
 					</div>
 				</div>
 				<div className="card shadow mb-4">
@@ -156,7 +138,7 @@ export default function Admin(data: Props) {
 						{data.responseCode.sort((a, b) => a._count.history - b._count.history).reverse().map(e => (
 							<>
 								<Tooltip place="top" content={`${e._count.history}`} id={`endpoint_${e.code}`}/>
-								<h4 className="small font-weight-bold">{e.code} <span className="float-end">{(e._count.history / data.count) * 100}%</span></h4>
+								<h4 className="small font-weight-bold">{e.code} <span className="float-end">{Math.round((e._count.history / data.count) * 100)}%</span></h4>
 								<div className="progress mb-4" data-tooltip-id={`endpoint_${e.code}`}>
 									<div className="progress-bar bg-success" role="progressbar" style={{ width: `${(e._count.history / data.count) * 100}%` }}	aria-valuenow={e._count.history} aria-valuemin={0} aria-valuemax={data.count}>{e._count.history}</div>
 								</div>

@@ -1,16 +1,15 @@
-import { Error, InfoPill } from '@/components';
+import { Error, InfoPill, CollapsibleCard, HistoryListCard } from '@/components';
 import AdminLayout from '@/layouts/Admin';
 import { useSession } from 'next-auth/react';
-import { getStatusColour, sendRequest } from '@/utils/functions';
+import { sendRequest } from '@/utils/functions';
 
 import type { Endpoint, UserHistory } from '@/types';
 import type { GetServerSidePropsContext } from 'next';
 import type { SyntheticEvent } from 'react';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faAnglesLeft, faAnglesRight, faSearch, faDownload, faCircle, faCalendar, faCalendarDays, faCalendarWeek, faClock } from '@fortawesome/free-solid-svg-icons';
+import { faSearch, faDownload, faCalendar, faCalendarDays, faCalendarWeek, faClock } from '@fortawesome/free-solid-svg-icons';
 import { useState } from 'react';
-import { Tooltip } from 'react-tooltip';
 import 'react-tooltip/dist/react-tooltip.css';
 
 interface Props {
@@ -22,19 +21,10 @@ interface Props {
   last24hours: number
 }
 
-export default function AdminEndpoints({ endpointData, history: h, error, total, last30daysCount, last24hours }: Props) {
+export default function AdminEndpoints({ endpointData, error, last30daysCount, last24hours }: Props) {
 	const { data: session, status } = useSession();
 	const [endpoints, setEndpoints] = useState<Array<Endpoint>>(endpointData);
-	const [history, setHistory] = useState<Array<UserHistory>>(h);
-	const [page, setPage] = useState(0);
 	if (status == 'loading' || session == null) return null;
-
-	function updateDOM(e: SyntheticEvent) {
-		const el = e.target as HTMLInputElement;
-		if (el) {
-			setHistory(history.filter(i => i.endpointName.startsWith(el.value)));
-		}
-	}
 
 	async function searchEndpoint(e: SyntheticEvent) {
 		const el = e.target as HTMLInputElement;
@@ -47,25 +37,6 @@ export default function AdminEndpoints({ endpointData, history: h, error, total,
 		}
 		console.log(searchedEndpoints);
 		setEndpoints(searchedEndpoints.endpoints);
-	}
-
-
-	async function fetchHistory(p: number) {
-		try {
-			const res = await fetch(`/api/session/stats/history?page=${p}`, {
-				method: 'get',
-				headers: {
-					'Accept': 'application/json',
-					'Content-Type': 'application/json',
-				},
-			});
-
-			const data = await res.json();
-			setHistory(data.history);
-			setPage(p);
-		} catch (err) {
-			return { props: { users: [], error: 'API server currently unavailable' } };
-		}
 	}
 
 	async function updateEndpoint(e: SyntheticEvent, name: string) {
@@ -118,18 +89,6 @@ export default function AdminEndpoints({ endpointData, history: h, error, total,
 		}
 	}
 
-	async function deleteEndpoint(id: number) {
-		await fetch('/api/admin/history', {
-			method: 'DELETE',
-			headers: {
-				'Accept': 'application/json',
-				'Content-Type': 'application/json',
-			},
-			body: JSON.stringify({
-				id,
-			}),
-		});
-	}
 
 	return (
 		<AdminLayout user={session.user}>
@@ -158,14 +117,10 @@ export default function AdminEndpoints({ endpointData, history: h, error, total,
 						<InfoPill title={'Last 24 hours'} text={`${last24hours}`} icon={faClock} />
 					</div>
 				</div>
-
 				<div className="row">
 					<div className="col-xl-6 col-lg-12">
-						<div className="card shadow mb-4">
-							<div className="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-								<h5 className="m-0 fw-bold text-primary">Total endpoints ({endpointData.length}):</h5>
-							</div>
-							<div className="card-body table-responsive">
+						<CollapsibleCard id={'Total_endpoints'} header={<h5 className="m-0 fw-bold text-primary">Total endpoints ({endpointData.length}):</h5>}>
+							<div className="table-responsive">
 								<div className="input-group mb-3">
 									<input type="text" className="form-control" placeholder="Endpoint" aria-label="Endpoint" aria-describedby="basic-addon2" onChange={(e) => searchEndpoint(e)}/>
 									<span className="input-group-text" id="basic-addon2">
@@ -223,67 +178,10 @@ export default function AdminEndpoints({ endpointData, history: h, error, total,
 									</tbody>
 								</table>
 							</div>
-						</div>
+						</CollapsibleCard>
 					</div>
 					<div className="col-xl-6 col-lg-12">
-						<div className="card shadow mb-4">
-							<div className="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-								<h5 className="m-0 fw-bold text-primary">Total API usage ({total}):</h5>
-							</div>
-							<div className="card-body table-responsive">
-								<div className="input-group mb-3">
-									<input type="text" className="form-control" placeholder="Endpoint" aria-label="Endpoint" aria-describedby="basic-addon2" onChange={updateDOM}/>
-									<span className="input-group-text" id="basic-addon2">
-										<FontAwesomeIcon icon={faSearch} />
-									</span>
-								</div>
-								{history.map(hi => <Tooltip key={hi.id} id={`${hi.id}`} place="top" content={`${hi.statusCode}`} variant="dark" />)}
-								<table className="table">
-									<thead>
-										<tr>
-											<th scope="col">UserID</th>
-											<th scope="col">Endpoint</th>
-											<th scope="col">Accessed at</th>
-											<th scope="col">Status</th>
-											<th scope="col">Delete</th>
-										</tr>
-									</thead>
-									<tbody>
-										{history.map(hi => (
-											<tr key={hi.id}>
-												<th scope="row">{hi.userId}</th>
-												<td>{hi.endpointName}</td>
-												<td>{new Date(hi.createdAt).toDateString()} {new Date(hi.createdAt).toLocaleTimeString('en-US')}</td>
-												<td style={{ textAlign: 'center' }} data-tooltip-id={`${hi.id}`}>
-													<FontAwesomeIcon icon={faCircle} style={{ color: getStatusColour(hi.statusCode) }}/>
-												</td>
-												<td>
-													<input className="form-check-input" type="checkbox" id="flexCheckChecked" onClick={() => deleteEndpoint(hi.id)} />
-												</td>
-											</tr>
-										))}
-									</tbody>
-								</table>
-								<nav aria-label="Page navigation example">
-									<p style={{ display: 'inline' }}>Showing results {(page < 1 ? 0 : page) * 50} - {(page * 50) + (history.length < 50 ? history.length : 50)} of {total}</p>
-									<ul className="pagination justify-content-center">
-										<li className="page-item">
-											<a className="page-link" onClick={() => fetchHistory(page == 0 ? page : page - 1)} href="#">
-												<FontAwesomeIcon icon={faAnglesLeft} />
-											</a>
-										</li>
-										<li className="page-item">
-											<p className="page-link">{page}</p>
-										</li>
-										<li className="page-item">
-											<a className="page-link" onClick={() => fetchHistory(endpointData.length >= 50 ? page + 1 : page)} href="#">
-												<FontAwesomeIcon icon={faAnglesRight} />
-											</a>
-										</li>
-									</ul>
-								</nav>
-							</div>
-						</div>
+						<HistoryListCard />
 					</div>
 				</div>
 			</div>
@@ -302,14 +200,13 @@ export async function getServerSideProps(ctx: GetServerSidePropsContext) {
   			},
 		};
 
-		const [res1, res2, res3, res4] = await Promise.all([fetch(`${process.env.BACKEND_URL}api/session/admin/endpoints/json`, obj),
-			fetch(`${process.env.BACKEND_URL}api/session/stats/history`, obj),
-			fetch(`${process.env.BACKEND_URL}api/session/admin/history?time=month`, obj),
-			fetch(`${process.env.BACKEND_URL}api/session/admin/history?time=day`, obj)]);
+		const [res1, res3, res4] = await Promise.all([fetch(`${process.env.BACKEND_URL}api/session/admin/endpoints/json`, obj),
+			fetch(`${process.env.BACKEND_URL}api/session/admin/history/growth?time=month`, obj),
+			fetch(`${process.env.BACKEND_URL}api/session/admin/history/growth?time=day`, obj)]);
 
-		const [{ endpoints: endpointData }, { history, total }, { count }, { count: last24hours }] = await Promise.all([res1.json(), res2.json(), res3.json(), res4.json()]);
+		const [{ endpoints: endpointData }, { count }, { count: last24hours }] = await Promise.all([res1.json(), res3.json(), res4.json()]);
 
-		return { props: { endpointData: (endpointData as Array<Endpoint>).filter(e => !e.name.startsWith('/api/session/admin')), history, total, last30daysCount: count, last24hours } };
+		return { props: { endpointData: (endpointData as Array<Endpoint>).filter(e => !e.name.startsWith('/api/session/admin')), last30daysCount: count, last24hours } };
 	} catch (err) {
 		return { props: { endpointData: [], history: [], total: 0, error: 'API server currently unavailable' } };
 	}
