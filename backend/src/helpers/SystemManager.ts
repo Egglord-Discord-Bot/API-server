@@ -16,6 +16,10 @@ export default class SystemManager extends SystemHistory {
 		this.init();
 	}
 
+	/**
+		* Create an endpoint data
+		* @returns The new endpoint data
+	*/
 	async calculateNetworkUsage() {
 		// Set initial used network bytes count
 		if (this.used_bytes <= 0) this.used_bytes = (await si.networkStats()).reduce((prev, current) => prev + current.rx_bytes, 0);
@@ -27,6 +31,10 @@ export default class SystemManager extends SystemHistory {
 		return this.bandwidth;
 	}
 
+	/**
+		* Get the current memory usage and the system max memory
+		* @returns The current memory usage and max memory
+	*/
 	calculateMemoryUsage() {
 		return {
 			USAGE: Number(process.memoryUsage().heapUsed.toFixed(2)),
@@ -34,13 +42,20 @@ export default class SystemManager extends SystemHistory {
 		};
 	}
 
+	/**
+		* Get the current CPU load
+		* @returns The CPU load
+	*/
 	async calculateCPUUsage() {
 		return Math.round(await si.currentLoad().then(l => l.currentLoad));
 	}
 
+	/**
+		* Calculate the current disk usage and system max
+		* @returns The current disk usage and system max
+	*/
 	async calculateDiskUsage() {
 		const platform = process.platform;
-
 		if (platform == 'win32') {
 			const { stdout } = await cmd('wmic logicaldisk get size,freespace,caption');
 			const parsed = stdout.trim().split('\n').slice(1).map(line => line.trim().split(/\s+(?=[\d/])/));
@@ -61,6 +76,9 @@ export default class SystemManager extends SystemHistory {
 		}
 	}
 
+	/**
+		* Save the memory and CPU usage to database
+	*/
 	async saveSystemHistory() {
 		const mem = this.calculateMemoryUsage();
 		const cpu = await this.calculateCPUUsage();
@@ -72,9 +90,12 @@ export default class SystemManager extends SystemHistory {
 		setInterval(async () => {
 			// Save the new data
 			await this.saveSystemHistory();
-
-			// Delete if older than 7 days
-			await this.delete();
 		}, 60_000);
+
+		// Check every 5 hours
+		setInterval(async () => {
+			await this.delete();
+			// Delete if older than 7 days
+		}, 5 * 3600000);
 	}
 }
