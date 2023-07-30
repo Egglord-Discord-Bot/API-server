@@ -7,6 +7,8 @@ const router = Router();
 
 type orderList = 'asc' | 'desc' | undefined
 type orderType = 'joinedAt' | 'requests' | undefined
+type countEnum = { [key: string | number]: number }
+
 export function run(client: Client) {
 
 	router.get('/', isAdmin, async (req, res) => {
@@ -41,19 +43,47 @@ export function run(client: Client) {
 		}
 	});
 
-	router.get('/history', isAdmin, async (_req, res) => {
-		type countEnum = { [key: string]: number }
-		const months: countEnum = { 'January': 0, 'February': 0, 'March': 0, 'April': 0, 'May': 0, 'June': 0, 'July': 0, 'August': 0, 'September': 0, 'October': 0, 'November': 0, 'December': 0 };
-		const d = new Date();
-		d.setDate(1);
-		for (let i = 0; i <= 11; i++) {
-			const y = Object.keys(months).at(d.getMonth());
-			// IF i is bigger than the current month then it has reached the previous year
-			const year = new Date().getFullYear() - (new Date().getMonth() < i ? 1 : 0);
-			if (y !== undefined) months[y] = await client.UserManager.fetchUsersByMonth(d.getMonth(), year);
-			d.setMonth(d.getMonth() - 1);
+	type frameEnum = 'yearly' | 'monthly' | 'daily';
+	router.get('/growth', isAdmin, async (req, res) => {
+		// Get time frame and validate it
+		const frame = req.query.frame as frameEnum;
+		if (!frame || !['yearly', 'monthly', 'daily'].includes(frame)) return Error.InvalidValue(res, 'frame', ['yearly', 'monthly', 'daily']);
+
+		switch(frame) {
+			case 'yearly': {
+				// Get last 10 year
+				const years: countEnum = {};
+				for (let i = 0; i <= 9; i++) {
+					const users = await client.UserManager.fetchUserCountByYear(new Date().getFullYear() - i);
+					years[new Date().getFullYear() - i] = users;
+				}
+				return res.json({ years });
+			}
+			case 'monthly': {
+				// Get last 12 months
+				const months: countEnum = { 'January': 0, 'February': 0, 'March': 0, 'April': 0, 'May': 0, 'June': 0, 'July': 0, 'August': 0, 'September': 0, 'October': 0, 'November': 0, 'December': 0 };
+				const d = new Date();
+				d.setDate(1);
+				for (let i = 0; i <= 11; i++) {
+					const y = Object.keys(months).at(d.getMonth());
+					// IF i is bigger than the current month then it has reached the previous year
+					const year = new Date().getFullYear() - (new Date().getMonth() < i ? 1 : 0);
+					if (y !== undefined) months[y] = await client.UserManager.fetchUserCountByMonth(d.getMonth(), year);
+					d.setMonth(d.getMonth() - 1);
+				}
+				return res.json({ months });
+			}
+			case 'daily': {
+				// Get last 14 days
+				const days: countEnum = {};
+				for (let i = 0; i <= 14; i++) {
+					const users = await client.UserManager.fetchUserCountByDate(new Date().getDate() - i, new Date().getMonth(), new Date().getFullYear());
+					days[`${new Date().getFullYear()}-${new Date().getMonth()}-${new Date().getDate() - i}`] = users;
+				}
+
+				return res.json({ days });
+			}
 		}
-		return res.json({ months });
 	});
 
 	router.get('/search', isAdmin, async (req, res) => {

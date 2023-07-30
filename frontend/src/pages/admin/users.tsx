@@ -150,7 +150,7 @@ export async function getServerSideProps(ctx: GetServerSidePropsContext) {
 		};
 
 		const [res1, res2] = await Promise.all([fetch(`${process.env.BACKEND_URL}api/session/admin/users/stats`, obj),
-			fetch(`${process.env.BACKEND_URL}api/session/admin/users/history`, obj)]);
+			fetch(`${process.env.BACKEND_URL}api/session/admin/users/growth?frame=monthly`, obj)]);
 
 		const { total, admin, premium, block } = await res1.json();
 		const { months } = await res2.json();

@@ -9,7 +9,6 @@ interface ExtendedUser extends User {
 	}
 }
 
-
 export default class UserManager {
 	size: number;
 	cachedUsers: Array<User>;
@@ -26,7 +25,7 @@ export default class UserManager {
 		* @param {createUser} data The user class
 		* @returns The new user
 	*/
-	async create(data: createUser) {
+	async create(data: createUser): Promise<User> {
 		this.size++;
 		return client.user.create({
 			data: {
@@ -46,7 +45,7 @@ export default class UserManager {
 		* @param {number} id The ID of the user
 		* @returns The deleted user
 	*/
-	async delete(id: number) {
+	async delete(id: number): Promise<User> {
 		this.size--;
 		return client.user.delete({
 			where: { id },
@@ -58,7 +57,7 @@ export default class UserManager {
 		* @param {updateUser} data The data for updating user
 		* @returns The new user
 	*/
-	async update(data: updateUser) {
+	async update(data: updateUser): Promise<User> {
 		return client.user.update({
 			where: {
 				id: data.id,
@@ -122,18 +121,53 @@ export default class UserManager {
     * @param {Param} id The ID of the user
     * @returns A user
   */
-	async fetchByParam({ id, token }: userUnqiueParam) {
+	async fetchByParam({ id, token }: userUnqiueParam): Promise<User| null> {
 		return client.user.findUnique({
 			where: { id, token },
 		});
 	}
 
 	/**
-		* Fetch a specific's user total history count
-		* @param {number} month The userId for getting their user history count
-		* @returns The total number of entries by a user
+		* Fetch the total number of users who joined in a certain year
+		* @param {number} year The year to search in
+		* @returns The number of users
 	*/
-	async fetchUsersByMonth(month: number, year = new Date().getFullYear()) {
+	async fetchUserCountByYear(year = new Date().getFullYear()) {
+		return client.user.count({
+			where: {
+				createdAt:{
+					gte: new Date(year, 0),
+					lte: new Date(year + 1, 0),
+				},
+			},
+		});
+	}
+
+	/**
+		* Fetch the total number of users who joined on a certain date
+		* @param {number} day The day to search on
+		* @param {number} month The month to search on
+		* @param {number} year The year to search on
+		* @returns The number of users
+	*/
+	async fetchUserCountByDate(day: number, month: number, year: number) {
+		return client.user.count({
+			where: {
+				createdAt: {
+					gte: new Date(year, month, day),
+					lte: new Date(year, month, day + 1),
+				},
+			},
+		});
+	}
+
+	/**
+		* Fetch the total number of users who joined in a certain month
+		* @param {number} month The month to search in
+		* @param {number?} year The year to search in
+		* @returns The number of users
+	*/
+	async fetchUserCountByMonth(month: number, year = new Date().getFullYear()) {
 		return client.user.count({
 			where: {
 				createdAt: {
@@ -145,11 +179,12 @@ export default class UserManager {
 	}
 
 	/**
-		* Fetch a specific's user total history count
-		* @param {string} name The userId for getting their user history count
+		* Fetch users based on their name
+		* @param {string} name The name to search by
+		* @param {boolean} includeHistory Whether or not to include their history count
 		* @returns An array of users
 	*/
-	async fetchByUsername(name: string, includeHistory = true) {
+	async fetchByUsername(name: string, includeHistory = true): Promise<ExtendedUser[]> {
 		return this._removeToken(await client.user.findMany({
 			where: {
 				username: {
@@ -165,11 +200,15 @@ export default class UserManager {
 	}
 
 	/**
-    * Extract the user from the request (if any)
-    * @param {pagination} page The ID of the user
+    * Fetch a list of the users based on the params
+    * @param {fetchUsersParam} filters The filters to fetch users
+    * @param {number} filters.page The page index
+    * @param {string} filters.orderDir The direction of sort
+    * @param {string} filters.orderType The property to sort by
+    * @param {boolean} filters.includeHistory If the history count should be included
     * @returns An array of users
   */
-	async fetchUsers({ page, orderDir = 'desc', orderType = 'joinedAt', includeHistory = true }: fetchUsersParam) {
+	async fetchUsers({ page, orderDir = 'desc', orderType = 'joinedAt', includeHistory = true }: fetchUsersParam): Promise<ExtendedUser[]> {
 		let users = [];
 		if (orderType == 'requests') {
 			users = await client.user.findMany({
@@ -206,19 +245,20 @@ export default class UserManager {
 	}
 
 	/**
-		* Extract the user from the request (if any)
+		* Fetch all users, mainly just for downloading
 		* @returns An array of users
 	*/
-	async fetchAll() {
-		return client.user.findMany();
+	async fetchAll(removeToken = false): Promise<ExtendedUser[]> {
+		const users = await client.user.findMany();
+		return (removeToken) ? this._removeToken(users) : users;
 	}
 
 	/**
-		* Extract the user from the request (if any)
-		* @param {Array<User>} users The ID of the user
+		* Strip the token from the users
+		* @param {Array<User>} users The array of users
 		* @returns An array of users
 	*/
-	private _removeToken(users: Array<ExtendedUser>) {
+	private _removeToken(users: Array<ExtendedUser>): ExtendedUser[] {
 		return users.map(u => ({ ...u, token: '' }));
 	}
 }
