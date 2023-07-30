@@ -149,11 +149,16 @@ export default class UserManager {
 		* @param {string} name The userId for getting their user history count
 		* @returns An array of users
 	*/
-	async fetchByUsername(name: string) {
+	async fetchByUsername(name: string, includeHistory = true) {
 		return this._removeToken(await client.user.findMany({
 			where: {
 				username: {
 					startsWith: name,
+				},
+			},
+			include: {
+				_count: {
+					select: { history: includeHistory },
 				},
 			},
 		}));
