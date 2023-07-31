@@ -34,7 +34,7 @@ export default function HistoryListCard() {
 		});
 	}
 
-	async function updateDOM(e: SyntheticEvent) {
+	async function searchByName(e: SyntheticEvent) {
 		const { value } = (e.target as HTMLInputElement);
 		const query = value.length > 0 ? `/search?name=${value}` : '';
 		try {
@@ -92,10 +92,10 @@ export default function HistoryListCard() {
 	}
 
 	return (
-		<CollapsibleCard id={'Total_API_Usage'} header={	<h5 className="m-0 fw-bold text-primary">Total API usage ({total}):</h5>}>
-			<>
+		<CollapsibleCard id={'Total_API_Usage'} header={<h5 className="m-0 fw-bold text-primary">Total API Requests ({total}):</h5>}>
+			<div className="table-responsive">
 				<div className="input-group mb-3">
-					<input type="text" className="form-control" placeholder="Endpoint" aria-label="Endpoint" aria-describedby="basic-addon2" onChange={updateDOM}/>
+					<input type="text" className="form-control" placeholder="Endpoint" aria-label="Endpoint" aria-describedby="basic-addon2" onChange={(e) => searchByName(e)}/>
 					<span className="input-group-text" id="basic-addon2">
 						<FontAwesomeIcon icon={faSearch} />
 					</span>
@@ -120,19 +120,19 @@ export default function HistoryListCard() {
 									)}
 								</div>
 							</th>
-							<th scope="col">Delete</th>
+							<th scope="col" className="d-none d-lg-table-cell">Delete</th>
 						</tr>
 					</thead>
 					<tbody>
 						{history.map(hi => (
 							<tr key={hi.id}>
-								<th scope="row">{hi.userId}</th>
-								<td>{hi.endpointName}</td>
-								<td>{new Date(hi.createdAt).toDateString()} {new Date(hi.createdAt).toLocaleTimeString('en-US')}</td>
-								<td style={{ textAlign: 'center' }} data-tooltip-id={`${hi.id}`}>
+								<th scope="col">{hi.userId}</th>
+								<td scope="col">{hi.endpointName}</td>
+								<td scope="col">{new Date(hi.createdAt).toLocaleDateString('en-GB', { year: 'numeric', month: 'short', day: 'numeric' })} {new Date(hi.createdAt).toLocaleTimeString('en-GB')}</td>
+								<td scope="col" style={{ textAlign: 'center' }} data-tooltip-id={`${hi.id}`}>
 									<FontAwesomeIcon icon={faCircle} style={{ color: getStatusColour(hi.statusCode) }}/>
 								</td>
-								<td>
+								<td scope="col" className="d-none d-lg-table-cell">
 									<input className="form-check-input" type="checkbox" id="flexCheckChecked" onClick={() => deleteEndpoint(hi.id)} />
 								</td>
 							</tr>
@@ -157,7 +157,7 @@ export default function HistoryListCard() {
 						</li>
 					</ul>
 				</nav>
-			</>
+			</div>
 		</CollapsibleCard>
 	);
 }

@@ -7,6 +7,7 @@ import Modal from './Modal';
 import UserListCard from './Cards/UserListCard';
 import CollapsibleCard from './Cards/CollapsibleCard';
 import HistoryListCard from './Cards/HistoryListCard';
+import EndpointListCard from './Cards/EndpointListCard';
 
 // Dashboard folder
 import InfoPillProgress from './dashboard/infoPill-progress';
@@ -18,4 +19,8 @@ import Footer from './navbar/footer';
 import Navbar from './navbar/main';
 import Sidebar from './navbar/sidebar';
 
-export { Error, Header, ParamBuilder, Modal, UserListCard, CollapsibleCard, HistoryListCard, InfoPillProgress, InfoPill, AdminNavbar, Footer, Navbar, Sidebar };
+// Graph folder
+import PieChart from './Graphs/Pie';
+import LineGraph from './Graphs/Line';
+
+export { Error, Header, ParamBuilder, Modal, UserListCard, CollapsibleCard, HistoryListCard, EndpointListCard, InfoPillProgress, InfoPill, AdminNavbar, Footer, Navbar, Sidebar, PieChart, LineGraph };

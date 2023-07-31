@@ -1,9 +1,9 @@
-import { Error, InfoPill, UserListCard, CollapsibleCard } from '@/components';
+import { Error, InfoPill, UserListCard, CollapsibleCard, PieChart, LineGraph } from '@/components';
 import AdminLayout from '@/layouts/Admin';
 
 import { useSession } from 'next-auth/react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { Pie, Line } from 'react-chartjs-2';
+import type { ChartData, CoreChartOptions } from 'chart.js';
 import { faUsers, faBan, faDollarSign, faUserCheck, faDownload } from '@fortawesome/free-solid-svg-icons';
 import { Chart as ChartJS, ArcElement, Tooltip, Legend,	CategoryScale, LinearScale, PointElement, LineElement, Title } from 'chart.js';
 
@@ -43,7 +43,7 @@ export default function AdminUsers({ error, total, admin, premium, block, months
 				borderWidth: 1,
 			},
 		],
-	};
+	} as ChartData<'pie'>;
 
 	const usage = [];
 	const monthName = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
@@ -65,7 +65,7 @@ export default function AdminUsers({ error, total, admin, premium, block, months
 				backgroundColor: 'rgba(255, 99, 132, 0.5)',
 			},
 		],
-	};
+	} as ChartData<'line'>;
 
 	// Allow admin to download user JSON file
 	async function download() {
@@ -129,12 +129,12 @@ export default function AdminUsers({ error, total, admin, premium, block, months
 				<div className="row">
 					<div className="col-xl-8 col-lg-7" style={{ paddingBottom: '12px' }}>
 						<CollapsibleCard id={'user_growth'} header={<h4 className="m-0 font-weight-bold text-primary">User Growth</h4>}>
-							<Line data={userJoinData} options={{ responsive: true, maintainAspectRatio: false, aspectRatio:2 }} style={{ height: '400px' }}/>
+							<LineGraph data={userJoinData} options={{ responsive: true, maintainAspectRatio: false, aspectRatio:2 } as CoreChartOptions<'line'>} style={{ height: '400px' }}/>
 						</CollapsibleCard>
 					</div>
 					<div className="col-xl-4 col-lg-5" style={{ paddingBottom: '12px' }}>
 						<CollapsibleCard id={'User_Make-up'} header={<h4 className="m-0 font-weight-bold text-primary">User Make-up</h4>}>
-							<Pie data={graphData} style={{ maxHeight: '400px' }} />
+							<PieChart data={graphData} style={{ maxHeight: '400px' }} />
 						</CollapsibleCard>
 					</div>
 				</div>

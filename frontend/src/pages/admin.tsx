@@ -1,17 +1,16 @@
-import { InfoPill, CollapsibleCard } from '../components';
+import { InfoPill, CollapsibleCard, PieChart, LineGraph } from '../components';
 import AdminLayout from '../layouts/Admin';
 
 import { nFormatter, formatBytes } from '../utils/functions';
-import { Pie, Line } from 'react-chartjs-2';
+import type { ChartData, CoreChartOptions } from 'chart.js';
 import { useSession } from 'next-auth/react';
 import { Tooltip } from 'react-tooltip';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faDownload, faSignal, faUsers, faClock, faMemory } from '@fortawesome/free-solid-svg-icons';
-import { Chart as ChartJS, ArcElement, Tooltip as t, Legend,	CategoryScale, LinearScale, PointElement, LineElement, Title } from 'chart.js';
+import axios from 'axios';
 
 import type { User } from '../types/next-auth';
 import type { GetServerSidePropsContext, Endpoint, ResponseCode } from '../types';
-ChartJS.register(ArcElement, t, Legend, CategoryScale, LinearScale, PointElement, LineElement, Title);
 
 type countEnum = { [key: string]: number }
 interface Props {
@@ -49,7 +48,7 @@ export default function Admin(data: Props) {
 				backgroundColor: 'rgba(255, 99, 132, 0.5)',
 			},
 		],
-	};
+	} as ChartData<'line'>;
 
 	const top20Endpoints = data.mostAccessedEndpoints.filter(e => e._count?.history ?? 0 > 0).sort((a, b) =>(a._count?.history ?? 0) - (b._count?.history ?? 0));
 	const mostAccessEndp = {
@@ -70,7 +69,7 @@ export default function Admin(data: Props) {
 				borderWidth: 1,
 			},
 		],
-	};
+	} as ChartData<'pie'>;
 
 	async function download() {
 		try {
@@ -121,12 +120,12 @@ export default function Admin(data: Props) {
 				<div className="row">
 					<div className="col-xl-8 col-lg-12" style={{ paddingBottom: '12px' }}>
 						<CollapsibleCard id={'Total_API_usage'} header={<h5 className="m-0 fw-bold text-primary">Total API usage (Year)</h5>}>
-							<Line data={historyAccessed} options={{ responsive: true, maintainAspectRatio: false, aspectRatio:2 }} style={{ height: '400px' }}/>
+							<LineGraph data={historyAccessed} options={{ responsive: true, maintainAspectRatio: false, aspectRatio:2 } as CoreChartOptions<'line'>} style={{ height: '400px' }}/>
 						</CollapsibleCard>
 					</div>
 					<div className="col-xl-4 col-lg-12" style={{ paddingBottom: '12px' }}>
 						<CollapsibleCard id={'Top_20_Accessed'} header={<h5 className="m-0 fw-bold text-primary">Top 20 Accessed Endpoints</h5>}>
-							<Pie data={mostAccessEndp} options={{ responsive: true }} style={{ maxHeight: '400px' }}/>
+							<PieChart data={mostAccessEndp} options={{ responsive: true } as CoreChartOptions<'pie'>} style={{ maxHeight: '400px' }}/>
 						</CollapsibleCard>
 					</div>
 				</div>
@@ -153,21 +152,17 @@ export default function Admin(data: Props) {
 
 // Fetch admin API usage
 export async function getServerSideProps(ctx: GetServerSidePropsContext) {
+	const headers = {
+		headers: {
+			cookie: ctx.req.headers.cookie,
+		},
+	};
+
 	try {
 		// Fetch data from API
-		const obj = {
-			method: 'get',
-			headers: {
-				'cookie': ctx.req.headers.cookie as string,
-			},
-		};
-		const [res1, res2, res3] = await Promise.all([fetch(`${process.env.BACKEND_URL}api/session/admin/json`, obj),
-			fetch(`${process.env.BACKEND_URL}api/session/admin/system`, obj),
-			fetch(`${process.env.BACKEND_URL}api/session/admin/history?time=year`, obj),
-		]);
-		const { historyCount, userCount, responseCodes, mostAccessedEndpoints } = await res1.json();
-		const { uptime, current: { memory: { USAGE } } } = await res2.json();
-		const { months } = await res3.json();
+		const { data: { historyCount, userCount, responseCodes, mostAccessedEndpoints } } = await axios.get(`${process.env.BACKEND_URL}api/session/admin/json`, headers);
+		const { data: { uptime, current: { memory: { USAGE } } } } = await axios.get(`${process.env.BACKEND_URL}api/session/admin/system`, headers);
+		const { data: { months } } = await axios.get(`${process.env.BACKEND_URL}api/session/admin/history/growth?frame=monthly`, headers);
 
 		return { props: { count: historyCount, responseCode: responseCodes, mostAccessedEndpoints, userCount, uptime, memoryUsage: USAGE, monthUsage: months } };
 	} catch (err) {

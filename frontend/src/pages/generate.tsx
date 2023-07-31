@@ -5,6 +5,7 @@ import { useSession } from 'next-auth/react';
 import { useState } from 'react';
 import Script from 'next/script';
 import Image from 'next/image';
+import axios from 'axios';
 
 import type { EndpointExtra, EndpointParam, GetServerSidePropsContext } from '../types';
 import type { ChangeEvent, FormEvent } from 'react';
@@ -100,13 +101,11 @@ export default function Home({ endpoints, error }: Props) {
 
 export async function getServerSideProps(ctx: GetServerSidePropsContext) {
 	try {
-		const res = await fetch(`${process.env.BACKEND_URL}api/session/admin/endpoints/json`, {
-			method: 'get',
+		const { data:{ endpoints: endpointData } } = await axios.get(`${process.env.BACKEND_URL}api/session/admin/endpoints/json`, {
 			headers: {
-				'cookie': ctx.req.headers.cookie as string,
+				cookie: ctx.req.headers.cookie as string,
 			},
 		});
-		const { endpoints: endpointData } = await res.json();
 		return { props: { endpoints: endpointData.filter((e: EndpointExtra) => e.data != null) } };
 	} catch (err) {
 		console.log(err);

@@ -1,9 +1,8 @@
 import MainLayout from '@/layouts/Main';
-
+import axios from 'axios';
 import Link from 'next/link';
 import { useSession } from 'next-auth/react';
 import { useEffect, useState } from 'react';
-import { sendRequest } from '@/utils/functions';
 interface Props {
 	userCount: number
   endpointCount: number
@@ -12,13 +11,12 @@ interface Props {
 
 export default function Home() {
 	const { data: session, status } = useSession();
-	const [data, setData] = useState<Props>({ userCount: 0, endpointCount: 0, historyCount: 0 });
+	const [{ userCount, endpointCount, historyCount }, setData] = useState<Props>({ userCount: 0, endpointCount: 0, historyCount: 0 });
 
 	useEffect(() => {
 		(async () => {
-			const t = await sendRequest('session/stats');
-			console.log(t);
-			setData(t);
+			const { data } = await axios.get('/api/session/stats');
+			setData(data);
 		})();
 	}, []);
 
@@ -46,21 +44,21 @@ export default function Home() {
 								<div className="col-lg-3 col-md-6">
 									<div className="count-box">
 										<i className="bi bi-emoji-smile"></i>
-										<span data-purecounter-start="0" data-purecounter-end={data.userCount} data-purecounter-duration="1" className="purecounter">{data.userCount}</span>
+										<span data-purecounter-start="0" data-purecounter-end={userCount} data-purecounter-duration="1" className="purecounter">{userCount}</span>
 										<p>API Users</p>
 									</div>
 								</div>
 								<div className="col-lg-3 col-md-6 mt-5 mt-lg-0">
 									<div className="count-box">
 										<i className="bi bi-hdd"></i>
-										<span data-purecounter-start="0" data-purecounter-end={data.endpointCount} data-purecounter-duration="1" className="purecounter">{data.endpointCount}</span>
+										<span data-purecounter-start="0" data-purecounter-end={endpointCount} data-purecounter-duration="1" className="purecounter">{endpointCount}</span>
 										<p>Total API endpoints</p>
 									</div>
 								</div>
 								<div className="col-lg-3 col-md-6 mt-5 mt-lg-0">
 									<div className="count-box">
 										<i className="bi bi-hdd"></i>
-										<span data-purecounter-start="0" data-purecounter-end={data.historyCount} data-purecounter-duration="1" className="purecounter">{data.historyCount}</span>
+										<span data-purecounter-start="0" data-purecounter-end={historyCount} data-purecounter-duration="1" className="purecounter">{historyCount}</span>
 										<p>API requests recieved</p>
 									</div>
 								</div>

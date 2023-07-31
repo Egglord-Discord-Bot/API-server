@@ -27,14 +27,24 @@ export function run(client: Client) {
 		}
 	});
 
+	type frameEnum = 'yearly' | 'monthly' | 'daily' | 'hourly';
 	router.get('/growth', isAdmin, async (req, res) => {
 		type countEnum = { [key: string]: number }
-		const timeFrame = req.query.time as string;
-		if (!timeFrame) return Error.InvalidValue(res, 'timeFrame', ['year', 'month', 'day']);
+		const frame = req.query.frame as frameEnum;
+		if (!frame || !['yearly', 'monthly', 'daily', 'hourly'].includes(frame)) return Error.InvalidValue(res, 'frame', ['yearly', 'monthly', 'daily', 'hourly']);
 
-		switch (timeFrame) {
-			// Last year
-			case 'year': {
+		switch (frame) {
+			// Last 10 years
+			case 'yearly': {
+				const years: countEnum = {};
+				for (let i = 0; i <= 9; i++) {
+					const users = await client.UserHistoryManager.fetchHistoryCountByYear(new Date().getFullYear() - i);
+					years[new Date().getFullYear() - i] = users;
+				}
+				return res.json({ years });
+			}
+			// Last 12 months
+			case 'monthly': {
 				const months: countEnum = { 'January': 0, 'February': 0, 'March': 0, 'April': 0, 'May': 0, 'June': 0, 'July': 0, 'August': 0, 'September': 0, 'October': 0, 'November': 0, 'December': 0 };
 				const d = new Date();
 				d.setDate(1);
@@ -42,23 +52,28 @@ export function run(client: Client) {
 					const y = Object.keys(months).at(d.getMonth());
 					// IF i is bigger than the current month then it has reached the previous year
 					const year = new Date().getFullYear() - (new Date().getMonth() < i ? 1 : 0);
-					if (y !== undefined) months[y] = await client.UserHistoryManager.fetchEndpointsByMonth(d.getMonth(), year);
+					if (y !== undefined) months[y] = await client.UserHistoryManager.fetchHistoryCountByMonth(d.getMonth(), year);
 					d.setMonth(d.getMonth() - 1);
 				}
 				return res.json({ months });
 			}
-			// Last 30 days
-			case 'month': {
-				const count = await client.UserHistoryManager.fetchEndpointsbyLast30Days();
-				return res.json({ count });
+			// last 14 days
+			case 'daily': {
+				// Get last 14 days
+				const days: countEnum = {};
+				for (let i = 0; i <= 14; i++) {
+					days[`${new Date().getFullYear()}-${new Date().getMonth()}-${new Date().getDate() - i}`] = await client.UserHistoryManager.fetchHistoryCountByDate(new Date().getDate() - i, new Date().getMonth(), new Date().getFullYear());
+				}
+				return res.json({ days });
 			}
-			// last 24hours
-			case 'day': {
-				const count = await client.UserHistoryManager.fetchEndpointsbyLast24hours();
-				return res.json({ count });
+			// Last 24 hours
+			case 'hourly': {
+				const hours: countEnum = {};
+				for (let i = 0; i <= 24; i++) {
+					hours[`${new Date().getHours() - i}`] = await client.UserHistoryManager.fetchHistoryCountByHour(new Date().getHours() - i);
+				}
+				return res.json({ hours });
 			}
-			default:
-				return res.json({ months: [] });
 		}
 	});
 

@@ -138,11 +138,27 @@ export default class userHistoryManager {
 	}
 
 	/**
+		* Fetch the total number of requests that were made in a certain year
+		* @param {number} year The year to search in
+		* @returns The number of users
+	*/
+	async fetchHistoryCountByYear(year = new Date().getFullYear()) {
+		return client.userHistory.count({
+			where: {
+				createdAt:{
+					gte: new Date(year, 0),
+					lte: new Date(year + 1, 0),
+				},
+			},
+		});
+	}
+
+	/**
 		* Fetch a specific's user total history count
 		* @param {number} month The userId for getting their user history count
 		* @returns The total number of entries by a user
 	*/
-	async fetchEndpointsByMonth(month: number, year = new Date().getFullYear()) {
+	async fetchHistoryCountByMonth(month: number, year = new Date().getFullYear()) {
 		return client.userHistory.count({
 			where: {
 				createdAt: {
@@ -154,35 +170,42 @@ export default class userHistoryManager {
 	}
 
 	/**
-		* Fetch the total number of request in the last 30 days
-		* @returns number
+		* Fetch the total number of requests that were made on a certain date
+		* @param {number} day The day to search on
+		* @param {number} month The month to search on
+		* @param {number} year The year to search on
+		* @returns The number of users
 	*/
-	async fetchEndpointsbyLast30Days() {
-		const daysAgo30 = Date.now() - (30 * 24 * 60 * 60 * 1000);
+	async fetchHistoryCountByDate(day: number, month: number, year: number) {
 		return client.userHistory.count({
 			where: {
 				createdAt: {
-					gte: new Date(daysAgo30).toISOString(),
+					gte: new Date(year, month, day),
+					lte: new Date(year, month, day + 1),
 				},
 			},
 		});
 	}
 
 	/**
-		* Fetch the total number of request in the last 24 hours
-		* @returns number
+		* Fetch the total number of requests that were made on a certain date
+		* @param {number} hour The hour to search on
+		* @param {number} day The day to search on
+		* @param {number} month The month to search on
+		* @param {number} year The year to search on
+		* @returns The number of users
 	*/
-	async fetchEndpointsbyLast24hours() {
-		const hoursAgo24 = Date.now() - (24 * 60 * 60 * 1000);
+	async fetchHistoryCountByHour(hour: number, day = new Date().getDate(), month = new Date().getMonth(), year = new Date().getFullYear()) {
+		console.log(new Date(year, month, day, hour));
 		return client.userHistory.count({
 			where: {
 				createdAt: {
-					gte: new Date(hoursAgo24).toISOString(),
+					gte: new Date(year, month, day, hour),
+					lte: new Date(year, month, day, hour + 1),
 				},
 			},
 		});
 	}
-
 	/**
 		* Returns the total number of entries
 		* @returns The total number of entries

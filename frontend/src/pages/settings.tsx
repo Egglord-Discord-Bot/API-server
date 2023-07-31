@@ -1,17 +1,15 @@
-import { Header, Navbar } from '@/components';
+import { Header, Navbar, PieChart } from '@/components';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEye, faEyeSlash, faAnglesLeft, faAnglesRight, faEllipsis, faCircle } from '@fortawesome/free-solid-svg-icons';
 import { useSession } from 'next-auth/react';
-import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
-import { Pie } from 'react-chartjs-2';
 import { useState, useEffect } from 'react';
-import { getStatusColour, sendRequest } from '@/utils/functions';
-
+import { getStatusColour } from '@/utils/functions';
+import axios from 'axios';
 import type { UserHistory } from '@/types';
 import type { MouseEvent } from 'react';
+import type { ChartData } from 'chart.js';
 import { Tooltip as ReactToolTip } from 'react-tooltip';
 import 'react-tooltip/dist/react-tooltip.css';
-ChartJS.register(ArcElement, Tooltip, Legend);
 
 export default function Settings() {
 	const { data: session, status } = useSession();
@@ -30,15 +28,15 @@ export default function Settings() {
 
 		// Fetch user's history
 		(async () => {
-			const t = await sendRequest('session/history');
-			setHistory(t.history);
-			setTotal(t.total);
+			const { data } = await axios.get('/api/session/history');
+			setHistory(data.history);
+			setTotal(data.total);
 		})();
 
 		// Fetch users graph
 		(async () => {
-			const t = await sendRequest('session/history/graph');
-			setGraph(t.data);
+			const { data } = await axios.get('/api/session/history/graph');
+			setGraph(data.data);
 		})();
 
 	}, [status, session?.user.token]);
@@ -93,14 +91,8 @@ export default function Settings() {
 
 	async function fetchHistory(p: number) {
 		try {
-			const res = await fetch(`/api/session/history?page=${p}`, {
-				method: 'get',
-				headers: {
-					'Accept': 'application/json',
-					'Content-Type': 'application/json',
-				},
-			});
-			setHistory((await res.json()).history);
+			const { data } = await axios.get(`/api/session/history?page=${p}`);
+			setHistory(data.history);
 			setPage(p);
 		} catch (err) {
 			console.log(err);
@@ -110,14 +102,8 @@ export default function Settings() {
 	async function resetToken(e: MouseEvent<HTMLButtonElement>) {
 		e.preventDefault();
 		try {
-			const res = await fetch('/api/session/regenerate', {
-				method: 'POST',
-				headers: {
-					'Accept': 'application/json',
-					'Content-Type': 'application/json',
-				},
-			});
-			setToken((await res.json()).token);
+			const { data } = await axios.post('/api/session/regenerate');
+			setToken(data.token);
 		} catch (err) {
 			console.log(err);
 		}
@@ -142,7 +128,7 @@ export default function Settings() {
 				borderWidth: 1,
 			},
 		],
-	};
+	} as ChartData<'pie'>;
 
 	return (
 		<>
@@ -186,7 +172,7 @@ export default function Settings() {
 								</a>
 							</div>
 							<div className="card-body collapse show" id="collapseOne">
-								<Pie data={graphData} />
+								<PieChart data={graphData} />
 							</div>
 						</div>
 					</div>

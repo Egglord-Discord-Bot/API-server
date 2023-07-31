@@ -1,5 +1,5 @@
 import MainLayout from '../layouts/Main';
-
+import axios from 'axios';
 import { useSession } from 'next-auth/react';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -81,7 +81,7 @@ export default function Docs({ endpoints }: Props) {
 															</thead>
 															<tbody>
 																{ [[200, 'OK'], [400, 'Bad Request'], [401, 'Unauthorized'], [403, 'Forbidden'], [404, 'Not Found'], [413, 'Payload Too Large'], [429, 'Too many requests'], [500, 'Internal Server Error'], [501, 'Not Implemented'], [502, 'Bad Gateway'], [503, 'Service Unavailable']].map(_ => (
-																	<tr key={null}>
+																	<tr key={_.at(0)}>
 																		<th scope="row">{_.at(0)}</th>
 																		<td>{_.at(1)}</td>
 																	</tr>
@@ -92,7 +92,7 @@ export default function Docs({ endpoints }: Props) {
 													<div className="tab-pane fade" id="v-pills-settings" role="tabpanel" aria-labelledby="v-pills-settings-tab">
 														<div className="accordion" id="accordionPanelsStayOpenExample">
 															{endpoints?.map(e => (
-																<div className="accordion-item" style={{ minWidth:'100%' }} key={e.data?.description}>
+																<div className="accordion-item" style={{ minWidth:'100%' }} key={e.name}>
 																	<h2 className="accordion-header" id={`panelsStayOpen-heading${endpoints.indexOf(e)}`}>
 																		<button className="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target={`#panelsStayOpen-collapse${endpoints.indexOf(e)}`} aria-expanded="true" aria-controls={`panelsStayOpen-collapse${endpoints.indexOf(e)}`}>
 																			{e.name}
@@ -152,17 +152,15 @@ export default function Docs({ endpoints }: Props) {
 	);
 }
 
-// Fetch endpoints
 export async function getServerSideProps(ctx: GetServerSidePropsContext) {
-
 	try {
-		const res = await fetch(`${process.env.BACKEND_URL}api/session/admin/endpoints/json`, {
-			method: 'get',
+		// Fetch endpoints for Docs
+		const { data: { endpoints: endpointData } } = await axios.get(`${process.env.BACKEND_URL}api/session/admin/endpoints/json`, {
 			headers: {
-				'cookie': ctx.req.headers.cookie as string,
+				cookie: ctx.req.headers.cookie as string,
 			},
 		});
-		const { endpoints: endpointData } = await res.json();
+
 		return { props: { endpoints: endpointData.filter((e: EndpointExtra) => e.data != null) } };
 	} catch (err) {
 		console.log(err);

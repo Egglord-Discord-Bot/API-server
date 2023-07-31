@@ -81,7 +81,7 @@ export function run() {
 	  * @openapi
 	  * /image/beautiful:
 	  *  get:
-	  *    description: Create an affect image
+	  *    description: Create an beautiful image
 	  *    parameters:
 	  *       - name: image1
 	  *         description: The URL of the image
