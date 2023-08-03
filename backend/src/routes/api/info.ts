@@ -6,7 +6,7 @@ import { Utils, Error } from '../../utils';
 import { RedditPost } from '../../types/socials/Reddit';
 import { translate } from '@vitalets/google-translate-api';
 import languages from '../../assets/JSON/languages.json';
-import radioStationData from '../../assets/JSON/radio_streams_yuck.json';
+import radioStationData from '../../assets/JSON/radio-stations.json';
 import type { RadioStation } from '../../types';
 import ud from 'urban-dictionary';
 import * as geniusLyrics from 'genius-lyrics';
@@ -71,7 +71,7 @@ export function run() {
 	  *    description: Get a list of radio stations
 	  *    parameters:
 		*       - name: search
- 	  *         description: The country to get COVID stats from
+ 	  *         description: The query to search for radio station
  	  *         required: true
  	  *         type: string
 	*/
@@ -79,7 +79,15 @@ export function run() {
 		const query = req.query.search as string;
 		if (!query) return Error.MissingQuery(res, 'search');
 
-		const stations = (radioStationData as Array<RadioStation>).filter(r => r.name.toLowerCase().startsWith(query.toLowerCase()));
+		// Check if it's a website or not
+		const WEBSITE_REGEX = /(https:\/\/www\.|http:\/\/www\.|https:\/\/|http:\/\/)?[a-zA-Z0-9]{2,}(\.[a-zA-Z0-9]{2,})(\.[a-zA-Z0-9]{2,})?/g,
+			stations = [];
+		if (WEBSITE_REGEX.test(query)) {
+			stations.push((radioStationData as Array<RadioStation>).filter(r => r.website == query));
+		} else {
+			stations.push((radioStationData as Array<RadioStation>).filter(r => r.name.toLowerCase().startsWith(query.toLowerCase())).slice(0, 10));
+		}
+
 		res.json({ stations });
 	});
 
