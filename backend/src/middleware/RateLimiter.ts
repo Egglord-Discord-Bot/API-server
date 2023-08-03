@@ -123,8 +123,11 @@ export default class RateLimit {
 		const possibleUser = await Utils.getSession(req);
 		if (possibleUser != null) return possibleUser.user as User;
 
-		// They might be trying to connect via their token
-		if (req.headers.authorization || req.query.token) return await this.client.UserManager.fetchByParam({ token: (req.headers.authorization || req.query.token) as string });
+		// They might be trying to connect via authorization header
+		if (req.headers.authorization) return this.client.UserManager.fetchByParam({ token: req.headers.authorization });
+
+		// They might be trying to connect via token query
+		if (req.query.token && typeof req.query.token == 'string') return this.client.UserManager.fetchByParam({ token: req.headers.authorization || req.query.token });
 
 		// They are not logged in at all
 		return null;
