@@ -233,6 +233,8 @@ export function run() {
 
 		try {
 			const search = await LyricsFetcher.songs.search(title);
+			if (search.length == 0) return Error.GenericError(res, `No lyrics could be found from a song called: ${title}.`);
+
 			const lyrics = await search[0].lyrics();
 			res.json({ data: {
 				name: search[0].title,
