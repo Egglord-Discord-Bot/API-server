@@ -6,6 +6,8 @@ import { Utils, Error } from '../../utils';
 import { RedditPost } from '../../types/socials/Reddit';
 import { translate } from '@vitalets/google-translate-api';
 import languages from '../../assets/JSON/languages.json';
+import radioStationData from '../../assets/JSON/radio_streams_yuck.json';
+import type { RadioStation } from '../../types';
 import ud from 'urban-dictionary';
 import * as geniusLyrics from 'genius-lyrics';
 import { parseString } from 'xml2js';
@@ -60,6 +62,25 @@ export function run() {
 		}
 
 		res.json({ data: data });
+	});
+
+	/**
+	  * @openapi
+	  * /info/radio:
+	  *  get:
+	  *    description: Get a list of radio stations
+	  *    parameters:
+		*       - name: search
+ 	  *         description: The country to get COVID stats from
+ 	  *         required: true
+ 	  *         type: string
+	*/
+	router.get('/radio', async (req, res) => {
+		const query = req.query.search as string;
+		if (!query) return Error.MissingQuery(res, 'search');
+
+		const stations = (radioStationData as Array<RadioStation>).filter(r => r.name.toLowerCase().startsWith(query.toLowerCase()));
+		res.json({ stations });
 	});
 
 	/**

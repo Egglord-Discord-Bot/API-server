@@ -49,3 +49,9 @@ export interface swaggerJsdocType {
   paths: swaggerPath
 	tags: Array<string>
 }
+
+export interface RadioStation {
+	website: string
+	name: string
+	audio: string
+}
