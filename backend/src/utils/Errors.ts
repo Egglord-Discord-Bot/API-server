@@ -28,7 +28,7 @@ export default class Error {
 	public static GenericError(res: Response, errMsg: string) {
 		return res
 			.status(500)
-			.json({ error: errMsg });
+			.json({ error: `${errMsg} If this error keeps occurring, please contact support.` });
 	}
 
 	public static MissingEndpoint(res: Response, endpoint: string) {

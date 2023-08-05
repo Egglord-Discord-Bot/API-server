@@ -7,9 +7,10 @@ import { Error } from '../../utils';
 import { LeagueHandler } from '../../helpers';
 import { R6Account } from '../../types/games/R6';
 import { LOLSummoner, LolActiveGame, validRegions } from '../../types/games/LeagueOfLegends';
+import type Client from '../../helpers/Client';
 const { findByUsername, getRanks, getStats, getProgression } = new R6API({ email: process.env.R6Email, password: process.env.R6Password });
 
-export function run() {
+export function run(client: Client) {
 	const LeagueCacheHandler = new LeagueHandler({ token: process.env.riotToken as string });
 
 	/**
@@ -39,9 +40,9 @@ export function run() {
 				headers: { 'TRN-Api-Key': process.env.fortniteAPI as string },
 			});
 			res.json({ data: data });
-		} catch (err: any) {
-			console.log(err);
-			Error.GenericError(res, err.message);
+		} catch (err) {
+			client.Logger.error(axios.isAxiosError(err) ? JSON.stringify(err.response?.data) : err);
+			Error.GenericError(res, `Failed to look up ${username}'s fortnite statistics.`);
 		}
 	});
 
@@ -66,7 +67,7 @@ export function run() {
 	router.get('/mc', async (req, res) => {
 		// Check query paramters
 		const ip = req.query.ip as string;
-		const port = req.query.port as string;
+		let port = req.query.port as string;
 		if (!ip) return Error.MissingQuery(res, 'ip');
 
 		// Verify port is a number and inbetween 0 and 65535
@@ -77,12 +78,16 @@ export function run() {
 				return Error.IncorrectType(res, 'port', 'number');
 			}
 		}
+
+		// Check if the user accidently added the port to the IP section
+		if (ip.split(':').length == 1) port = ip.split(':')?.[1] ?? false;
+
 		try {
-			const response = await status(ip, port ? Number(port) : 25565);
+			const response = await status(ip.split(':')[0], port ? Number(port) : 25565);
 			res.json({ data: response });
-		} catch (err: any) {
-			console.log(err);
-			Error.GenericError(res, err.message);
+		} catch (err) {
+			client.Logger.error(err);
+			Error.GenericError(res, `Failed to get a response from: ${ip.split(':')[0]}:${port}.`);
 		}
 	});
 
@@ -112,32 +117,31 @@ export function run() {
 		if (process.env.R6Email?.length == 0 || process.env.R6Password?.length == 0) return Error.DisabledEndpoint(res);
 
 		// Get the username, platform and region of the player
-		const username = req.query.username as string;
+		const { username, platform, region } = req.query as { [key: string]: any};
+
 		if (!username) return Error.MissingQuery(res, 'username');
-
-		const platform = req.query.platform as string;
 		if (!platform) return Error.MissingQuery(res, 'platform');
-
-		const region = req.query.region as string;
 		if (!region) return Error.MissingQuery(res, 'region');
 
 		// Make sure type is from set
 		type platformType = 'uplay' | 'psn' | 'xbl'
-		const platformAllowedTypes = ['uplay', 'psn', 'xbl'];
+		const platformAllowedTypes = ['uplay', 'psn', 'xbl'] as Array<platformType>;
 		if (!platformAllowedTypes.includes(platform)) return Error.InvalidValue(res, 'platform', platformAllowedTypes);
 
 		// Make sure type is from set
 		type regionType = 'apac' | 'emea' | 'ncsa'
-		const regionAllowedTypes = ['apac', 'emea', 'ncsa'];
+		const regionAllowedTypes = ['apac', 'emea', 'ncsa'] as Array<regionType>;
 		if (!regionAllowedTypes.includes(region)) return Error.InvalidValue(res, 'region', regionAllowedTypes);
 
 		// Get basic player info
 		const { 0: player } = await findByUsername(platform as platformType, username);
-		if (!player) return Error.GenericError(res, 'That user does not exist on that platform or region.');
+		if (!player) return Error.GenericError(res, `User: ${username} does not exist on that platform (${platform}) or region (${region}).`);
 
-		// Get player stats
-		const [{ 0: playerRank }, { 0: playerStats }, { 0: playerGame }] = await Promise.all([getRanks(platform as platformType, player.id), getStats(platform as platformType, player.id), getProgression(platform as platformType, player.id)]);
 		try {
+			// Get player stats
+			const [{ 0: playerRank }, { 0: playerStats }, { 0: playerGame }] = await Promise.all([getRanks(platform, player.id),
+				getStats(platform, player.id), getProgression(platform, player.id)]);
+
 			const { current, max } = playerRank.seasons[27].regions[region as regionType].boards.pvp_ranked;
 			const { pvp, pve } = playerStats;
 			const { level, xp } = playerGame;
@@ -161,9 +165,9 @@ export function run() {
 			});
 
 			res.json({ data: data });
-		} catch (err: any) {
-			console.log(err);
-			Error.GenericError(res, err.message);
+		} catch (err) {
+			client.Logger.error(err);
+			Error.GenericError(res, `Failed to fetch ${username} R6 user statistics.`);
 		}
 	});
 
@@ -200,8 +204,8 @@ export function run() {
 			try {
 				summoner = await LeagueCacheHandler.getSummonerByUsername(region as validRegions, username);
 			} catch (err) {
-				if (axios.isAxiosError(err)) Error.GenericError(res, err.response?.data as string);
-				return console.log(err);
+				client.Logger.error(axios.isAxiosError(err) ? JSON.stringify(err.response?.data) : err);
+				return Error.GenericError(res, `Failed to find summoner with name ${username} in region ${region}.`);
 			}
 		}
 
@@ -210,7 +214,7 @@ export function run() {
 		try {
 			activeGame = await LeagueCacheHandler.getActiveGameByUsername(region as validRegions, summoner.id);
 		} catch (err) {
-			if (axios.isAxiosError(err)) console.log(err.response?.data);
+			if (axios.isAxiosError(err)) client.Logger.error(JSON.stringify(err.response?.data));
 		}
 
 		// Create object for showing data

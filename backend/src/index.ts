@@ -5,7 +5,7 @@ import cors from 'cors';
 const app = express();
 import helmet from 'helmet';
 import compression from 'compression';
-import { Utils, Logger, Error } from './utils';
+import { Utils, Error } from './utils';
 import { join } from 'path';
 import RateLimter from './middleware/RateLimiter';
 import bodyParser from 'body-parser';
@@ -57,14 +57,14 @@ dotenv.config();
 			newRes._endTime = 0;
 
 			// Run logger & RateLimter
-			if (req.originalUrl !== '/favicon.ico') Logger.connection(newReq, newRes);
+			if (req.originalUrl !== '/favicon.ico') client.Logger.connection(newReq, newRes);
 			if (req.originalUrl.startsWith('/api/') && 	!['/api/admin', '/api/session', '/api/stats'].some(i => req.originalUrl.startsWith(i))) return RateLimiterHandler.checkRateLimit(newReq, newRes, next);
 			next();
 		});
 
 	// Dynamically load all endpoints
 	for (const endpoint of endpoints) {
-		Logger.debug(`Loading: ${endpoint.route} endpoint.`);
+		client.Logger.debug(`Loading: ${endpoint.route} endpoint.`);
 		const file = await import(endpoint.path);
 		app.use(endpoint.route, file.run(client));
 	}
@@ -74,5 +74,5 @@ dotenv.config();
 		.use('/api/*', (req, res) => {
 			Error.MissingEndpoint(res, req.originalUrl);
 		})
-		.listen(process.env.port, () => Logger.log(`Started on PORT: ${process.env.port}`));
+		.listen(process.env.port, () => client.Logger.ready(`Started on PORT: ${process.env.port}`));
 })();

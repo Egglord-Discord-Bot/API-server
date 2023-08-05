@@ -8,10 +8,10 @@ import { translate } from '@vitalets/google-translate-api';
 import languages from '../../assets/JSON/languages.json';
 import radioStationData from '../../assets/JSON/radio-stations.json';
 import type { RadioStation } from '../../types';
-import ud from 'urban-dictionary';
 import * as geniusLyrics from 'genius-lyrics';
 import { parseString } from 'xml2js';
 export type redditType = 'hot' | 'new';
+import type Client from '../../helpers/Client';
 
 type redditChild = {
 	data: object
@@ -20,7 +20,7 @@ type redditData = {
 	children: redditChild[]
 }
 
-export function run() {
+export function run(client: Client) {
 	const CovidHandler = new CacheHandler();
 	const RedditHandler = new CacheHandler();
 	const NPMHandler = new CacheHandler();
@@ -40,24 +40,24 @@ export function run() {
 		*         default: all
 	*/
 	router.get('/covid', async (req, res) => {
-		const country = (req.query.country ?? '/all') as string;
+		const country = (req.query.country ?? 'all') as string;
 
 		let data = {};
 		if (CovidHandler.data.get(country)) {
 			data = CovidHandler.data.get(country) as object;
 		} else {
 			try {
-				if (country != '/all') {
+				if (country != 'all') {
 					data = (await axios.get(`https://disease.sh/v3/covid-19/countries/${country}`)).data;
 					CovidHandler.data.set(country, data);
 				} else {
 					data = (await axios.get('https://disease.sh/v3/covid-19/all')).data;
-					CovidHandler.data.set('/all', data);
+					CovidHandler.data.set('all', data);
 				}
 				CovidHandler._addData({ id: country, data: data });
-			} catch (err: any) {
-				console.log(err);
-				return Error.GenericError(res, err.message);
+			} catch (err) {
+				client.Logger.error(axios.isAxiosError(err) ? JSON.stringify(err.response?.data) : err);
+				return Error.GenericError(res, `Failed to look up COVID-19 statisic ${country !== 'all' ? `in country ${country}.` : '.'}`);
 			}
 		}
 
@@ -125,14 +125,14 @@ export function run() {
 				// Make sure the subreddit has posts
 				const post = dataRes.data.children[Utils.randomInteger(21)];
 				const p = post?.data;
-				if (!p) return Error.GenericError(res, 'Subreddit does not exist or doesn\'t have any posts yet.');
+				if (!p) return Error.GenericError(res, `Subreddit: ${sub} does not exist or doesn't have any posts yet.`);
 
 				// Return the data
 				RedditHandler._addData({ id: `${sub}_${type}`, data: dataRes.data });
 				sentData = new RedditPost(p);
-			} catch (err: any) {
-				console.log(err);
-				return Error.GenericError(res, err.message);
+			} catch (err) {
+				client.Logger.error(axios.isAxiosError(err) ? JSON.stringify(err.response?.data) : err);
+				return Error.GenericError(res, `Failed to fetch posts from subreddit: ${sub}.`);
 			}
 		}
 		res.json({ data: sentData });
@@ -159,7 +159,7 @@ export function run() {
 			sentData = NPMHandler.data.get(npmPackage) as object;
 		} else {
 			try {
-				const data = (await axios.get(`https://registry.npmjs.com/${encodeURIComponent(req.query.package as string)}`)).data;
+				const { data } = (await axios.get(`https://registry.npmjs.com/${encodeURIComponent(req.query.package as string)}`));
 				const resp = {
 					version: Object.keys(data.versions).reverse(),
 					description: data.description,
@@ -172,9 +172,16 @@ export function run() {
 				};
 				NPMHandler._addData({ id: npmPackage, data: resp });
 				sentData = resp;
-			} catch (err: any) {
-				console.log(err);
-				return Error.GenericError(res, err.message);
+			} catch (err) {
+				const error = `Failed to fetch NPM data with name: ${npmPackage}.`;
+				// Check if there isn't a package with the request name
+				if (axios.isAxiosError(err)) {
+					client.Logger.error(JSON.stringify(err.response?.data));
+					return Error.GenericError(res, err.response?.status == 404 ? `No Package with the name ${npmPackage} exists on NPM.` : error);
+				} else {
+					client.Logger.error(err);
+					return Error.GenericError(res, error);
+				}
 			}
 		}
 		res.json({ data: sentData });
@@ -209,8 +216,9 @@ export function run() {
 		try {
 			const { text: response } = await translate(text as string, { to: lang });
 			res.json({ data: response });
-		} catch (err: any) {
-			return Error.GenericError(res, err.message);
+		} catch (err) {
+			client.Logger.error(err);
+			Error.GenericError(res, `Failed to translate text to language: ${lang}.`);
 		}
 	});
 
@@ -243,8 +251,8 @@ export function run() {
 			},
 			});
 		} catch (err) {
-			console.log(err);
-			Error.GenericError(res, 'An error occured when searching for those lyrics');
+			client.Logger.error(err);
+			Error.GenericError(res, `Failed to fetch lyrics from song: ${title}.`);
 		}
 	});
 
@@ -266,10 +274,11 @@ export function run() {
 		if (!phrase) return Error.MissingQuery(res, 'phrase');
 
 		try {
-			const data = await ud.define(phrase);
+			const { data } = await axios.get(`https://api.urbandictionary.com/v0/define?term=${phrase}`);
 			res.json({ data });
-		} catch (err: any) {
-			return Error.GenericError(res, err.message);
+		} catch (err) {
+			client.Logger.error(axios.isAxiosError(err) ? JSON.stringify(err.response?.data) : err);
+			Error.GenericError(res, `Failed to fetch definition(s) of word: ${phrase}.`);
 		}
 	});
 
@@ -321,9 +330,9 @@ export function run() {
 					WeatherHandler._addData({ id: `${location}_${tempType}`, data: resp });
 					sentData = resp;
 				});
-			} catch (err: any) {
-				console.log(err);
-				return Error.GenericError(res, err.message);
+			} catch (err) {
+				client.Logger.error(axios.isAxiosError(err) ? JSON.stringify(err.response?.data) : err);
+				return Error.GenericError(res, `Failed to get weather for location: ${location}.`);
 			}
 		}
 		res.json({ data: sentData });

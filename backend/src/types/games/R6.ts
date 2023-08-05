@@ -1,6 +1,23 @@
 export class R6Account {
 	constructor(data: R6Account) {
 		this.id = data.id;
+		this.username = data.username;
+		this.platform = data.platform;
+		this.profileURL = data.profileURL;
+		this.rank = {
+			current: {
+				name: data.rank.current.name,
+				mmr: data.rank.current.mmr,
+			},
+			max: {
+				name: data.rank.max.name,
+				mmr: data.rank.max.mmr,
+			},
+		},
+		this.pvp = data.pvp;
+		this.pve = data.pve;
+		this.level = data.level;
+		this.xp = data.xp;
 	}
 }
 

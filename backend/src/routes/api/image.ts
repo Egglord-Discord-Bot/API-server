@@ -3,8 +3,9 @@ const router = Router();
 import { checkImage } from '../../middleware/middleware';
 import { Error } from '../../utils';
 import { Image } from '../../helpers';
+import type Client from '../../helpers/Client';
 
-export function run() {
+export function run(client: Client) {
 	/**
 	  * @openapi
 	  * /image/3000years:
@@ -23,9 +24,9 @@ export function run() {
 			res.set('Content-Disposition', 'inline; filename=3000years.png');
 			res.setHeader('content-type', 'image/png');
 			res.send(img);
-		} catch (err: any) {
-			console.log(err);
-			Error.GenericError(res, err.message);
+		} catch (err) {
+			client.Logger.error(err);
+			Error.GenericError(res, 'Failed to generate image.');
 		}
 	});
 
@@ -47,9 +48,9 @@ export function run() {
 			res.set('Content-Disposition', 'inline; filename=affect.png');
 			res.setHeader('content-type', 'image/png');
 			res.send(img);
-		} catch (err: any) {
-			console.log(err);
-			Error.GenericError(res, err.message);
+		} catch (err) {
+			client.Logger.error(err);
+			Error.GenericError(res, 'Failed to generate image.');
 		}
 	});
 
@@ -71,9 +72,9 @@ export function run() {
 			res.set('Content-Disposition', 'inline; filename=approved.png');
 			res.setHeader('content-type', 'image/png');
 			res.send(img);
-		} catch (err: any) {
-			console.log(err);
-			Error.GenericError(res, err.message);
+		} catch (err) {
+			client.Logger.error(err);
+			Error.GenericError(res, 'Failed to generate image.');
 		}
 	});
 
@@ -95,9 +96,9 @@ export function run() {
 			res.set('Content-Disposition', 'inline; filename=beautiful.png');
 			res.setHeader('content-type', 'image/png');
 			res.send(img);
-		} catch (err: any) {
-			console.log(err);
-			Error.GenericError(res, err.message);
+		} catch (err) {
+			client.Logger.error(err);
+			Error.GenericError(res, 'Failed to generate image.');
 		}
 	});
 
@@ -124,9 +125,9 @@ export function run() {
 			res.set('Content-Disposition', 'inline; filename=bed.png');
 			res.setHeader('content-type', 'image/png');
 			res.send(img);
-		} catch (err: any) {
-			console.log(err);
-			Error.GenericError(res, err.message);
+		} catch (err) {
+			client.Logger.error(err);
+			Error.GenericError(res, 'Failed to generate image.');
 		}
 	});
 
@@ -148,9 +149,9 @@ export function run() {
 			res.set('Content-Disposition', 'inline; filename=blur.png');
 			res.setHeader('content-type', 'image/png');
 			res.send(img);
-		} catch (err: any) {
-			console.log(err);
-			Error.GenericError(res, err.message);
+		} catch (err) {
+			client.Logger.error(err);
+			Error.GenericError(res, 'Failed to generate image.');
 		}
 	});
 
@@ -174,9 +175,9 @@ export function run() {
 			res.set('Content-Disposition', 'inline; filename=changemymind.png');
 			res.setHeader('content-type', 'image/png');
 			res.send(img);
-		} catch (err: any) {
-			console.log(err);
-			Error.GenericError(res, err.message);
+		} catch (err) {
+			client.Logger.error(err);
+			Error.GenericError(res, 'Failed to generate image.');
 		}
 	});
 
@@ -198,9 +199,9 @@ export function run() {
 			res.set('Content-Disposition', 'inline; filename=circle.png');
 			res.setHeader('content-type', 'image/png');
 			res.send(img);
-		} catch (err: any) {
-			console.log(err);
-			Error.GenericError(res, err.message);
+		} catch (err) {
+			client.Logger.error(err);
+			Error.GenericError(res, 'Failed to generate image.');
 		}
 	});
 
@@ -224,9 +225,9 @@ export function run() {
 			res.set('Content-Disposition', 'inline; filename=clyde.png');
 			res.setHeader('content-type', 'image/png');
 			res.send(img);
-		} catch (err: any) {
-			console.log(err);
-			Error.GenericError(res, err.message);
+		} catch (err) {
+			client.Logger.error(err);
+			Error.GenericError(res, 'Failed to generate image.');
 		}
 	});
 
@@ -251,9 +252,9 @@ export function run() {
 			res.set('Content-Disposition', 'inline; filename=colour.png');
 			res.setHeader('content-type', 'image/png');
 			res.send(img);
-		} catch (err: any) {
-			console.log(err);
-			Error.GenericError(res, err.message);
+		} catch (err) {
+			client.Logger.error(err);
+			Error.GenericError(res, 'Failed to generate image.');
 		}
 	});
 
@@ -275,9 +276,9 @@ export function run() {
 			res.set('Content-Disposition', 'inline; filename=deepfry.png');
 			res.setHeader('content-type', 'image/png');
 			res.send(img);
-		} catch (err: any) {
-			console.log(err);
-			Error.GenericError(res, err.message);
+		} catch (err) {
+			client.Logger.error(err);
+			Error.GenericError(res, 'Failed to generate image.');
 		}
 	});
 
@@ -310,9 +311,9 @@ export function run() {
 			res.set('Content-Disposition', 'inline; filename=distracted.png');
 			res.setHeader('content-type', 'image/png');
 			res.send(img);
-		} catch (err: any) {
-			console.log(err);
-			Error.GenericError(res, err.message);
+		} catch (err) {
+			client.Logger.error(err);
+			Error.GenericError(res, 'Failed to generate image.');
 		}
 	});
 
@@ -334,9 +335,9 @@ export function run() {
 			res.set('Content-Disposition', 'inline; filename=facepalm.png');
 			res.setHeader('content-type', 'image/png');
 			res.send(img);
-		} catch (err: any) {
-			console.log(err);
-			Error.GenericError(res, err.message);
+		} catch (err) {
+			client.Logger.error(err);
+			Error.GenericError(res, 'Failed to generate image.');
 		}
 	});
 
@@ -358,9 +359,9 @@ export function run() {
 			res.set('Content-Disposition', 'inline; filename=greyscale.png');
 			res.setHeader('content-type', 'image/png');
 			res.send(img);
-		} catch (err: any) {
-			console.log(err);
-			Error.GenericError(res, err.message);
+		} catch (err) {
+			client.Logger.error(err);
+			Error.GenericError(res, 'Failed to generate image.');
 		}
 	});
 
@@ -382,9 +383,9 @@ export function run() {
 			res.set('Content-Disposition', 'inline; filename=invert.png');
 			res.setHeader('content-type', 'image/png');
 			res.send(img);
-		} catch (err: any) {
-			console.log(err);
-			Error.GenericError(res, err.message);
+		} catch (err) {
+			client.Logger.error(err);
+			Error.GenericError(res, 'Failed to generate image.');
 		}
 	});
 
@@ -406,9 +407,9 @@ export function run() {
 			res.set('Content-Disposition', 'inline; filename=joke-over-head.png');
 			res.setHeader('content-type', 'image/png');
 			res.send(img);
-		} catch (err: any) {
-			console.log(err);
-			Error.GenericError(res, err.message);
+		} catch (err) {
+			client.Logger.error(err);
+			Error.GenericError(res, 'Failed to generate image.');
 		}
 	});
 
@@ -435,9 +436,9 @@ export function run() {
 			res.set('Content-Disposition', 'inline; filename=kiss.png');
 			res.setHeader('content-type', 'image/png');
 			res.send(img);
-		} catch (err: any) {
-			console.log(err);
-			Error.GenericError(res, err.message);
+		} catch (err) {
+			client.Logger.error(err);
+			Error.GenericError(res, 'Failed to generate image.');
 		}
 	});
 
@@ -462,9 +463,9 @@ export function run() {
 			res.set('Content-Disposition', 'inline; filename=ohno.png');
 			res.setHeader('content-type', 'image/png');
 			res.send(img);
-		} catch (err: any) {
-			console.log(err);
-			Error.GenericError(res, err.message);
+		} catch (err) {
+			client.Logger.error(err);
+			Error.GenericError(res, 'Failed to generate image.');
 		}
 	});
 
@@ -486,9 +487,9 @@ export function run() {
 			res.set('Content-Disposition', 'inline; filename=rip.png');
 			res.setHeader('content-type', 'image/png');
 			res.send(img);
-		} catch (err: any) {
-			console.log(err);
-			Error.GenericError(res, err.message);
+		} catch (err) {
+			client.Logger.error(err);
+			Error.GenericError(res, 'Failed to generate image.');
 		}
 	});
 
@@ -515,9 +516,9 @@ export function run() {
 			res.set('Content-Disposition', 'inline; filename=slap.png');
 			res.setHeader('content-type', 'image/png');
 			res.send(img);
-		} catch (err: any) {
-			console.log(err);
-			Error.GenericError(res, err.message);
+		} catch (err) {
+			client.Logger.error(err);
+			Error.GenericError(res, 'Failed to generate image.');
 		}
 	});
 
@@ -544,9 +545,9 @@ export function run() {
 			res.set('Content-Disposition', 'inline; filename=spank.png');
 			res.setHeader('content-type', 'image/png');
 			res.send(img);
-		} catch (err: any) {
-			console.log(err);
-			Error.GenericError(res, err.message);
+		} catch (err) {
+			client.Logger.error(err);
+			Error.GenericError(res, 'Failed to generate image.');
 		}
 	});
 
@@ -568,9 +569,9 @@ export function run() {
 			res.set('Content-Disposition', 'inline; filename=trigger.gif');
 			res.setHeader('content-type', 'image/gif');
 			res.send(img);
-		} catch (err: any) {
-			console.log(err);
-			Error.GenericError(res, err.message);
+		} catch (err) {
+			client.Logger.error(err);
+			Error.GenericError(res, 'Failed to generate image.');
 		}
 	});
 
@@ -592,9 +593,9 @@ export function run() {
 			res.set('Content-Disposition', 'inline; filename=wanted.png');
 			res.setHeader('content-type', 'image/png');
 			res.send(img);
-		} catch (err: any) {
-			console.log(err);
-			Error.GenericError(res, err.message);
+		} catch (err) {
+			client.Logger.error(err);
+			Error.GenericError(res, 'Failed to generate image.');
 		}
 	});
 
@@ -616,9 +617,9 @@ export function run() {
 			res.set('Content-Disposition', 'inline; filename=wasted.png');
 			res.setHeader('content-type', 'image/png');
 			res.send(img);
-		} catch (err: any) {
-			console.log(err);
-			Error.GenericError(res, err.message);
+		} catch (err) {
+			client.Logger.error(err);
+			Error.GenericError(res, 'Failed to generate image.');
 		}
 	});
 
@@ -645,9 +646,9 @@ export function run() {
 			res.set('Content-Disposition', 'inline; filename=whowouldwin.png');
 			res.setHeader('content-type', 'image/png');
 			res.send(img);
-		} catch (err: any) {
-			console.log(err);
-			Error.GenericError(res, err.message);
+		} catch (err) {
+			client.Logger.error(err);
+			Error.GenericError(res, 'Failed to generate image.');
 		}
 	});
 	return router;

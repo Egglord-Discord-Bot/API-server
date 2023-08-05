@@ -9,8 +9,9 @@ import validAnimals from '../../assets/JSON/animals.json';
 import adviceList from '../../assets/JSON/advice.json';
 import QRcode from 'qrcode';
 import { PassThrough } from 'stream';
+import type Client from '../../helpers/Client';
 
-export function run() {
+export function run(client: Client) {
 	/**
 		* @openapi
 		* /misc/advice:
@@ -22,6 +23,7 @@ export function run() {
 			const advice = adviceList[Math.floor((Math.random() * adviceList.length))];
 			res.json({ data: advice });
 		} catch (err: any) {
+			client.Logger.error(err.message);
 			Error.GenericError(res, err.message);
 		}
 	});

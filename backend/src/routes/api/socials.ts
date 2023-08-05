@@ -1,12 +1,13 @@
 import { Router } from 'express';
 import { CacheHandler, TwitchHandler, TwitterHandler, SteamHandler } from '../../helpers';
+import type Client from '../../helpers/Client';
 import { DiscordAccount } from '../../types/socials/Discord';
 import { GithubUser, GithubRepo } from '../../types/socials/Github';
 import { Error } from '../../utils';
 import axios from 'axios';
 const router = Router();
 
-export function run() {
+export function run(client: Client) {
 	const DiscordHandler = new CacheHandler();
 	const SteamCacheHandler = new SteamHandler({ token: process.env.steam as string });
 	const GithubHandler = new CacheHandler();
@@ -45,11 +46,8 @@ export function run() {
 				DiscordHandler._addData({ id: `${userId}`, data: user });
 				sentData = user;
 			} catch (err) {
-				if (axios.isAxiosError(err)) {
-					res.json({ error: err.response?.data });
-				} else {
-					console.log(err);
-				}
+				client.Logger.error(axios.isAxiosError(err) ? JSON.stringify(err.response?.data) : err);
+				return Error.GenericError(res, `Failed to fetch Discord account with ID: ${userId}.`);
 			}
 		}
 
@@ -95,9 +93,9 @@ export function run() {
 				// Save data to cache
 				GithubHandler._addData({ id: `${username}_${repo}`, data: obj });
 				sentData = obj;
-			} catch (err: any) {
-				console.log(err);
-				return Error.GenericError(res, err.message);
+			} catch (err) {
+				client.Logger.error(axios.isAxiosError(err) ? JSON.stringify(err.response?.data) : err);
+				return Error.GenericError(res, `Failed to fetch Github ${repo.length !== 0 ? `repository: ${repo} from user: ${username}` : `user: ${username}`}.`);
 			}
 		}
 
@@ -135,9 +133,9 @@ export function run() {
 				// Fetch player data + VAC bans
 				const [playerSum, playerBans] = await Promise.all([SteamCacheHandler.getUserSummariesById(user.steamid), SteamCacheHandler.getUserBansById(user.steamid)]);
 				data = SteamCacheHandler.createAccount(playerSum, playerBans);
-			} catch (err: any) {
-				console.log(err);
-				return Error.GenericError(res, err.message);
+			} catch (err) {
+				client.Logger.error(axios.isAxiosError(err) ? JSON.stringify(err.response?.data) : err);
+				return Error.GenericError(res, `Failed to fetch Steam account with name: ${username}.`);
 			}
 		}
 
@@ -189,9 +187,9 @@ export function run() {
 
 				TwitchCacheHandler._addData({ id: username, data: data });
 				sentData = data;
-			} catch (err: any) {
-				console.log(err);
-				return Error.GenericError(res, err.message);
+			} catch (err) {
+				client.Logger.error(axios.isAxiosError(err) ? JSON.stringify(err.response?.data) : err);
+				return Error.GenericError(res, `Failed to fetch Twitch account with name: ${username}.`);
 			}
 		}
 
@@ -225,9 +223,9 @@ export function run() {
 
 				TwitterCacheHandler._addData({ id: username, data: data });
 				sentData = data;
-			} catch (err: any) {
-				console.log(err);
-				return Error.GenericError(res, err.message);
+			} catch (err) {
+				client.Logger.error(axios.isAxiosError(err) ? JSON.stringify(err.response?.data) : err);
+				return Error.GenericError(res, `Failed to fetch Twitter account with name: ${username}.`);
 			}
 		}
 

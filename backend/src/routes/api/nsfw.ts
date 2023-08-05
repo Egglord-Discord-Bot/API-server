@@ -5,8 +5,9 @@ import * as tf from '@tensorflow/tfjs-node';
 import * as nsfwjs from 'nsfwjs';
 import type { Tensor3D } from '@tensorflow/tfjs-node';
 import { Error } from '../../utils';
+import type Client from '../../helpers/Client';
 
-export function run() {
+export function run(client: Client) {
 	/**
 		* @openapi
 		* /nsfw/check:
@@ -34,9 +35,15 @@ export function run() {
 				isNSFW: (['Porn', 'Hentai', 'Sexy'].includes(data[0].className)),
 				probabilities: data },
 			});
-		} catch (err: any) {
-			console.log(err);
-			res.json({ error: err.message });
+		} catch (err) {
+			// See if image was failed to fetch
+			if (axios.isAxiosError(err)) {
+				client.Logger.error(JSON.stringify(err.response?.data));
+				Error.GenericError(res, 'Failed to fetch image.');
+			} else {
+				client.Logger.error(err);
+				Error.GenericError(res, 'Failed to decode image for NSFW content.');
+			}
 		}
 	});
 
@@ -65,8 +72,9 @@ export function run() {
 		try {
 			const { data } = await axios.get(`https://nekobot.xyz/api/image?type=${type}`);
 			res.json({ data: data.message });
-		} catch (err: any) {
-			res.json({ error: err.message });
+		} catch (err) {
+			client.Logger.error(axios.isAxiosError(err) ? JSON.stringify(err.response?.data) : err);
+			Error.GenericError(res, 'Failed to retrieve image.');
 		}
 	});
 
