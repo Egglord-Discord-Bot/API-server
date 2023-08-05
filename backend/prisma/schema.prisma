@@ -43,6 +43,7 @@ model Endpoint {
   maxRequests   Int       @default(5)
   maxRequestper Int       @default(60000)
   isBlocked     Boolean   @default(false)
+  isValid       Boolean   @default(false)
   premiumOnly   Boolean   @default(false)
   history       UserHistory[]
 }

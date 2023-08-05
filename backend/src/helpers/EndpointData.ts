@@ -1,9 +1,9 @@
 import type Client from './Client';
 import { join } from 'path';
-import { Utils, Logger } from '../utils';
+import { Utils } from '../utils';
 
 export default async function EndpointData(client: Client) {
-	Logger.debug('Checking database for new endpoints');
+	client.Logger.debug('Checking database for new endpoints');
 
 	const endpointsBasedOnFiles = Utils.generateRoutes(join(__dirname, '../', 'routes')).filter(e => e.route !== '/index');
 	const fileData = await Promise.all(endpointsBasedOnFiles.map(e => import(`${e.path}`)));
@@ -16,19 +16,17 @@ export default async function EndpointData(client: Client) {
 			}))].filter(i => i !== '/').map(i => `${endpointsBasedOnFiles[index].route}/${i}`);
 		}).flat();
 
-	const endpointsFromOnDB = await client.EndpointManager.fetchEndpointData();
-	const endpointsNotOnDB = files.filter(e => !endpointsFromOnDB.map(end => end.name).includes(e) && e.startsWith('/api/'));
-
-	// Delete old endpoints
-	const endpointsToBeDeleted = endpointsFromOnDB.filter(d => files.indexOf(d.name) == -1);
-	Logger.debug(`Found ${endpointsToBeDeleted.length} old endpoints`);
-	for (const oldEndpoint of endpointsToBeDeleted) {
-		await client.EndpointManager.delete(oldEndpoint.name);
+	// Make sure if they are on the database update it
+	const endpointsFromOnDB = await client.EndpointManager.fetchEndpointData(false, false);
+	for (const endpoints of endpointsFromOnDB.filter(e => !e.isValid)) {
+		await client.EndpointManager.update({ name: endpoints.name, isValid: true });
 	}
 
+	const endpointsNotOnDB = files.filter(e => !endpointsFromOnDB.map(end => end.name).includes(e) && e.startsWith('/api/'));
+
 	// Add new endpoints
-	Logger.debug(`Found ${endpointsNotOnDB.length} new endpoints`);
+	client.Logger.debug(`Found ${endpointsNotOnDB.length} new endpoints`);
 	for (const newEndpoint of endpointsNotOnDB) {
-		await client.EndpointManager.create({ name: newEndpoint });
+		await client.EndpointManager.create({ name: newEndpoint, isValid: true });
 	}
 }

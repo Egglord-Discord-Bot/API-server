@@ -7,9 +7,13 @@ import { Error } from '../../../../utils';
 const router = Router();
 
 export function run(client: Client) {
-	router.get('/json', async (_req, res) => {
+	router.get('/json', async (req, res) => {
+		// See if the includeHistory query was made aswell
+		const history = req.query.includeHistory as string;
+		if (history && !['true', 'false'].includes(history)) return Error.InvalidValue(res, 'includeHistory', ['true', 'false']);
+
 		try {
-			const endpoints = await client.EndpointManager.fetchEndpointData();
+			const endpoints = await client.EndpointManager.fetchEndpointData(true, (history == 'true') ? true : false);
 			const openapiSpecification = swaggerJsdoc({
 				failOnErrors: true,
 				definition: {
