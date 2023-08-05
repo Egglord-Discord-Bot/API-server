@@ -4,6 +4,7 @@ import LeagueHandler from './handlers/LeagueHandler';
 import SteamHandler from './handlers/SteamHandler';
 import TwitchHandler from './handlers/TwitchHandler';
 import TwitterHandler from './handlers/TwitterHandler';
+import DuckDuckGoHandler from './handlers/DuckDuckGoHandler';
 
 // Managers
 import Client from './Client';
@@ -11,4 +12,4 @@ import EndpointData from './EndpointData';
 import Image from './Image';
 import SystemManager from './SystemManager';
 
-export { CacheHandler, LeagueHandler, SteamHandler, TwitchHandler, TwitterHandler, Client, EndpointData, Image, SystemManager };
+export { CacheHandler, LeagueHandler, SteamHandler, TwitchHandler, TwitterHandler, DuckDuckGoHandler, Client, EndpointData, Image, SystemManager };

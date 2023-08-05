@@ -4,7 +4,7 @@ import Tesseract from 'tesseract.js';
 import axios from 'axios';
 import { Error } from '../../utils';
 import * as fs from 'fs';
-import { image_search } from 'duckduckgo-images-api';
+import { DuckDuckGoHandler } from '../../helpers';
 import validAnimals from '../../assets/JSON/animals.json';
 import adviceList from '../../assets/JSON/advice.json';
 import QRcode from 'qrcode';
@@ -52,12 +52,16 @@ export function run(client: Client) {
 		}
 
 		// Search for animal picture
-		const results = await image_search({
-			query: name, moderate: true,
-			iterations: 2, retries: 2,
-		});
+		try {
+			const DuckDuckGoCacheHandler = new DuckDuckGoHandler();
+			const results = await DuckDuckGoCacheHandler.search(name);
 
-		res.json({ data: results[Math.floor(Math.random() * results.length)].image });
+			res.json({ data: results.slice(0, 10) });
+		} catch (err) {
+			client.Logger.error(axios.isAxiosError(err) ? JSON.stringify(err.response?.data) : err);
+			Error.GenericError(res, 'Failed to search for images');
+		}
+
 	});
 
 	router.get('/animal/raw', (_req, res) => {
