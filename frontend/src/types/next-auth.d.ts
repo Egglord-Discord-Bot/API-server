@@ -1,12 +1,12 @@
 export interface User {
   id: string
-  discriminator: string
   username: string
   email: string
   avatar: string
   token: string
   createdAt: Date
   role: 'USER' | 'ADMIN' | 'BLOCK' | 'PREMIUM'
+  locale: string
   _count?: {
     history: number
   }

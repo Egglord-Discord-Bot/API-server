@@ -1,27 +1,36 @@
+import Modal from './Modal';
 import axios from 'axios';
-import { useRef } from 'react';
+import Image from 'next/image';
 import type { User } from '@/types/next-auth';
-import type { FormEvent } from 'react';
+import type { ChangeEvent } from 'react';
 interface Props {
   user: User
   id: string
 }
 
 export default function AdminUserModal({ user, id }: Props) {
-	const closeRef = useRef<HTMLButtonElement | null>(null);
 
-	async function submitEvent(e: FormEvent<HTMLFormElement>) {
-		e.preventDefault();
-		const role = (document.getElementById(`${user.id}_role`) as HTMLSelectElement).value;
-
-		const { data } = await axios.patch('/api/session/admin/users/update', {
+	async function onChange(e: ChangeEvent<HTMLSelectElement>) {
+		await axios.patch('/api/session/admin/users/update', {
 			userId: user.id,
-			role,
+			role: e.target.value,
 		});
-
-		if (data.success) closeRef.current?.click();
 	};
 
+	async function refreshData() {
+		try {
+			const { data } = await axios.get(`/api/socials/discord?userId=${user.id}`);
+			if (data.error) return null;
+
+			await axios.patch('/api/session/admin/users/update', {
+				userId: user.id,
+				username: data.data.username,
+				avatar: data.data.avatar,
+			});
+		} catch (err) {
+			console.log(err);
+		}
+	}
 
 	async function resetToken() {
 		try {
@@ -33,38 +42,65 @@ export default function AdminUserModal({ user, id }: Props) {
 	}
 
 	return (
-		<div className="modal fade" id={id} tabIndex={-1} aria-labelledby="exampleModalLabel" aria-hidden="true">
-			<div className="modal-dialog modal-dialog-centered">
-				<div className="modal-content">
-					<div className="modal-header">
-						<h1 className="modal-title fs-5" id="exampleModalLabel">Edit user: {user.username} ({user.id})</h1>
-						<button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+		<Modal id={id} header={`User: ${user.username} (${user.id})`} >
+			<div className="modal-body row">
+				<div className="col-lg-6">
+					<div className="mb-3 row">
+						<label htmlFor="IDFormInput" className="col-sm-3 col-form-label">ID: </label>
+						<div className="col-sm-9">
+							<input type="text" readOnly className="form-control" id="IDFormInput" value={user.id} />
+						</div>
 					</div>
-					<form onSubmit={(e) => submitEvent(e)}>
-						<div className="modal-body row">
-							<div className="col-lg-6">
-								<h5 className="fw-bold">Role</h5>
-								<div className="input-group mb-3">
-									<label className="input-group-text" htmlFor={`${user.id}_isBlocked`}>Role:</label>
-									<select className="form-select" id={`${user.id}_role`} defaultValue={`${user.role}`}>
-										<option value="BLOCK">Block</option>
-										<option value="ADMIN">Admin</option>
-										<option value="PREMIUM">Premium</option>
-									</select>
-								</div>
-							</div>
-							<div className="col-lg-6">
-								<h5 className="fw-bold">Reset token?</h5>
-								<button className="btn btn-success" onClick={() => resetToken()}>Confirm</button>
-							</div>
+					<div className="mb-3 row">
+						<label htmlFor="usernameFormInput" className="col-sm-3 col-form-label">Username: </label>
+						<div className="col-sm-9">
+							<input type="text" readOnly className="form-control" id="usernameFormInput" value={user.username} />
 						</div>
-						<div className="modal-footer">
-							<button type="button" className="btn btn-secondary" data-bs-dismiss="modal" ref={closeRef}>Close</button>
-							<button type="submit" className="btn btn-primary">Save changes</button>
+					</div>
+					<div className="mb-3 row">
+						<label htmlFor="emailFormInput" className="col-sm-3 col-form-label">Email: </label>
+						<div className="col-sm-9">
+							<input type="text" readOnly className="form-control" id="emailFormInput" value={user.email} />
 						</div>
-					</form>
+					</div>
+					<div className="mb-3 row">
+						<label htmlFor="localeFormInput" className="col-sm-3 col-form-label">Locale: </label>
+						<div className="col-sm-9">
+							<input type="text" readOnly className="form-control" id="localeFormInput" value={user.locale} />
+						</div>
+					</div>
+					<div className="mb-3 row">
+						<label htmlFor="joinedFormInput" className="col-sm-3 col-form-label">Joined: </label>
+						<div className="col-sm-9">
+							<input type="text" readOnly className="form-control" id="joinedFormInput" value={user.createdAt.toString()} />
+						</div>
+					</div>
+					<div className="mb-3 row">
+						<label htmlFor="historyFormInput" className="col-sm-3 col-form-label">History: </label>
+						<div className="col-sm-9">
+							<input type="text" readOnly className="form-control" id="historyFormInput" value={user._count?.history} />
+						</div>
+					</div>
+					<button className="btn btn-success float-end" onClick={() => refreshData()}>Refresh</button>
+				</div>
+				<div className="col-lg-6">
+					<div className="d-flex justify-content-center">
+						<Image className="rounded-circle" src={user.avatar} width={128} height={128} alt={'User\'s avatar'}/>
+					</div>
+					<h5 className="fw-bold">Role</h5>
+					<div className="input-group mb-3">
+						<label className="input-group-text" htmlFor={`${user.id}_isBlocked`}>Role:</label>
+						<select className="form-select" id={`${user.id}_role`} defaultValue={`${user.role}`} onChange={(e) => onChange(e)}>
+							<option value="USER">User</option>
+							<option value="BLOCK">Block</option>
+							<option value="ADMIN">Admin</option>
+							<option value="PREMIUM">Premium</option>
+						</select>
+					</div>
+					<h5 className="fw-bold">Reset token?</h5>
+					<button className="btn btn-success float-end" onClick={() => resetToken()}>Confirm</button>
 				</div>
 			</div>
-		</div>
+		</Modal>
 	);
 }

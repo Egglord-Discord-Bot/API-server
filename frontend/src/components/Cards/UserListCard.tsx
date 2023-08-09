@@ -1,10 +1,11 @@
 import { AdminUserModal, CollapsibleCard } from '../index';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faAnglesLeft, faAnglesRight, faPenToSquare, faSearch, faBan, faDollarSign, faUserCheck, faChevronUp, faChevronDown } from '@fortawesome/free-solid-svg-icons';
+import { faAnglesLeft, faAnglesRight, faPenToSquare, faSearch, faBan, faDollarSign, faUser, faUserCheck, faChevronUp, faChevronDown } from '@fortawesome/free-solid-svg-icons';
 import { useState, useEffect } from 'react';
 import { Tooltip } from 'react-tooltip';
 import type { User } from '@/types/next-auth';
 import type { SyntheticEvent } from 'react';
+import axios from 'axios';
 
 interface Props {
   total: number
@@ -26,14 +27,7 @@ export default function UserCard({ total }: Props) {
 		if (order == undefined) order = sortOrder;
 		if (type == undefined) type = sortType;
 		try {
-			const res = await fetch(`/api/session/admin/users?orderDir=${order}&page=${p}&orderType=${type}`, {
-				method: 'get',
-				headers: {
-					'Accept': 'application/json',
-					'Content-Type': 'application/json',
-				},
-			});
-			const data = await res.json();
+			const { data } = await axios.get(`/api/session/admin/users?orderDir=${order}&page=${p}&orderType=${type}`);
 			setUsers(data.users);
 			setPage(p);
 		} catch (err) {
@@ -60,17 +54,23 @@ export default function UserCard({ total }: Props) {
 		const { value } = (e.target as HTMLInputElement);
 		const query = value.length > 0 ? `/search?name=${value}` : '';
 
-		const res = await fetch(`/api/session/admin/users${query}`, {
-			method: 'get',
-			headers: {
-				'Accept': 'application/json',
-				'Content-Type': 'application/json',
-			},
-		});
-		const data = await res.json();
+		const { data } = await axios.get(`/api/session/admin/users${query}`);
 		setUsers(data.users);
 		setPage(0);
 		setSortOrder('desc');
+	}
+
+	function formatRoleIcon(role: 'USER' | 'ADMIN' | 'BLOCK' | 'PREMIUM', index: number) {
+		switch (role) {
+			case 'ADMIN':
+				return <FontAwesomeIcon icon={faUserCheck} style={{ color: '#198754' }} data-tooltip-id={`${index}_Tooltip`}/>;
+			case 'BLOCK':
+				return <FontAwesomeIcon icon={faBan} style={{ color: '#dc3545' }} data-tooltip-id={`${index}_Tooltip`} />;
+			case 'PREMIUM':
+				return <FontAwesomeIcon icon={faDollarSign} style={{ color: '#ffc107' }} data-tooltip-id={`${index}_Tooltip`} />;
+			default:
+				return <FontAwesomeIcon icon={faUser} data-tooltip-id={`${index}_Tooltip`}/>;
+		}
 	}
 
 	return (
@@ -115,16 +115,8 @@ export default function UserCard({ total }: Props) {
 								<th>{new Date(u.createdAt).toLocaleDateString('en-GB', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</th>
 								<th>{u._count?.history}</th>
 								<th>
-									<Tooltip place="top" content={'Admin'} id={`${index}_Tooltip`} />
-									{u.role == 'ADMIN' && (
-										<FontAwesomeIcon icon={faUserCheck} style={{ color: '#198754' }} data-tooltip-id={`${index}_Tooltip`}/>
-									)}
-									{u.role == 'PREMIUM' && (
-										<FontAwesomeIcon icon={faDollarSign} style={{ color: '#ffc107' }} data-tooltip-id={`${index}_Tooltip`} />
-									)}
-									{u.role == 'BLOCK' && (
-										<FontAwesomeIcon icon={faBan} style={{ color: '#dc3545' }} data-tooltip-id={`${index}_Tooltip`} />
-									)}
+									<Tooltip place="top" content={`${u.role}`} id={`${index}_Tooltip`} />
+									{formatRoleIcon(u.role, index)}
 								</th>
 								<th>
 									<AdminUserModal user={u} id={`${u.id}_modal`}/>

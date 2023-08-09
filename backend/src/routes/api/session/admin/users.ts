@@ -101,10 +101,10 @@ export function run(client: Client) {
 
 	router.patch('/update', isAdmin, async (req, res) => {
 		console.log(req.body);
-		const { userId, role } = req.body;
+		const { userId, role, username, avatar } = req.body;
 
 		try {
-			await client.UserManager.update({ id: BigInt(userId), role: role });
+			await client.UserManager.update({ id: BigInt(userId), role, username, avatar });
 			res.json({ success: `Successfully updated user: ${userId}` });
 		} catch (err) {
 			console.log(err);
