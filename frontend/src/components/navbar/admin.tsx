@@ -44,7 +44,7 @@ export default function Admin({ user }: Props) {
 				<div className="topbar-divider d-none d-sm-block"></div>
 				<li className="nav-item dropdown no-arrow">
 					<a className="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-						<span className="mr-2 d-none d-lg-inline text-gray-600 small">{user.username}#{user.discriminator} </span>
+						<span className="mr-2 d-none d-lg-inline text-gray-600 small">{user.username} </span>
 						<Image className="img-profile rounded-circle" src={user.avatar} alt="..." width={32} height={32}/>
 					</a>
 					<div className="dropdown-menu dropdown-menu-end shadow animated--grow-in" aria-labelledby="userDropdown">
