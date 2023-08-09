@@ -52,27 +52,6 @@ export default function AdminEndpointModal({ user, id }: Props) {
 						<div className="modal-body row">
 							<div className="col-lg-6">
 								<h5 className="fw-bold">Attributes</h5>
-								<div className="input-group mb-3">
-									<label className="input-group-text" htmlFor={`${user.id}_isBlocked`}>Blocked:</label>
-									<select className="form-select" id={`${user.id}_isBlocked`} defaultValue={`${user.isBlocked}`}>
-										<option value="true">True</option>
-										<option value="false">False</option>
-									</select>
-								</div>
-								<div className="input-group mb-3">
-									<label className="input-group-text" htmlFor={`${user.id}_isPremium`}>Premium:</label>
-									<select className="form-select" id={`${user.id}_isPremium`} defaultValue={`${user.isPremium}`}>
-										<option value="true">True</option>
-										<option value="false">False</option>
-									</select>
-								</div>
-								<div className="input-group mb-3">
-									<label className="input-group-text" htmlFor={`${user.id}_isAdmin`}>Admin:</label>
-									<select className="form-select" id={`${user.id}_isAdmin`} defaultValue={`${user.isAdmin}`}>
-										<option value="true">True</option>
-										<option value="false">False</option>
-									</select>
-								</div>
 							</div>
 							<div className="col-lg-6">
 								<h5 className="fw-bold">Reset token?</h5>

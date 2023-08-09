@@ -1,3 +1,5 @@
+import type { Role } from '@prisma/client';
+
 /* USER DATABASE TYPES */
 export type updateUser = {
 	id: bigint
@@ -5,9 +7,7 @@ export type updateUser = {
 	username?: string
 	avatar?: string
 	discriminator?: string
-	isAdmin?: boolean
-	isBlocked?: boolean
-	isPremium?: boolean
+	role?: Role
 }
 
 export type createUser = {

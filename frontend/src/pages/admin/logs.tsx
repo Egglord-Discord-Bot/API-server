@@ -1,4 +1,4 @@
-import { Error } from '@/components';
+import { ErrorAlert } from '@/components';
 import { useSession } from 'next-auth/react';
 import { useState } from 'react';
 import AdminLayout from '@/layouts/Admin';
@@ -69,7 +69,7 @@ export default function AdminEndpoints({ error, logFiles }: Props) {
 		<AdminLayout user={session.user}>
 			<div className="container-fluid" style={{ overflowY: 'scroll', maxHeight: 'calc(100vh - 64px)' }}>
 				{error && (
-					<Error text={error} />
+					<ErrorAlert text={error} />
 				)}
 				<div className="d-sm-flex align-items-center justify-content-between mb-4">
 					<h1 className="h3 mb-0 text-gray-800">Logs Dashboard</h1>

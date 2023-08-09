@@ -1,5 +1,5 @@
 // Alerts folder
-import ErrorAlert from './Alerts/error';
+import ErrorAlert from './Alerts/Error';
 import SuccessAlert from './Alerts/Success';
 
 import Header from './header';

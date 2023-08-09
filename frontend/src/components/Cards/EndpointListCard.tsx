@@ -1,7 +1,8 @@
 import { CollapsibleCard } from '../index';
 import axios from 'axios';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faSearch } from '@fortawesome/free-solid-svg-icons';
+import { faSearch, faPenToSquare } from '@fortawesome/free-solid-svg-icons';
+import { Tooltip } from 'react-tooltip';
 import { useState, useEffect } from 'react';
 import type { SyntheticEvent } from 'react';
 import type { Endpoint } from '@/types';
@@ -14,7 +15,7 @@ export default function EndpointListCard() {
 
 	async function fetchEndpoints() {
 		try {
-			const { data } = await axios.get('/api/session/admin/endpoints/json');
+			const { data } = await axios.get('/api/session/admin/endpoints/json?includeHistory=true');
 			// Filter out session
 			const endpointList = (data.endpoints as Array<Endpoint>).filter(e => !e.name.startsWith('/api/session'));
 			setEndpoints(endpointList);
@@ -28,7 +29,7 @@ export default function EndpointListCard() {
 		const el = e.target as HTMLInputElement;
 
 		// Fetch endpoints
-		let { data: { endpoints: endpointList } } = await axios.get('/api/session/admin/endpoints/json');
+		let { data: { endpoints: endpointList } } = await axios.get('/api/session/admin/endpoints/json?includeHistory=true');
 		endpointList = endpointList.filter((endpoint: Endpoint) => !endpoint.name.startsWith('/api/session'));
 
 		// Filter based on input
@@ -99,48 +100,30 @@ export default function EndpointListCard() {
 					<thead>
 						<tr>
 							<th scope="col">Name</th>
-							<th scope="col">Cooldown</th>
-							<th scope="col">maxRequests</th>
-							<th scope="col">maxRequestper</th>
+							<th scope="col">Total Requests</th>
 							<th scope="col">Blocked?</th>
-							<th scope="col">Premium?</th>
+							<th scope="col">Edit</th>
 						</tr>
 					</thead>
 					<tbody>
-						{endpoints.map(endpoint => (
+						{endpoints.map((endpoint, index) => (
 							<tr key={endpoint.name}>
 								<th scope="row" className="text-truncate">{endpoint.name}</th>
-								<td>
-									<div className="form-outline">
-										<input min="500" max="60000" step={500} defaultValue={endpoint.cooldown} type="number" id="cooldown" className="form-control" onChange={(e) => updateEndpoint(e, endpoint.name)} />
-									</div>
-								</td>
-								<td>
-									<div className="form-outline">
-										<input min="1" max="60" step={1} defaultValue={endpoint.maxRequests} type="number" id="maxRequests" className="form-control" onChange={(e) => updateEndpoint(e, endpoint.name)} />
-									</div>
-								</td>
-								<td>
-									<div className="form-outline">
-										<input min="30000" max="180000" step={500} defaultValue={endpoint.maxRequestper} type="number" id="maxRequestper" className="form-control" onChange={(e) => updateEndpoint(e, endpoint.name)} />
-									</div>
-								</td>
-								<td>
+								<th>{endpoint._count?.history}</th>
+								<th>
 									<div className="form-check">
 										<input className="form-check-input" type="checkbox" onClick={(e) => updateEndpoint(e, endpoint.name)} defaultChecked={endpoint.isBlocked} id="isBlocked" />
 										<label className="form-check-label" htmlFor="flexCheckDefault" id={`${endpoint.name}_isBlocked`}>
 											{endpoint.isBlocked ? 'Yes' : 'No'}
 										</label>
 									</div>
-								</td>
-								<td>
-									<div className="form-check">
-										<input className="form-check-input" type="checkbox" onClick={(e) => updateEndpoint(e, endpoint.name)} defaultChecked={endpoint.premiumOnly} id="premiumOnly" />
-										<label className="form-check-label" htmlFor="flexCheckDefault" id={`${endpoint.name}_premiumOnly`}>
-											{endpoint.premiumOnly ? 'Yes' : 'No'}
-										</label>
-									</div>
-								</td>
+								</th>
+								<th>
+									<Tooltip place="top" content={'Edit'} id={`${index}_openEndpointModal`} />
+									<button className="btn" data-bs-toggle="modal" data-bs-target={`#${index}_Endpointmodal`} data-tooltip-id={`${index}_openEndpointModal`}>
+										<FontAwesomeIcon icon={faPenToSquare} />
+									</button>
+								</th>
 							</tr>
 						))}
 					</tbody>

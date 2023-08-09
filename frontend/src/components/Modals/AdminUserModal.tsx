@@ -12,15 +12,11 @@ export default function AdminUserModal({ user, id }: Props) {
 
 	async function submitEvent(e: FormEvent<HTMLFormElement>) {
 		e.preventDefault();
-		const isBlocked = (document.getElementById(`${user.id}_isBlocked`) as HTMLSelectElement).value;
-		const isAdmin = (document.getElementById(`${user.id}_isAdmin`) as HTMLInputElement).value;
-		const isPremium = (document.getElementById(`${user.id}_isPremium`) as HTMLInputElement).value;
+		const role = (document.getElementById(`${user.id}_role`) as HTMLSelectElement).value;
 
 		const { data } = await axios.patch('/api/session/admin/users/update', {
 			userId: user.id,
-			isBlocked,
-			isAdmin,
-			isPremium,
+			role,
 		});
 
 		if (data.success) closeRef.current?.click();
@@ -47,26 +43,13 @@ export default function AdminUserModal({ user, id }: Props) {
 					<form onSubmit={(e) => submitEvent(e)}>
 						<div className="modal-body row">
 							<div className="col-lg-6">
-								<h5 className="fw-bold">Attributes</h5>
+								<h5 className="fw-bold">Role</h5>
 								<div className="input-group mb-3">
-									<label className="input-group-text" htmlFor={`${user.id}_isBlocked`}>Blocked:</label>
-									<select className="form-select" id={`${user.id}_isBlocked`} defaultValue={`${user.isBlocked}`}>
-										<option value="true">True</option>
-										<option value="false">False</option>
-									</select>
-								</div>
-								<div className="input-group mb-3">
-									<label className="input-group-text" htmlFor={`${user.id}_isPremium`}>Premium:</label>
-									<select className="form-select" id={`${user.id}_isPremium`} defaultValue={`${user.isPremium}`}>
-										<option value="true">True</option>
-										<option value="false">False</option>
-									</select>
-								</div>
-								<div className="input-group mb-3">
-									<label className="input-group-text" htmlFor={`${user.id}_isAdmin`}>Admin:</label>
-									<select className="form-select" id={`${user.id}_isAdmin`} defaultValue={`${user.isAdmin}`}>
-										<option value="true">True</option>
-										<option value="false">False</option>
+									<label className="input-group-text" htmlFor={`${user.id}_isBlocked`}>Role:</label>
+									<select className="form-select" id={`${user.id}_role`} defaultValue={`${user.role}`}>
+										<option value="BLOCK">Block</option>
+										<option value="ADMIN">Admin</option>
+										<option value="PREMIUM">Premium</option>
 									</select>
 								</div>
 							</div>

@@ -1,4 +1,4 @@
-import { Error, InfoPill, HistoryListCard, EndpointListCard } from '@/components';
+import { ErrorAlert, InfoPill, HistoryListCard, EndpointListCard } from '@/components';
 import AdminLayout from '@/layouts/Admin';
 import { useSession } from 'next-auth/react';
 import axios from 'axios';
@@ -29,7 +29,7 @@ export default function AdminEndpoints({ error, lastYear, lastMonth, last7Days, 
 		<AdminLayout user={session.user}>
 			<div className="container-fluid" style={{ overflowY: 'scroll', maxHeight: 'calc(100vh - 64px)' }}>
 				{error && (
-					<Error text={error} />
+					<ErrorAlert text={error} />
 				)}
         &nbsp;
 				<div className="d-sm-flex align-items-center justify-content-between mb-4">
