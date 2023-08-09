@@ -35,11 +35,11 @@ export default function Main({ user }: Props) {
 							:
 							<li className="nav-item dropdown">
 								<a className="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-									<Image src={user.avatar} width={25} height={25} className="rounded-circle" alt="User avatar" /> {user.username}#{user.discriminator}
+									<Image src={user.avatar} width={25} height={25} className="rounded-circle" alt="User avatar" /> {user.username}
 								</a>
 								<div className="dropdown-menu dropdown-menu-end">
 									<Link className="dropdown-item text-dark" href="/settings">Settings</Link>
-									{user.isAdmin && (
+									{user.role == 'ADMIN' && (
 										<Link className="dropdown-item text-dark" href="/admin">Admin</Link>
 									)}
 									<div className="dropdown-divider"></div>

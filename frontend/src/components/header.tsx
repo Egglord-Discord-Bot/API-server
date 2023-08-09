@@ -6,6 +6,7 @@ export default function Header() {
 			<Head>
 				<meta charSet="utf-8" />
 				<meta name="viewport" content="width=device-width, initial-scale=1" />
+				<meta name="referrer" content="origin" />
 				<meta property="og:type" content="website" />
 				<meta property="og:title" content="API server" />
 				<meta property="og:description" content="This API is a service that provides anyone the ease of creating memes or fetching information on the internet." />

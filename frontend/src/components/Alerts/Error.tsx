@@ -3,7 +3,7 @@ interface Props {
   text: string
 }
 
-export default function ErrorPopup({ text }: Props) {
+export default function ErrorAlert({ text }: Props) {
 	return (
 		<div className="alert alert-danger alert-dismissible fade show" role="alert" style={{ margin: '10px' }}>
 			<strong>Error - {text}!</strong> If this error keeps occurring, please contact <Link href="/contact-us">support</Link>.

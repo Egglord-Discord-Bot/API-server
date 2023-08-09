@@ -8,7 +8,7 @@ export default withAuth({
 			if (token == null) return false;
 
 			// `/admin` requires admin role
-			if (req.nextUrl.pathname === '/admin') return (token.user as User).isAdmin;
+			if (req.nextUrl.pathname === '/admin') return (token.user as User).role == 'ADMIN';
 
 			// User is accessing settings page and is logged in, allow access
 			return true;

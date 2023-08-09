@@ -1,3 +1,5 @@
+import axios from 'axios';
+import { useRef } from 'react';
 import type { User } from '@/types/next-auth';
 import type { FormEvent } from 'react';
 interface Props {
@@ -5,35 +7,29 @@ interface Props {
   id: string
 }
 
-export default function Modal({ user, id }: Props) {
+export default function AdminUserModal({ user, id }: Props) {
+	const closeRef = useRef<HTMLButtonElement | null>(null);
 
 	async function submitEvent(e: FormEvent<HTMLFormElement>) {
 		e.preventDefault();
 		const isBlocked = (document.getElementById(`${user.id}_isBlocked`) as HTMLSelectElement).value;
 		const isAdmin = (document.getElementById(`${user.id}_isAdmin`) as HTMLInputElement).value;
 		const isPremium = (document.getElementById(`${user.id}_isPremium`) as HTMLInputElement).value;
-		const res = await fetch('/api/session/admin/users/update', {
-			method: 'PATCH',
-			headers: {
-				'content-type': 'application/json;charset=UTF-8',
-			},
-			body: JSON.stringify({
-				userId: user.id,
-				isBlocked,
-				isAdmin,
-				isPremium,
-			}),
+
+		const { data } = await axios.patch('/api/session/admin/users/update', {
+			userId: user.id,
+			isBlocked,
+			isAdmin,
+			isPremium,
 		});
-		console.log(await res.json());
-	}
+
+		if (data.success) closeRef.current?.click();
+	};
 
 
 	async function resetToken() {
 		try {
-			const res = await fetch(`/api/session/admin/users/regenerate?userId=${user.id}`, {
-				method: 'PATCH',
-			});
-			const data = await res.json();
+			const { data } = await axios.patch(`/api/session/admin/users/regenerate?userId=${user.id}`);
 			console.log(data);
 		} catch (err) {
 			console.log(err);
@@ -80,7 +76,7 @@ export default function Modal({ user, id }: Props) {
 							</div>
 						</div>
 						<div className="modal-footer">
-							<button type="button" className="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+							<button type="button" className="btn btn-secondary" data-bs-dismiss="modal" ref={closeRef}>Close</button>
 							<button type="submit" className="btn btn-primary">Save changes</button>
 						</div>
 					</form>

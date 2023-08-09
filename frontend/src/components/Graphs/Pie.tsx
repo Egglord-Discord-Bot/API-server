@@ -6,8 +6,8 @@ ChartJS.register(ArcElement, Tooltip, Legend);
 
 interface Props {
   data: ChartData<'pie'>
-  options: CoreChartOptions<'pie'> | undefined
-  style: CSSProperties | undefined
+  options?: CoreChartOptions<'pie'> | undefined
+  style?: CSSProperties | undefined
 }
 export default function PieChart({ data, options = undefined, style = undefined }: Props) {
 	return (

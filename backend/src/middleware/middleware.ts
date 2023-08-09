@@ -28,7 +28,7 @@ export function checkImage(NumberofImages: number) {
 export async function isAdmin(req: Request, res: Response, next: NextFunction) {
 	// Check if user is logged in and is admin
 	const ses = await Utils.getSession(req);
-	if (ses?.user.isAdmin) return next();
+	if (ses?.user.role == 'ADMIN') return next();
 
 	// If not they are logged in or an admin
 	return Error.MissingAccess(res);

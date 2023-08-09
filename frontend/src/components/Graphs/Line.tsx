@@ -6,8 +6,8 @@ ChartJS.register(ArcElement, Tooltip, Legend, CategoryScale, LinearScale, PointE
 
 interface Props {
   data: ChartData<'line'>
-  options: CoreChartOptions<'line'> | undefined
-  style: CSSProperties | undefined
+  options?: CoreChartOptions<'line'> | undefined
+  style?: CSSProperties | undefined
 }
 
 export default function PieChart({ data, options = undefined, style = undefined }: Props) {

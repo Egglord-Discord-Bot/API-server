@@ -6,9 +6,7 @@ export interface User {
   avatar: string
   token: string
   createdAt: Date
-  isAdmin: boolean
-  isBlocked: boolean
-  isPremium: boolean
+  role: 'USER' | 'ADMIN' | 'BLOCK' | 'PREMIUM'
   _count?: {
     history: number
   }

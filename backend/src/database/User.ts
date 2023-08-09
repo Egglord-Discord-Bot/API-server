@@ -1,5 +1,5 @@
 import { CONSTANTS } from '../utils';
-import type { User } from '@prisma/client';
+import type { User, Role } from '@prisma/client';
 import type { updateUser, createUser, userUnqiueParam, fetchUsersParam } from '../types/database';
 import client from './client';
 
@@ -32,7 +32,6 @@ export default class UserManager {
 				id: data.id,
 				token: data.token,
 				username: data.username,
-				discriminator: data.discriminator,
 				avatar: data.avatar,
 				locale: data.locale,
 				email: data.email,
@@ -64,11 +63,8 @@ export default class UserManager {
 			},
 			data: {
 				token: data.newToken != null ? data.newToken : undefined,
-				isAdmin: data.isAdmin != null ? data.isAdmin : undefined,
-				isBlocked: data.isBlocked != null ? data.isBlocked : undefined,
-				isPremium: data.isPremium != null ? data.isPremium : undefined,
+				role: 'USER',
 				username: data.username != null ? data.username : undefined,
-				discriminator: data.discriminator != null ? data.discriminator : undefined,
 				avatar: data.avatar != null ? data.avatar : undefined,
 			},
 		});
@@ -84,34 +80,12 @@ export default class UserManager {
 	}
 
 	/**
-		* Returns the total number of premium users
+		* Returns the total number of users who have a certain role
 	*/
-	async fetchPremiumCount() {
+	async fetchCountByRole(role: Role) {
 		return client.user.count({
 			where: {
-				isPremium: true,
-			},
-		});
-	}
-	/**
-		* Returns the total number of entries
-		* @returns The total number of entries
-	*/
-	async fetchAdminCount() {
-		return client.user.count({
-			where: {
-				isAdmin: true,
-			},
-		});
-	}
-	/**
-		* Returns the total number of entries
-		* @returns The total number of entries
-	*/
-	async fetchBlockedCount() {
-		return client.user.count({
-			where: {
-				isBlocked: true,
+				role: role,
 			},
 		});
 	}

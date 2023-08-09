@@ -7,12 +7,17 @@ const router = Router();
 export function run(client: Client) {
 	router.post('/signIn', async (req, res) => {
 		const userId = BigInt(req.query.userId as string);
-		const { discriminator, avatar, locale, email, username } = req.body;
+		const { avatar, discriminator, locale, email, username } = req.body;
 
 		// Create avatar URL
 		let image_url;
 		if (avatar == null) {
-			image_url = `https://cdn.discordapp.com/embed/avatars/${discriminator % 5}.png`;
+			// Check if they are still on legacy discriminator system
+			if (discriminator && discriminator != '0') {
+				image_url = `https://cdn.discordapp.com/embed/avatars/${discriminator % 5}.png`;
+			} else {
+				image_url = `https://cdn.discordapp.com/embed/avatars/${Number(userId >> BigInt(22)) % 6}.png`;
+			}
 		} else {
 			image_url = `https://cdn.discordapp.com/avatars/${userId}/${avatar}.png`;
 		}
@@ -24,23 +29,21 @@ export function run(client: Client) {
 				user = await client.UserManager.create({ id: userId,
 					token: new TokenGenerator({ bitSize: 512, baseEncoding: TokenBase.BASE62 }).generate(),
 					avatar: image_url,
-					discriminator, locale, email, username,
+					locale, email, username,
 				});
 			}
 
 			// Send updated profile back to user
 			res.json({
 				id: `${userId}`,
-				isBlocked: user.isBlocked,
-				isPremium: user.isPremium,
-				isAdmin: user.isAdmin,
+				role: user.role,
 				avatar: image_url,
 				token: user.token,
-				discriminator, username, email,
+				username, email,
 			});
 
 			// Update the database if any changes are found
-			if (username != user.username || discriminator != user.discriminator || image_url != user.avatar) await client.UserManager.update({ id: userId, username, discriminator, avatar: image_url });
+			if (username != user.username || image_url != user.avatar) await client.UserManager.update({ id: userId, username, avatar: image_url });
 		} catch (err) {
 			console.log(err);
 			res.json();

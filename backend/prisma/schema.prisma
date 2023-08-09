@@ -15,14 +15,18 @@ model User {
   token         String        @unique
   avatar        String?
   username      String?
-  discriminator String?
   locale        String?
   email         String?
   history       UserHistory[]
-  isBlocked     Boolean       @default(false)
-  isPremium     Boolean       @default(false)
-  isAdmin       Boolean       @default(false)
+  role          Role          @default(USER)
   createdAt     DateTime      @default(now()) @map("created_at")
+}
+
+enum Role {
+  USER
+  ADMIN
+  BLOCK
+  PREMIUM
 }
 
 model UserHistory {

@@ -70,10 +70,10 @@ export default class RateLimit {
 		if (endpoint.isBlocked) return this.sendResponse({ req, res, userId: user.id, endpoint: endpoint.name, response: Error.DisabledEndpoint });
 
 		// Check if endpoint is premium only or not
-		if (endpoint.premiumOnly && !user.isPremium) return this.sendResponse({ req, res, userId: user.id, endpoint: endpoint.name, response: Error.Unauthorized });
+		if (endpoint.premiumOnly && user.role !== 'PREMIUM') return this.sendResponse({ req, res, userId: user.id, endpoint: endpoint.name, response: Error.Unauthorized });
 
 		// Bypass ratelimit if user is an Admin
-		if (!user.isAdmin) {
+		if (user.role != 'ADMIN') {
 			// Now check if user is rate limited by global rate Limit
 			const isGloballyRateLimited = this._checkGlobalCooldown(user.id);
 			if (isGloballyRateLimited) return this.sendResponse({ req, res, userId: user.id, endpoint: endpoint.name, response: Error.GlobalRateLimit });

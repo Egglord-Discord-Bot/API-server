@@ -1,6 +1,6 @@
-import { Header, Navbar, PieChart } from '@/components';
+import { Header, Navbar, Footer, PieChart, CollapsibleCard } from '@/components';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faEye, faEyeSlash, faAnglesLeft, faAnglesRight, faEllipsis, faCircle } from '@fortawesome/free-solid-svg-icons';
+import { faEye, faEyeSlash, faAnglesLeft, faAnglesRight, faCircle } from '@fortawesome/free-solid-svg-icons';
 import { useSession } from 'next-auth/react';
 import { useState, useEffect } from 'react';
 import { getStatusColour } from '@/utils/functions';
@@ -134,7 +134,7 @@ export default function Settings() {
 		<>
 			<Header />
 			<Navbar user={session?.user}/>
-			<div className="container-fluid" style={{ padding:'1%' }}>
+			<div className="container-fluid" style={{ padding:'1%', minHeight: '84vh' }}>
 				<div className="row">
 					<form className="form-inline">
 						<h5>Your token:</h5>
@@ -164,29 +164,15 @@ export default function Settings() {
 						</div>
 					</form>
 					<div className="col-xl-6 col-lg-12" style={{ paddingBottom: '15px' }}>
-						<div className="card shadow">
-							<div className="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-								<h4 className="m-0 font-weight-bold text-primary">Endpoint Usage</h4>
-								<a type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseExample">
-									<FontAwesomeIcon icon={faEllipsis} />
-								</a>
-							</div>
-							<div className="card-body collapse show" id="collapseOne">
-								<PieChart data={graphData} />
-							</div>
-						</div>
+						<CollapsibleCard id={'API_usage'} header={<h5 className="m-0 fw-bold text-primary">Endpoint Usage</h5>}>
+							<PieChart data={graphData} />
+						</CollapsibleCard>
 					</div>
 					<div className="col-xl-6 col-lg-12">
-						<div className="card shadow mb-4">
-							<div className="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-								<h4 className="m-0 font-weight-bold text-primary">Total Endpoint Usage ({total}):</h4>
-								<a type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="true" aria-controls="collapseExample">
-    							<FontAwesomeIcon icon={faEllipsis} />
-								</a>
-							</div>
-							<div className="card-body collapse show" id="collapseTwo">
+						<CollapsibleCard id={'Total_API_usage'} header={<h5 className="m-0 fw-bold text-primary">Total Endpoint Usage ({total}):</h5>}>
+							<>
 								{history.map(hi => <ReactToolTip key={hi.id} id={`${hi.id}`} place="top" content={`${hi.statusCode}`} variant="dark" />)}
-								<table className="table" style={{ maxHeight:'400px' }}>
+								<table className="table">
 									<thead>
 										<tr>
 											<th scope="col">#</th>
@@ -196,9 +182,9 @@ export default function Settings() {
 										</tr>
 									</thead>
 									<tbody>
-										{history.map(_ => (
+										{history.map((_, index) => (
 											<tr key={_.id}>
-												<td scope="row">{(page * 50) + history.indexOf(_) + 1}</td>
+												<td scope="row">{(page * 50) + index + 1}</td>
 												<td>{_.endpointName}</td>
 												<td>{new Date(_.createdAt).toLocaleString('en-GB', { timeZone: 'UTC' })}</td>
 												<td style={{ textAlign: 'center' }} data-tooltip-id={`${_.id}`}>
@@ -226,11 +212,12 @@ export default function Settings() {
 										</li>
 									</ul>
 								</nav>
-							</div>
-						</div>
+							</>
+						</CollapsibleCard>
 					</div>
 				</div>
 			</div>
+			<Footer />
 		</>
 	);
 }

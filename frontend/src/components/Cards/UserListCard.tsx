@@ -1,4 +1,4 @@
-import { Modal, CollapsibleCard } from '../index';
+import { AdminUserModal, CollapsibleCard } from '../index';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faAnglesLeft, faAnglesRight, faPenToSquare, faSearch, faBan, faDollarSign, faUserCheck, faChevronUp, faChevronDown } from '@fortawesome/free-solid-svg-icons';
 import { useState, useEffect } from 'react';
@@ -74,7 +74,7 @@ export default function UserCard({ total }: Props) {
 	}
 
 	return (
-		<CollapsibleCard id="UserList" header={<h6 className="m-0 font-weight-bold text-primary">Users</h6>}>
+		<CollapsibleCard id="UserList" header={<h4 className="m-0 font-weight-bold text-primary">Users</h4>}>
 			<div className="table-responsive">
 				<div className="form-inline mr-auto my-2 my-md-0 mw-100 col-lg-6">
 					<div className="input-group mb-3">
@@ -103,7 +103,7 @@ export default function UserCard({ total }: Props) {
 									)}
 								</div>
 							</th>
-							<th scope="col">Attributes</th>
+							<th scope="col">Role</th>
 							<th scope="col">Edit</th>
 						</tr>
 					</thead>
@@ -111,27 +111,23 @@ export default function UserCard({ total }: Props) {
 						{users?.map((u, index) => (
 							<tr key={u.id}>
 								<th scope="row" className="d-none d-lg-table-cell">{u.id}</th>
-								<th>{u.username}{u.discriminator == '0' ? '' : `#${u.discriminator}`}</th>
+								<th>{u.username}</th>
 								<th>{new Date(u.createdAt).toLocaleDateString('en-GB', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</th>
 								<th>{u._count?.history}</th>
 								<th>
-									<Tooltip place="top" content={'Admin'} id={`${index}_isAdminTooltip`} />
-									{u.isAdmin && (
-										<FontAwesomeIcon icon={faUserCheck} style={{ color: '#198754' }} data-tooltip-id={`${index}_isAdminTooltip`}/>
+									<Tooltip place="top" content={'Admin'} id={`${index}_Tooltip`} />
+									{u.role == 'ADMIN' && (
+										<FontAwesomeIcon icon={faUserCheck} style={{ color: '#198754' }} data-tooltip-id={`${index}_Tooltip`}/>
 									)}
-                &nbsp;
-									<Tooltip place="top" content={'Premium'} id={`${index}_isPremiumTooltip`} />
-									{u.isPremium && (
-										<FontAwesomeIcon icon={faDollarSign} style={{ color: '#ffc107' }} data-tooltip-id={`${index}_isPremiumTooltip`} />
+									{u.role == 'PREMIUM' && (
+										<FontAwesomeIcon icon={faDollarSign} style={{ color: '#ffc107' }} data-tooltip-id={`${index}_Tooltip`} />
 									)}
-                &nbsp;
-									<Tooltip place="top" content={'Blocked'} id={`${index}_isBlockedTooltip`} />
-									{u.isBlocked && (
-										<FontAwesomeIcon icon={faBan} style={{ color: '#dc3545' }} data-tooltip-id={`${index}_isBlockedTooltip`} />
+									{u.role == 'BLOCK' && (
+										<FontAwesomeIcon icon={faBan} style={{ color: '#dc3545' }} data-tooltip-id={`${index}_Tooltip`} />
 									)}
 								</th>
 								<th>
-									<Modal user={u} id={`${u.id}_modal`}/>
+									<AdminUserModal user={u} id={`${u.id}_modal`}/>
 									<Tooltip place="top" content={'Edit user'} id={`${index}_openModal`} />
 									<button className="btn" data-bs-toggle="modal" data-bs-target={`#${u.id}_modal`} data-tooltip-id={`${index}_openModal`}>
 										<FontAwesomeIcon icon={faPenToSquare} />

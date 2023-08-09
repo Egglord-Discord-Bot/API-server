@@ -32,9 +32,9 @@ export function run(client: Client) {
 		try {
 			const [total, admin, premium, block] = await Promise.all([
 				client.UserManager.fetchCount(),
-				client.UserManager.fetchAdminCount(),
-				client.UserManager.fetchBlockedCount(),
-				client.UserManager.fetchPremiumCount()]);
+				client.UserManager.fetchCountByRole('ADMIN'),
+				client.UserManager.fetchCountByRole('BLOCK'),
+				client.UserManager.fetchCountByRole('PREMIUM')]);
 
 			res.json({ total, admin, premium, block });
 		} catch (err) {
