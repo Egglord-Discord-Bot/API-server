@@ -24,7 +24,6 @@ export function formatBytes(bytes: number, decimals = 2) {
 }
 
 export function getStatusColour(code: number) {
-
 	switch (code) {
 		case 200:
 		case 304:
@@ -38,3 +37,22 @@ export function getStatusColour(code: number) {
 			return 'red';
 	}
 }
+
+export function convertMiliseconds(miliseconds: number) {
+	const	total_seconds = Math.floor(miliseconds);
+	const	total_minutes = Math.floor(total_seconds / 60);
+	const	total_hours = Math.floor(total_minutes / 60);
+	const	days = Math.floor(total_hours / 24);
+
+	const	seconds = total_seconds % 60;
+	const	minutes = total_minutes % 60;
+	const	hours = total_hours % 24;
+
+	let formatText = '';
+	if (days > 0) formatText = formatText.concat(`${days} days `);
+	if (hours > 0) formatText = formatText.concat(`${hours} hours `);
+	if (minutes > 0) formatText = formatText.concat(`${minutes} minutes `);
+	if (days <= 1 && hours <= 1) formatText = formatText.concat(`${seconds} seconds`);
+
+	return formatText;
+};

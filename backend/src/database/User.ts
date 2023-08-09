@@ -63,7 +63,7 @@ export default class UserManager {
 			},
 			data: {
 				token: data.newToken != null ? data.newToken : undefined,
-				role: data.role,
+				role: data.role != null ? data.role : undefined,
 				username: data.username != null ? data.username : undefined,
 				avatar: data.avatar != null ? data.avatar : undefined,
 			},

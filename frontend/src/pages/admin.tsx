@@ -1,7 +1,7 @@
 import { InfoPill, CollapsibleCard, PieChart, LineGraph } from '../components';
 import AdminLayout from '../layouts/Admin';
 
-import { nFormatter, formatBytes } from '../utils/functions';
+import { nFormatter, formatBytes, convertMiliseconds } from '../utils/functions';
 import type { ChartData, CoreChartOptions } from 'chart.js';
 import { useSession } from 'next-auth/react';
 import { Tooltip } from 'react-tooltip';
@@ -111,7 +111,7 @@ export default function Admin(data: Props) {
 						<InfoPill title={'Total users'} text={nFormatter(data.userCount, 2)} icon={faUsers}/>
 					</div>
 					<div className="col-xl-3 col-md-6 mb-4">
-						<InfoPill title={'Uptime'} text={new Date(data.uptime * 1000).toISOString().slice(11, 19)} icon={faClock}/>
+						<InfoPill title={'Uptime'} text={convertMiliseconds(data.uptime)} icon={faClock}/>
 					</div>
 					<div className="col-xl-3 col-md-6 mb-4">
 						<InfoPill title={'Memory Usage'} text={formatBytes(data.memoryUsage)} icon={faMemory}/>
