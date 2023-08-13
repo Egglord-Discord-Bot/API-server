@@ -25,6 +25,12 @@ export default class Error {
 			.json({ error: `Query parameter: ${query} must be either: ${values.join(' or ')}` });
 	}
 
+	public static MissingFromBody(res: Response, query: string, type: string) {
+		return res
+			.status(412)
+			.json({ error: `Request body property: ${query} is missing or not type: ${type}.` });
+	}
+
 	public static GenericError(res: Response, errMsg: string) {
 		return res
 			.status(500)

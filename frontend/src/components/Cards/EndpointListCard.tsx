@@ -1,4 +1,5 @@
 import { CollapsibleCard } from '../index';
+import AdminEndpointModal from '../Modals/AdminEndpointModal';
 import axios from 'axios';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faSearch, faPenToSquare } from '@fortawesome/free-solid-svg-icons';
@@ -40,27 +41,7 @@ export default function EndpointListCard() {
 	async function updateEndpoint(e: SyntheticEvent, name: string) {
 		const target = e.target as HTMLInputElement;
 		const options = { name: name } as Endpoint;
-
-		// Get option selected
-		switch(target.id) {
-			case 'cooldown':
-				options.cooldown = Number(target.value);
-				break;
-			case 'maxRequests':
-				options.maxRequests = Number(target.value);
-				break;
-			case 'maxRequestper':
-				options.maxRequestper = Number(target.value);
-				break;
-			case 'isBlocked':
-				options.isBlocked = Boolean(target.checked);
-				break;
-			case 'premiumOnly':
-				options.premiumOnly = Boolean(target.checked);
-				break;
-			default:
-				break;
-		}
+		options.isBlocked = Boolean(target.checked);
 
 		// Send request to Database
 		await fetch('/api/session/admin/endpoints', {
@@ -119,6 +100,7 @@ export default function EndpointListCard() {
 									</div>
 								</th>
 								<th>
+									<AdminEndpointModal endpoint={endpoint} id={`${index}_Endpointmodal`}/>
 									<Tooltip place="top" content={'Edit'} id={`${index}_openEndpointModal`} />
 									<button className="btn" data-bs-toggle="modal" data-bs-target={`#${index}_Endpointmodal`} data-tooltip-id={`${index}_openEndpointModal`}>
 										<FontAwesomeIcon icon={faPenToSquare} />
