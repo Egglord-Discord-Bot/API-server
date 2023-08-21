@@ -9,7 +9,6 @@ import languages from '../../assets/JSON/languages.json';
 import radioStationData from '../../assets/JSON/radio-stations.json';
 import type { RadioStation } from '../../types';
 import * as geniusLyrics from 'genius-lyrics';
-import { parseString } from 'xml2js';
 export type redditType = 'hot' | 'new';
 import type Client from '../../helpers/Client';
 
@@ -189,6 +188,22 @@ export function run(client: Client) {
 
 	/**
 	 * @openapi
+	 * /info/stable-diffusion:
+	 *  get:
+	 *    description: Translate a message
+	 *    tags: info
+	 *    parameters:
+	 *       - name: text
+	 *         description: The text to translate
+	 *         required: true
+	 *         type: string
+	*/
+	router.get('/stable-diffusion', async (_req, res) => {
+		res.json({ error: 'coming soon' });
+	});
+
+	/**
+	 * @openapi
 	 * /info/translate:
 	 *  get:
 	 *    description: Translate a message
@@ -293,43 +308,20 @@ export function run(client: Client) {
  *         description: The location for the weather
  *         required: true
  *         type: string
- *       - name: tempType
- *         description: Either C or F (Celsuis or Fahrenheit)
- *         required: false
- *         type: string
- *         enum: [C, F]
 */
 	router.get('/weather', async (req, res) => {
 		// Get location to get weather from
 		const location = encodeURIComponent(req.query.location as string);
 		if (!location) return Error.MissingQuery(res, 'location');
 
-		// Optional query param (temperature type Fahrenheit or Celsuis)
-		let tempType = req.query.type as string;
-		if (tempType) {
-			if (!['C', 'F'].includes(tempType)) return Error.InvalidValue(res, tempType, ['C', 'F']);
-		} else {
-			tempType = 'C';
-		}
-
 		let sentData = {};
-		if (WeatherHandler.data.get(`${location}_${tempType}`)) {
-			sentData = WeatherHandler.data.get(`${location}_${tempType}`) as object;
+		if (WeatherHandler.data.get(`${location}`)) {
+			sentData = WeatherHandler.data.get(`${location}`) as object;
 		} else {
 			try {
-				const { data } = await axios.get(`http://weather.service.msn.com/find.aspx?src=outlook&weadegreetype=${tempType}&culture=en-US&weasearchstr=${location}`);
-
-				parseString(data, function(err, result) {
-					if (err) return Error.GenericError(res, err.message);
-
-					const resp = {
-						location: result.weatherdata.weather[0].$.weatherlocationname,
-						current: result.weatherdata.weather[0].current[0].$,
-						forecast: result.weatherdata.weather[0].forecast.map((d: any) => d.$),
-					};
-					WeatherHandler._addData({ id: `${location}_${tempType}`, data: resp });
-					sentData = resp;
-				});
+				const { data } = await axios.get(`https://api.weatherapi.com/v1/current.json?key=${process.env.weatherAPI}&q=${location}`);
+				WeatherHandler._addData({ id: `${location}`, data: data });
+				sentData = data;
 			} catch (err) {
 				client.Logger.error(axios.isAxiosError(err) ? JSON.stringify(err.response?.data) : err);
 				return Error.GenericError(res, `Failed to get weather for location: ${location}.`);
