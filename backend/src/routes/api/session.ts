@@ -1,35 +1,72 @@
 import { Router } from 'express';
 import type Client from '../../helpers/Client';
 import { TokenGenerator, TokenBase } from 'ts-token-generator';
-import { Utils } from '../../utils';
+import { Utils, Error } from '../../utils';
+import axios from 'axios';
 const router = Router();
 
 export function run(client: Client) {
+
+	router.get('/', async (req, res) => {
+		const { access_token, id } = req.query;
+		const user = await client.UserManager.fetchByParam({ id: BigInt(id as string) });
+
+		if (!user) return res.json({ error: 'Incorrect userID' });
+		if (access_token != user.access_token) return res.json({ error: 'access token is not correct' });
+
+		res.json({
+			id: `${user.id}`,
+			role: user.role,
+			avatar: user.avatar,
+			token: user.token,
+			username: user.username,
+			email: user.email,
+			access_token: user.access_token,
+		});
+	});
+
+
 	router.post('/signIn', async (req, res) => {
+		// Validate request
 		const userId = BigInt(req.query.userId as string);
-		const { avatar, discriminator, locale, email, username } = req.body;
+		const { access_token, refresh_token } = req.body;
 
-		// Create avatar URL
-		let image_url;
-		if (avatar == null) {
-			// Check if they are still on legacy discriminator system
-			if (discriminator && discriminator != '0') {
-				image_url = `https://cdn.discordapp.com/embed/avatars/${discriminator % 5}.png`;
-			} else {
-				image_url = `https://cdn.discordapp.com/embed/avatars/${Number(userId >> BigInt(22)) % 6}.png`;
-			}
-		} else {
-			image_url = `https://cdn.discordapp.com/avatars/${userId}/${avatar}.png`;
-		}
+		if (!(/(\d{17,20})/g.test(`${userId}`))) return Error.GenericError(res, 'Invalid user ID');
+		if (typeof access_token !== 'string') return Error.MissingFromBody(res, 'access_token', 'string');
+		if (typeof refresh_token !== 'string') return Error.MissingFromBody(res, 'refresh_token', 'string');
 
-		// Fetch / create user
 		try {
-			let user = await client.UserManager.fetchByParam({ id: BigInt(userId) });
+			const { data } = await axios.get('https://discord.com/api/v10/users/@me', {
+				headers: {
+					'authorization': `Bearer ${access_token}`,
+				},
+			});
+
+			// Get discord account data
+			const { avatar, discriminator, locale, email, username } = data as { [key:string]: string };
+
+			// Create avatar URL
+			let image_url;
+			if (avatar == null) {
+				// Check if they are still on legacy discriminator system
+				if (discriminator && discriminator != '0') {
+					image_url = `https://cdn.discordapp.com/embed/avatars/${Number(discriminator) % 5}.png`;
+				} else {
+					image_url = `https://cdn.discordapp.com/embed/avatars/${Number(userId >> BigInt(22)) % 6}.png`;
+				}
+			} else {
+				image_url = `https://cdn.discordapp.com/avatars/${userId}/${avatar}.png`;
+			}
+
+			// Fetch / create user
+			let user = await client.UserManager.fetchByParam({ id: userId });
 			if (user == null) {
 				user = await client.UserManager.create({ id: userId,
 					token: new TokenGenerator({ bitSize: 512, baseEncoding: TokenBase.BASE62 }).generate(),
 					avatar: image_url,
-					locale, email, username,
+					locale: locale ?? undefined,
+					email: email ?? undefined,
+					access_token, refresh_token, username,
 				});
 			}
 
@@ -39,14 +76,14 @@ export function run(client: Client) {
 				role: user.role,
 				avatar: image_url,
 				token: user.token,
-				username, email,
+				username, email, access_token,
 			});
 
 			// Update the database if any changes are found
-			if (username != user.username || image_url != user.avatar) await client.UserManager.update({ id: userId, username, avatar: image_url });
+			if (username != user.username || image_url != user.avatar || access_token != user.access_token || refresh_token != user.refresh_token) await client.UserManager.update({ id: userId, username, avatar: image_url, refresh_token, access_token });
 		} catch (err) {
-			console.log(err);
-			res.json();
+			client.Logger.error(err);
+			Error.GenericError(res, axios.isAxiosError(err) ? `${err.response?.data}` : `${err}`);
 		}
 	});
 

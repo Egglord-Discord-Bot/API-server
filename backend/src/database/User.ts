@@ -35,6 +35,8 @@ export default class UserManager {
 				avatar: data.avatar,
 				locale: data.locale,
 				email: data.email,
+				access_token: data.access_token,
+				refresh_token: data.refresh_token,
 			},
 		});
 	}
@@ -66,6 +68,8 @@ export default class UserManager {
 				role: data.role != null ? data.role : undefined,
 				username: data.username != null ? data.username : undefined,
 				avatar: data.avatar != null ? data.avatar : undefined,
+				access_token: data.access_token != null ? data.access_token : undefined,
+				refresh_token: data.refresh_token != null ? data.refresh_token : undefined,
 			},
 		});
 	}

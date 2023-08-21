@@ -8,6 +8,8 @@ export type updateUser = {
 	avatar?: string
 	discriminator?: string
 	role?: Role
+	access_token?: string
+	refresh_token?: string
 }
 
 export type createUser = {
@@ -18,6 +20,8 @@ export type createUser = {
 	avatar?: string
 	locale?: string
 	email?: string
+	access_token?: string
+	refresh_token?: string
 }
 
 export type fetchUsersParam = {

@@ -7,6 +7,7 @@ export interface User {
   createdAt: Date
   role: 'USER' | 'ADMIN' | 'BLOCK' | 'PREMIUM'
   locale: string
+  access_token: string
   _count?: {
     history: number
   }

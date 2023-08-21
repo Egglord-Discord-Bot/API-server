@@ -13,6 +13,8 @@ datasource db {
 model User {
   id            BigInt        @id
   token         String        @unique
+  access_token  String?
+  refresh_token String?
   avatar        String?
   username      String?
   locale        String?
