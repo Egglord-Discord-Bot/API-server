@@ -2,7 +2,7 @@ import type CacheHandler from './handlers/CacheHandler';
 import UserManager from '../database/User';
 import UserHistoryManager from '../database/userHistory';
 import SystemManager from './SystemManager';
-import EndpointManager from '../database/endpointData';
+import EndpointManager from './EndpointManager';
 import ResponseCodeManager from '../database/responseCodes';
 import { Logger } from '../utils';
 

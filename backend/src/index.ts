@@ -11,15 +11,29 @@ import RateLimter from './middleware/RateLimiter';
 import bodyParser from 'body-parser';
 import * as dotenv from 'dotenv';
 import Client from './helpers/Client';
-import type { time } from './types';
+import type { time, swaggerJsdocType } from './types';
+import swaggerJsdoc from 'swagger-jsdoc';
+import fs from 'fs';
 dotenv.config();
 
 
 (async () => {
+	const openapiSpecification = swaggerJsdoc({
+		failOnErrors: true,
+		definition: {
+			openapi: '3.0.0',
+			info: {
+				title: 'Hello World',
+				version: '1.0.0',
+			},
+		},
+		apis: ['./src/routes/api/*.ts'],
+	}) as swaggerJsdocType;
+	fs.writeFileSync(`${process.cwd()}/src/assets/JSON/endpoints.json`, JSON.stringify(openapiSpecification), 'utf8');
 
 	// Load passport and endpoint data
 	const client = new Client();
-	await (await import('./helpers/EndpointData')).default(client);
+	await client.EndpointManager.checkEndpointData(client);
 	const endpoints = Utils.generateRoutes(join(__dirname, './', 'routes')).filter(e => e.route !== '/index');
 	const RateLimiterHandler = new RateLimter(client);
 
