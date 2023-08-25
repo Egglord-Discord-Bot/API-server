@@ -1,6 +1,6 @@
-import { CONSTANTS } from '../utils';
+import { Collection, CONSTANTS } from '../utils';
 import type { User, Role } from '@prisma/client';
-import type { updateUser, createUser, userUnqiueParam, fetchUsersParam } from '../types/database';
+import type { createUser, updateUser, userUnqiueParam, fetchUsersParam } from '../types/database';
 import client from './client';
 
 interface ExtendedUser extends User {
@@ -10,11 +10,11 @@ interface ExtendedUser extends User {
 }
 
 export default class UserManager {
-	size: number;
-	cachedUsers: Array<User>;
+	count: number;
+	cache: Collection<bigint, User>;
 	constructor() {
-		this.size = 0;
-		this.cachedUsers = [];
+		this.count = 0;
+		this.cache = new Collection();
 
 		// Fetch total count on start up
 		this.fetchCount();
@@ -26,8 +26,8 @@ export default class UserManager {
 		* @returns The new user
 	*/
 	async create(data: createUser): Promise<User> {
-		this.size++;
-		return client.user.create({
+		this.count++;
+		const user = await client.user.create({
 			data: {
 				id: data.id,
 				token: data.token,
@@ -37,8 +37,11 @@ export default class UserManager {
 				email: data.email,
 				access_token: data.access_token,
 				refresh_token: data.refresh_token,
+				expiresAt: data.expiresAt,
 			},
 		});
+		this.cache.set(user.id, user);
+		return user;
 	}
 
 	/**
@@ -46,8 +49,9 @@ export default class UserManager {
 		* @param {number} id The ID of the user
 		* @returns The deleted user
 	*/
-	async delete(id: number): Promise<User> {
-		this.size--;
+	async delete(id: bigint): Promise<User> {
+		this.count--;
+		this.cache.delete(id);
 		return client.user.delete({
 			where: { id },
 		});
@@ -59,7 +63,7 @@ export default class UserManager {
 		* @returns The new user
 	*/
 	async update(data: updateUser): Promise<User> {
-		return client.user.update({
+		const user = await client.user.update({
 			where: {
 				id: data.id,
 			},
@@ -70,8 +74,12 @@ export default class UserManager {
 				avatar: data.avatar != null ? data.avatar : undefined,
 				access_token: data.access_token != null ? data.access_token : undefined,
 				refresh_token: data.refresh_token != null ? data.refresh_token : undefined,
+				expiresAt: data.expiresAt != null ? data.expiresAt : undefined,
 			},
 		});
+		// Update cache and return new user
+		this.cache.set(data.id, user);
+		return user;
 	}
 
 	/**
@@ -79,8 +87,8 @@ export default class UserManager {
 		* @returns The total number of entries
 	*/
 	async fetchCount() {
-		if (this.size == 0) this.size = await client.user.count();
-		return this.size;
+		if (this.count == 0) this.count = await client.user.count();
+		return this.count;
 	}
 
 	/**
@@ -100,9 +108,14 @@ export default class UserManager {
     * @returns A user
   */
 	async fetchByParam({ id, token }: userUnqiueParam): Promise<User| null> {
-		return client.user.findUnique({
-			where: { id, token },
-		});
+		let user = this.cache.find(u => u.id == id || u.token == token);
+		if (user == null) {
+			user = await client.user.findUnique({
+				where: { id, token },
+			});
+			if (user != null) this.cache.set(user.id, user);
+		}
+		return user;
 	}
 
 	/**
@@ -223,7 +236,7 @@ export default class UserManager {
 	}
 
 	/**
-		* Fetch all users, mainly just for downloading
+		* Fetch all users, mainly just for downloading (Not recommended)
 		* @returns An array of users
 	*/
 	async fetchAll(removeToken = false): Promise<ExtendedUser[]> {

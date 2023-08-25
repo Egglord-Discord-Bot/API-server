@@ -1,6 +1,7 @@
+import { Collection } from './Collection';
 import CONSTANTS from './CONSTANTS';
 import Error from './Errors';
 import Logger from './Logger';
 import Utils from './Utils';
 
-export { CONSTANTS, Error, Logger, Utils };
+export { Collection, CONSTANTS, Error, Logger, Utils };

@@ -15,6 +15,7 @@ model User {
   token         String        @unique
   access_token  String?
   refresh_token String?
+  expiresAt     DateTime?
   avatar        String?
   username      String?
   locale        String?

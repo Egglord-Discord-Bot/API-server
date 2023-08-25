@@ -10,6 +10,7 @@ export type updateUser = {
 	role?: Role
 	access_token?: string
 	refresh_token?: string
+	expiresAt?: Date
 }
 
 export type createUser = {
@@ -22,6 +23,7 @@ export type createUser = {
 	email?: string
 	access_token?: string
 	refresh_token?: string
+	expiresAt?: Date
 }
 
 export type fetchUsersParam = {

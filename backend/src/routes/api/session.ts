@@ -6,14 +6,16 @@ import axios from 'axios';
 const router = Router();
 
 export function run(client: Client) {
-
 	router.get('/', async (req, res) => {
 		const { access_token, id } = req.query;
 		const user = await client.UserManager.fetchByParam({ id: BigInt(id as string) });
 
-		if (!user) return res.json({ error: 'Incorrect userID' });
-		if (access_token != user.access_token) return res.json({ error: 'access token is not correct' });
+		// Validate user session
+		if (!user) return res.status(403).json({ error: 'Incorrect userID' });
+		if (access_token != user.access_token) return res.status(403).json({ error: 'Access token mismatch.' });
+		if (new Date(user.expiresAt ?? 0) <= new Date()) return res.status(403).json({ error: 'Access token has expired.' });
 
+		// Give back new user obj
 		res.json({
 			id: `${user.id}`,
 			role: user.role,
@@ -29,7 +31,7 @@ export function run(client: Client) {
 	router.post('/signIn', async (req, res) => {
 		// Validate request
 		const userId = BigInt(req.query.userId as string);
-		const { access_token, refresh_token } = req.body;
+		const { access_token, refresh_token, expiresAt } = req.body;
 
 		if (!(/(\d{17,20})/g.test(`${userId}`))) return Error.GenericError(res, 'Invalid user ID');
 		if (typeof access_token !== 'string') return Error.MissingFromBody(res, 'access_token', 'string');
@@ -64,9 +66,9 @@ export function run(client: Client) {
 				user = await client.UserManager.create({ id: userId,
 					token: new TokenGenerator({ bitSize: 512, baseEncoding: TokenBase.BASE62 }).generate(),
 					avatar: image_url,
-					locale: locale ?? undefined,
-					email: email ?? undefined,
-					access_token, refresh_token, username,
+					locale: locale ?? null,
+					email: email ?? null,
+					access_token, refresh_token, username, expiresAt: new Date(expiresAt * 1000),
 				});
 			}
 
@@ -80,7 +82,8 @@ export function run(client: Client) {
 			});
 
 			// Update the database if any changes are found
-			if (username != user.username || image_url != user.avatar || access_token != user.access_token || refresh_token != user.refresh_token) await client.UserManager.update({ id: userId, username, avatar: image_url, refresh_token, access_token });
+			if (username != user.username || image_url != user.avatar || access_token != user.access_token
+				|| refresh_token != user.refresh_token || expiresAt != user.expiresAt) await client.UserManager.update({ id: userId, username, avatar: image_url, refresh_token, access_token, expiresAt: new Date(expiresAt * 1000) });
 		} catch (err) {
 			client.Logger.error(err);
 			Error.GenericError(res, axios.isAxiosError(err) ? `${err.response?.data}` : `${err}`);

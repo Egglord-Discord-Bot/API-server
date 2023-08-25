@@ -7,7 +7,7 @@ import helmet from 'helmet';
 import compression from 'compression';
 import { Utils, Error } from './utils';
 import { join } from 'path';
-import RateLimter from './middleware/RateLimiter';
+import { RateLimiter } from './middleware';
 import bodyParser from 'body-parser';
 import * as dotenv from 'dotenv';
 import Client from './helpers/Client';
@@ -35,7 +35,7 @@ dotenv.config();
 	const client = new Client();
 	await client.EndpointManager.checkEndpointData(client);
 	const endpoints = Utils.generateRoutes(join(__dirname, './', 'routes')).filter(e => e.route !== '/index');
-	const RateLimiterHandler = new RateLimter(client);
+	const RateLimiterHandler = new RateLimiter(client);
 
 	// The web server
 	app.use(helmet({
@@ -57,7 +57,7 @@ dotenv.config();
 		}))
 		.use(compression())
 		.use(bodyParser.json())
-		.use((req: Request, res: Response, next: NextFunction) => {
+		.use(async (req: Request, res: Response, next: NextFunction) => {
 			// Handle custom rate limits
 			const newReq = req as Request & time;
 			const newRes = res as Response & time;
@@ -71,8 +71,10 @@ dotenv.config();
 			newRes._endTime = 0;
 
 			// Run logger & RateLimter
-			if (req.originalUrl !== '/favicon.ico') client.Logger.connection(newReq, newRes);
-			if (req.originalUrl.startsWith('/api/') && 	!['/api/admin', '/api/session', '/api/stats'].some(i => req.originalUrl.startsWith(i))) return RateLimiterHandler.checkRateLimit(newReq, newRes, next);
+			client.Logger.connection(newReq, newRes);
+			if (req.originalUrl.match(/\/api\/(?!(session|admin|stats)).*/g)) return RateLimiterHandler.checkRateLimit(newReq, newRes, next);
+
+			// Display actualy response
 			next();
 		});
 
