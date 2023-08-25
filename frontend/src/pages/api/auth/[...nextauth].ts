@@ -18,10 +18,10 @@ export const AuthOption = {
 				},
 			},
 			profile: async (profile, tokens) => {
-				console.log(profile, tokens);
 				const { data } = await axios.post(`${process.env.BACKEND_URL}api/session/signIn?userId=${profile.id}`, {
 					access_token: tokens.access_token,
 					refresh_token: tokens.refresh_token,
+					expiresAt: tokens.expires_at,
 				});
 
 				// Return update user
