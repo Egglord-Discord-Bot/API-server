@@ -196,7 +196,6 @@ export default class userHistoryManager {
 		* @returns The number of users
 	*/
 	async fetchHistoryCountByHour(hour: number, day = new Date().getDate(), month = new Date().getMonth(), year = new Date().getFullYear()) {
-		console.log(new Date(year, month, day, hour));
 		return client.userHistory.count({
 			where: {
 				createdAt: {
