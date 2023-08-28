@@ -1,3 +1,4 @@
+import { Collection } from '../../utils';
 type addData = {
 	id: string
 	data: object
@@ -5,11 +6,11 @@ type addData = {
 
 export default class CacheHandler {
 	timetillSweep: number;
-	data: Map<string, object>;
+	data: Collection<string, object>;
 	constructor() {
 		// 6 hours
 		this.timetillSweep = 6 * 60 * 60 * 1000;
-		this.data = new Map();
+		this.data = new Collection();
 	}
 
 	/**
