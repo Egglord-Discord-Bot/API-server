@@ -20,10 +20,13 @@ export type getLines = {
 }
 
 export type ParamAPIEndpoint = {
-	name?: string
-	description?: string
-	required?: boolean
-	type?: string
+	name: string
+	description: string
+	required: boolean
+	type: 'string' | 'number'
+	default: string | number
+  minimum: number
+  maximum: number
 }
 
 export type APIEndpointData = {
@@ -35,9 +38,10 @@ export type APIEndpointData = {
 	parameters?: Array<ParamAPIEndpoint>
 }
 
-type swaggerPath = { [key:string]: {
-	'get'?: any;
-}
+type swaggerPath = {
+	[key:string]: {
+		get: APIEndpointData
+	}
 }
 
 export interface swaggerJsdocType {

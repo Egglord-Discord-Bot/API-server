@@ -1,8 +1,8 @@
 import { join } from 'path';
 import { Utils } from '../utils';
 import endpointData from '../database/endpointData';
-import type { swaggerJsdocType, APIEndpointData } from '../types';
-import type { Endpoint } from '@prisma/client';
+import type { swaggerJsdocType } from '../types';
+import type { ExtendedEndpoint } from '../types/database';
 import type { Router }from 'express';
 import type Client from './Client';
 import fs from 'fs';
@@ -14,10 +14,19 @@ export default class EndpointManager extends endpointData {
 		* Create an endpoint data
 		* @returns The new endpoint data
 	*/
-	async fetchEndpointData(): Promise<Array<Endpoint & { data: APIEndpointData }>> {
-		const endpoints = [...(await this.fetchEndpoints()).values()];
-		const openapiSpecification = JSON.parse(fs.readFileSync(`${process.cwd()}/src/assets/JSON/endpoints.json`).toString()) as swaggerJsdocType;
-		return endpoints.map(e => ({ ...e, data: openapiSpecification.paths[`${e.name.replace('/api', '')}`]?.get }));
+	async fetchEndpointData(): Promise<Array<ExtendedEndpoint>> {
+		// Check cache
+		if (this.cache.random()?.data != undefined) {
+			return [...this.cache.values()];
+		} else {
+			const endpoints: Array<ExtendedEndpoint> = [...(await this.fetchEndpoints()).values()];
+			const openapiSpecification = JSON.parse(fs.readFileSync(`${process.cwd()}/src/assets/JSON/endpoints.json`).toString()) as swaggerJsdocType;
+			const endpointsWithData = endpoints.map(e => ({ ...e, data: openapiSpecification.paths[`${e.name.replace('/api', '')}`]?.get }));
+
+			// Update cache with the addition data
+			endpointsWithData.forEach(e => this.cache.set(e.name, e));
+			return endpointsWithData;
+		}
 	}
 
 	/**

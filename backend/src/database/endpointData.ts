@@ -1,10 +1,9 @@
 import client from './client';
-import type { Endpoint } from '@prisma/client';
-import type { createEndpointData, updateEndpointData } from '../types/database';
+import type { createEndpointData, updateEndpointData, ExtendedEndpoint } from '../types/database';
 import { Collection } from '../utils';
 
 export default class EndpointManager {
-	cache: Collection<string, Endpoint>;
+	cache: Collection<string, ExtendedEndpoint>;
 	constructor() {
 		this.cache = new Collection();
 
@@ -73,7 +72,7 @@ export default class EndpointManager {
 		* @param {?boolean} includeHistory Include the history with the request
 		* @returns An array of endpoint data entries
 	*/
-	async fetchEndpoints(force?: boolean, includeHistory?: boolean): Promise<Collection<string, Endpoint>> {
+	async fetchEndpoints(force?: boolean, includeHistory?: boolean): Promise<Collection<string, ExtendedEndpoint>> {
 		if (this.cache.size == 0 || force) {
 			const endpoints = await client.endpoint.findMany({
 				include: {

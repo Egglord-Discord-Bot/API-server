@@ -1,4 +1,5 @@
-import type { Role } from '@prisma/client';
+import type { Role, Endpoint } from '@prisma/client';
+import type { APIEndpointData } from './';
 
 /* USER DATABASE TYPES */
 export type updateUser = {
@@ -73,6 +74,11 @@ export type updateEndpointData = {
 	premiumOnly?: boolean
 	isValid?: boolean
 }
+
+export type ExtendedEndpoint = Endpoint & {
+	data?: APIEndpointData
+}
+
 
 /* MISC */
 export type pagination = {
