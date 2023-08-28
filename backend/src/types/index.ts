@@ -24,9 +24,10 @@ export type ParamAPIEndpoint = {
 	description: string
 	required: boolean
 	type: 'string' | 'number'
-	default: string | number
-  minimum: number
-  maximum: number
+	default?: string | number
+  minimum?: number
+  maximum?: number
+	enum?: Array<string | number>
 }
 
 export type APIEndpointData = {

@@ -3,16 +3,25 @@ import { join, parse, sep } from 'path';
 import type { Request } from 'express';
 import { decode } from 'next-auth/jwt';
 import type { JWT } from 'next-auth/jwt';
-import CONSTANTS from './CONSTANTS';
 
 type LabelEnum = { [key: string]: JWT }
 const sessionStore: LabelEnum = {};
 
+interface FileOptions {
+	path: string,
+	route: string,
+}
+
 export default class Utils {
+	/**
+		* Get all files in a directory (including sub-directories)
+		* @param {string} directory The response to the requestee
+		* @returns An array of file paths
+	*/
 	public static generateRoutes(directory: string) {
 		const seperator = '/';
 		const results: FileOptions[] = [];
-		for(const path of this.searchDirectory(directory)) {
+		for (const path of this.searchDirectory(directory)) {
 			const { dir, name } = parse(path);
 			const basePath = directory.split(sep).pop() as string;
 			const dirIndex = dir.indexOf(basePath);
@@ -22,6 +31,12 @@ export default class Utils {
 		return results;
 	}
 
+	/**
+		* Create the full path
+		* @param {string} context The name of the file or directory
+		* @param {boolean} isFile Whether or not the context if a file or not
+		* @returns An array of file paths
+	*/
 	private static validateDynamicRoute(context: string, isFile = false) {
 		const seperator = '/';
 		const dynamicRouteValidator = /(?<=\[).+?(?=\])/gi;
@@ -30,58 +45,34 @@ export default class Utils {
 		return context.replace(`[${validate[0]}]`, isFile ? `${seperator}:${validate[0]}` : `:${validate[0]}`);
 	}
 
+	/**
+		* Get the entries from a directory and check if they are more files or another directory
+		* @param {string} directory The name of the directory
+		* @param {Array<string>} files The files for saving context
+		* @returns An array of file paths
+	*/
 	public static searchDirectory(directory: string, files: string[] = []) {
 		for(const file of readdirSync(directory)) {
 			const path = join(directory, file);
 			const is = statSync(path);
-			if(is.isFile()) files.push(path);
-			if(is.isDirectory()) files = files.concat(this.searchDirectory(path));
+			if (is.isFile()) files.push(path);
+			if (is.isDirectory()) files = files.concat(this.searchDirectory(path));
 		}
 		return files;
 	}
 
-	public static randomInteger(num1: number, num2 = 1) {
-		return Math.floor(Math.random() * num1) + num2;
-	}
+	/**
+		* Generate a random integer
+		* @param {string} num1 The name of the directory
+		* @returns A number
+	*/
+	public static randomInteger = (num1: number, num2 = 1) => Math.floor(Math.random() * num1) + num2;
 
-	public static getIP(req: Request) {
-		if (req.headers) {
-			// Standard headers used by Amazon EC2, Heroku, and others.
-			if (CONSTANTS.ipv4Regex.test(req.headers['x-client-ip'] as string)) return req.headers['x-client-ip'];
-
-			// CF-Connecting-IP - applied to every request to the origin. (Cloudflare)
-			if (CONSTANTS.ipv4Regex.test(req.headers['cf-connecting-ip'] as string)) return req.headers['cf-connecting-ip'];
-
-			// Fastly and Firebase hosting header (When forwared to cloud function)
-			if (CONSTANTS.ipv4Regex.test(req.headers['fastly-client-ip'] as string)) return req.headers['fastly-client-ip'];
-
-			// Akamai and Cloudflare: True-Client-IP.
-			if (CONSTANTS.ipv4Regex.test(req.headers['true-client-ip'] as string)) return req.headers['true-client-ip'];
-
-			// Default nginx proxy/fcgi; alternative to x-forwarded-for, used by some proxies.
-			if (CONSTANTS.ipv4Regex.test(req.headers['x-real-ip'] as string)) return req.headers['x-real-ip'];
-
-			// (Rackspace LB and Riverbed's Stingray)
-			// http://www.rackspace.com/knowledge_center/article/controlling-access-to-linux-cloud-sites-based-on-the-client-ip-address
-			// https://splash.riverbed.com/docs/DOC-1926
-			if (CONSTANTS.ipv4Regex.test(req.headers['x-cluster-client-ip'] as string)) return req.headers['x-cluster-client-ip'];
-
-			if (CONSTANTS.ipv4Regex.test(req.headers['x-forwarded'] as string)) return req.headers['x-forwarded'];
-
-			if (CONSTANTS.ipv4Regex.test(req.headers['forwarded-for'] as string)) return req.headers['forwarded-for'];
-
-			if (CONSTANTS.ipv4Regex.test(req.headers.forwarded as string)) return req.headers.forwarded;
-		}
-
-		// Remote address checks.
-		if (req.socket) {
-			if (CONSTANTS.ipv4Regex.test(req.socket.remoteAddress ?? '')) return req.socket.remoteAddress;
-
-			if (req.socket && CONSTANTS.ipv4Regex.test(req.socket.remoteAddress ?? '')) return req.socket.remoteAddress;
-		}
-
-		return req.ip;
-	}
+	/**
+		* Get the requestee's session
+		* @param {string} req The Request
+		* @returns The session if there is one
+	*/
 	public static async getSession(req: Request): Promise<JWT | null> {
 		if (req.headers.cookie == undefined) return null;
 
@@ -101,9 +92,4 @@ export default class Utils {
 		sessionStore[sessionToken] = session;
 		return session;
 	}
-}
-
-interface FileOptions {
-	path: string,
-	route: string,
 }

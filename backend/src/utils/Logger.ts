@@ -4,7 +4,8 @@ import { createRollingFileLogger } from 'simple-node-logger';
 import onFinished from 'on-finished';
 import type { loggerTypes, time } from '../types';
 import type { Request, Response } from 'express';
-import Utils from './Utils';
+import CONSTANTS from './CONSTANTS';
+
 const log = createRollingFileLogger({
 	logDirectory: './src/utils/logs',
 	fileNamePattern: 'roll-<DATE>.log',
@@ -81,7 +82,7 @@ export default class Logger {
 			url = req.originalUrl || req.url,
 			status = res.statusCode,
 			color = status >= 500 ? 'bgRed' : status >= 400 ? 'bgMagenta' : status >= 300 ? 'bgCyan' : status >= 200 ? 'bgGreen' : 'dim',
-			requester = Utils.getIP(req);
+			requester = Logger.getIP(req);
 
 		// How long did it take for the page to load
 		let response_time;
@@ -94,5 +95,43 @@ export default class Logger {
 		} else {
 			this.error(`${requester} ${method} ${url} ${chalk[color](status)} - ${(response_time ?? '?')} ms`);
 		}
+	}
+
+	private static getIP(req: Request) {
+		if (req.headers) {
+			// Standard headers used by Amazon EC2, Heroku, and others.
+			if (CONSTANTS.ipv4Regex.test(req.headers['x-client-ip'] as string)) return req.headers['x-client-ip'];
+
+			// CF-Connecting-IP - applied to every request to the origin. (Cloudflare)
+			if (CONSTANTS.ipv4Regex.test(req.headers['cf-connecting-ip'] as string)) return req.headers['cf-connecting-ip'];
+
+			// Fastly and Firebase hosting header (When forwared to cloud function)
+			if (CONSTANTS.ipv4Regex.test(req.headers['fastly-client-ip'] as string)) return req.headers['fastly-client-ip'];
+
+			// Akamai and Cloudflare: True-Client-IP.
+			if (CONSTANTS.ipv4Regex.test(req.headers['true-client-ip'] as string)) return req.headers['true-client-ip'];
+
+			// Default nginx proxy/fcgi; alternative to x-forwarded-for, used by some proxies.
+			if (CONSTANTS.ipv4Regex.test(req.headers['x-real-ip'] as string)) return req.headers['x-real-ip'];
+
+			// (Rackspace LB and Riverbed's Stingray)
+			// http://www.rackspace.com/knowledge_center/article/controlling-access-to-linux-cloud-sites-based-on-the-client-ip-address
+			// https://splash.riverbed.com/docs/DOC-1926
+			if (CONSTANTS.ipv4Regex.test(req.headers['x-cluster-client-ip'] as string)) return req.headers['x-cluster-client-ip'];
+
+			if (CONSTANTS.ipv4Regex.test(req.headers['x-forwarded'] as string)) return req.headers['x-forwarded'];
+
+			if (CONSTANTS.ipv4Regex.test(req.headers['forwarded-for'] as string)) return req.headers['forwarded-for'];
+
+			if (CONSTANTS.ipv4Regex.test(req.headers.forwarded as string)) return req.headers.forwarded;
+		}
+
+		// Remote address checks.
+		if (req.socket) {
+			if (CONSTANTS.ipv4Regex.test(req.socket.remoteAddress ?? '')) return req.socket.remoteAddress;
+			if (req.socket && CONSTANTS.ipv4Regex.test(req.socket.remoteAddress ?? '')) return req.socket.remoteAddress;
+		}
+
+		return req.ip;
 	}
 }

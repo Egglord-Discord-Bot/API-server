@@ -24,7 +24,9 @@ export function run(client: Client) {
 	 *       - name: userId
 	 *         description: The ID of the discord user
 	 *         required: true
-	 *         type: string
+	 *         type: number
+	 *         minimum: 17
+ 	 *         maximum: 20
 	*/
 	router.get('/discord', async (req, res) => {
 		const userId = req.query.userId as string;
