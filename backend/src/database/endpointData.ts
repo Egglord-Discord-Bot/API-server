@@ -1,14 +1,15 @@
 import client from './client';
 import type { Endpoint } from '@prisma/client';
 import type { createEndpointData, updateEndpointData } from '../types/database';
+import { Collection } from '../utils';
 
 export default class EndpointManager {
-	cache: Array<Endpoint>;
+	cache: Collection<string, Endpoint>;
 	constructor() {
-		this.cache = [];
+		this.cache = new Collection();
 
 		// Fetch total count on start up
-		this.fetchEndpointData();
+		this.fetchEndpoints();
 	}
 
 	/**
@@ -17,7 +18,7 @@ export default class EndpointManager {
 		* @returns The new endpoint data
 	*/
 	async create(data: createEndpointData) {
-		return client.endpoint.create({
+		const endpoint = await client.endpoint.create({
 			data: {
 				name: data.name,
 				cooldown: data.cooldown,
@@ -27,6 +28,8 @@ export default class EndpointManager {
 				isValid: data.isValid == undefined ? false : data.isValid,
 			},
 		});
+		this.cache.set(endpoint.name, endpoint);
+		return endpoint;
 	}
 
 	/**
@@ -48,8 +51,7 @@ export default class EndpointManager {
 				isValid: data.isValid != null ? data.isValid : undefined,
 			},
 		});
-		// Update cache aswell
-		await this.fetchEndpointData(true);
+		this.cache.set(endpoint.name, endpoint);
 		return endpoint;
 	}
 
@@ -59,10 +61,9 @@ export default class EndpointManager {
 		* @returns The old endpoint data
 	*/
 	async delete(name: string) {
+		this.cache.delete(name);
 		return client.endpoint.delete({
-			where: {
-				name,
-			},
+			where: { name },
 		});
 	}
 
@@ -72,9 +73,9 @@ export default class EndpointManager {
 		* @param {?boolean} includeHistory Include the history with the request
 		* @returns An array of endpoint data entries
 	*/
-	async fetchEndpointData(force?: boolean, includeHistory = false) {
-		if (this.cache.length == 0 || force) {
-			this.cache = await client.endpoint.findMany({
+	async fetchEndpoints(force?: boolean, includeHistory?: boolean): Promise<Collection<string, Endpoint>> {
+		if (this.cache.size == 0 || force) {
+			const endpoints = await client.endpoint.findMany({
 				include: {
 					_count: !includeHistory ? false : {
 						select: {
@@ -83,6 +84,7 @@ export default class EndpointManager {
 					},
 				},
 			});
+			endpoints.forEach(e => this.cache.set(e.name, e));
 		}
 		return this.cache;
 	}
@@ -93,21 +95,30 @@ export default class EndpointManager {
 		* @param {?boolean} includeHistory Include the history with the request
 		* @returns Array of user history entries
 	*/
-	async fetchEndpointByName(name: string, includeHistory = false) {
-		return client.endpoint.findMany({
-			where: {
-				name: {
-					startsWith: name,
-				},
-			},
-			include: {
-				_count: {
-					select: {
-						history: includeHistory,
+	async fetchEndpointByName(name: string, includeHistory?: boolean) {
+		// Check cache first
+		let endpoints = [];
+		for (const endpointName of this.cache.keys()) {
+			if (endpointName.startsWith(name)) endpoints.push(this.cache.get(endpointName));
+		}
+
+		if (endpoints.length == 0) {
+			endpoints = await client.endpoint.findMany({
+				where: {
+					name: {
+						startsWith: name,
 					},
 				},
-			},
-		});
+				include: {
+					_count: {
+						select: {
+							history: includeHistory ?? false,
+						},
+					},
+				},
+			});
+		}
+		return endpoints;
 	}
 
 	async fetchMostAccessEndpoints() {
@@ -128,6 +139,6 @@ export default class EndpointManager {
 		* @returns The total number of entries
 	*/
 	async fetchCount() {
-		return this.cache.length;
+		return this.cache.size;
 	}
 }

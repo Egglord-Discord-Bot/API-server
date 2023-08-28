@@ -7,7 +7,8 @@ const client = new PrismaClient({ errorFormat: 'pretty',
 		{ level: 'info', emit: 'event' },
 		{ level: 'warn', emit: 'event' },
 		{ level: 'error', emit: 'event' },
-	] });
+	],
+});
 
 client.$use(async (params, next) => {
 	const startTime = Date.now(),

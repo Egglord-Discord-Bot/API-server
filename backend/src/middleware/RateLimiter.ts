@@ -1,7 +1,7 @@
 import type { Request, Response, NextFunction } from 'express';
 import type Client from '../helpers/Client';
 import type { time } from '../types';
-import { Utils, Error } from '../utils';
+import { Utils, Error, Collection } from '../utils';
 import type { User, Endpoint } from '@prisma/client';
 import onFinished from 'on-finished';
 import { createHash } from 'crypto';
@@ -26,7 +26,7 @@ interface endpointData {
 export default class RateLimit {
 	userRatelimit: Map<bigint, endpointData>;
 	lastChecked: number;
-	endpointData: Array<Endpoint>;
+	endpointData: Collection<string, Endpoint>;
 	client: Client;
 	constructor(client: Client) {
 		this.endpointData = client.EndpointManager.cache;
@@ -63,7 +63,7 @@ export default class RateLimit {
 		}
 
 		// Check that the endpoint is valid
-		const endpoint = this.endpointData.find(i => i.name == req.originalUrl.split('?')[0]);
+		const endpoint = this.endpointData.get(req.originalUrl.split('?')[0]);
 		if (endpoint == undefined) return this.sendResponse({ req, res, userId: user.id, endpoint: req.originalUrl.split('?')[0], response: Error.MissingEndpoint });
 
 		// Check if endpoint is blocked
@@ -150,24 +150,25 @@ export default class RateLimit {
 	/**
     * Check if the user is ratelimited on the endpoint
     * @param {bigint} userID The ID of the user getting checked
-    * @param {string} endpoint The endpoint name
+    * @param {string} endpointName The endpoint name
     * @returns Whether or not they are ratelimited on the endpoint
   */
-	async checkEndpointUsage(userID: bigint, endpoint: string) {
+	async checkEndpointUsage(userID: bigint, endpointName: string) {
 		let isRateLimted = false;
+		const endpoint = this.endpointData.get(endpointName) as Endpoint;
+
 		if (this.userRatelimit.get(userID)) {
 			// User has been cached
-			const end = this.userRatelimit.get(userID)?.endpoints.find(e => e.name == endpoint);
+			const end = this.userRatelimit.get(userID)?.endpoints.find(e => e.name == endpointName);
 			if (end != undefined) {
-				// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-				if (end.lastAccess.length >= this.endpointData.find(e => e.name == endpoint)!.maxRequests) return true;
+				if (end.lastAccess.length >= endpoint.maxRequests) return true;
 
-				isRateLimted = (end.lastAccess.sort((a, b) => b.getTime() - a.getTime())[0]?.getTime() ?? 0) >= new Date().getTime() - (this.endpointData.find(e => e.name == endpoint)?.cooldown ?? 2000);
+				isRateLimted = (end.lastAccess.sort((a, b) => b.getTime() - a.getTime())[0]?.getTime() ?? 0) >= new Date().getTime() - endpoint.cooldown;
 			}
 		}
 
 		// Only save to user's history if not ratelimited
-		if (!isRateLimted) await this.addEndpoint(userID, endpoint);
+		if (!isRateLimted) await this.addEndpoint(userID, endpointName);
 		return isRateLimted;
 	}
 
