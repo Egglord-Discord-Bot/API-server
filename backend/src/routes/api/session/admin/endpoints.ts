@@ -1,9 +1,8 @@
 import { Router } from 'express';
 import type Client from '../../../../helpers/Client';
-import type { swaggerJsdocType } from '../../../../types';
 import { isAdmin } from '../../../../middleware/middleware';
 import { Error } from '../../../../utils';
-import fs from 'fs';
+
 const router = Router();
 
 export function run(client: Client) {
@@ -13,10 +12,7 @@ export function run(client: Client) {
 		if (history && !['true', 'false'].includes(history)) return Error.InvalidValue(res, 'includeHistory', ['true', 'false']);
 
 		try {
-			const endpoints = await client.EndpointManager.fetchEndpointData(true, (history == 'true') ? true : false);
-			const openapiSpecification = JSON.parse(fs.readFileSync(`${process.cwd()}/src/assets/JSON/endpoints.json`).toString()) as swaggerJsdocType;
-			const el = endpoints.map(e => ({ ...e, data: openapiSpecification.paths[`${e.name.replace('/api', '')}`]?.get }));
-			res.json({ endpoints: el });
+			res.json({ endpoints: await client.EndpointManager.fetchEndpointData() });
 		} catch (err) {
 			console.log(err);
 			res.json({ endpoints: [] });
