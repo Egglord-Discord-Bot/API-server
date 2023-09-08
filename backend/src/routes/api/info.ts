@@ -82,9 +82,9 @@ export function run(client: Client) {
 		const WEBSITE_REGEX = /(https:\/\/www\.|http:\/\/www\.|https:\/\/|http:\/\/)?[a-zA-Z0-9]{2,}(\.[a-zA-Z0-9]{2,})(\.[a-zA-Z0-9]{2,})?/g,
 			stations = [];
 		if (WEBSITE_REGEX.test(query)) {
-			stations.push((radioStationData as Array<RadioStation>).filter(r => r.website == query));
+			stations.push(...(radioStationData as Array<RadioStation>).filter(r => r.website == query));
 		} else {
-			stations.push((radioStationData as Array<RadioStation>).filter(r => r.name.toLowerCase().startsWith(query.toLowerCase())).slice(0, 10));
+			stations.push(...(radioStationData as Array<RadioStation>).filter(r => r.name.toLowerCase().startsWith(query.toLowerCase())).slice(0, 10));
 		}
 
 		res.json({ data: stations });
