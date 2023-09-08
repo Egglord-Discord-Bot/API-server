@@ -87,7 +87,7 @@ export function run(client: Client) {
 			stations.push((radioStationData as Array<RadioStation>).filter(r => r.name.toLowerCase().startsWith(query.toLowerCase())).slice(0, 10));
 		}
 
-		res.json({ stations });
+		res.json({ data: stations });
 	});
 
 	/**
