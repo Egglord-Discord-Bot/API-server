@@ -260,7 +260,8 @@ export function run(client: Client) {
 		if (!title) return Error.MissingQuery(res, 'title');
 
 		try {
-			const search = await LyricsFetcher.songs.search(`${artist} - ${title}`);
+			const searchQuery = (artist == undefined) ? title : `${artist} - ${title}`;
+			const search = await LyricsFetcher.songs.search(searchQuery);
 			if (search.length == 0) return Error.GenericError(res, `No lyrics could be found from a song called: ${title}.`);
 
 			const lyrics = await search[0].lyrics();
