@@ -248,14 +248,19 @@ export function run(client: Client) {
 	 *         description: The title of the song
 	 *         required: true
 	 *         type: string
+	 *       - name: artist
+	 *         description: The artist of the song
+	 *         required: false
+	 *         type: string
 	*/
 	router.get('/lyrics', async (req, res) => {
 		// Get text to translate
 		const title = req.query.title as string;
+		const artist = req.query.artist as string;
 		if (!title) return Error.MissingQuery(res, 'title');
 
 		try {
-			const search = await LyricsFetcher.songs.search(title);
+			const search = await LyricsFetcher.songs.search(`${artist} - ${title}`);
 			if (search.length == 0) return Error.GenericError(res, `No lyrics could be found from a song called: ${title}.`);
 
 			const lyrics = await search[0].lyrics();
