@@ -8,36 +8,35 @@ import { translate } from '@vitalets/google-translate-api';
 import languages from '../../assets/JSON/languages.json';
 import radioStationData from '../../assets/JSON/radio-stations.json';
 import type { RadioStation } from '../../types';
-import * as geniusLyrics from 'genius-lyrics';
+import { getSong } from 'genius-lyrics-api';
 export type redditType = 'hot' | 'new';
 import type Client from '../../helpers/Client';
 
 type redditChild = {
-	data: object
-}
+	data: object;
+};
 type redditData = {
-	children: redditChild[]
-}
+	children: redditChild[];
+};
 
 export function run(client: Client) {
 	const CovidHandler = new CacheHandler();
 	const RedditHandler = new CacheHandler();
 	const NPMHandler = new CacheHandler();
 	const WeatherHandler = new CacheHandler();
-	const LyricsFetcher = new geniusLyrics.Client();
 
 	/**
-	  * @openapi
-	  * /info/covid:
-	  *  get:
-	  *    description: Get COVID stats on a country or the world.
-	  *    parameters:
-		*       - name: country
- 	  *         description: The country to get COVID stats from
- 	  *         required: false
- 	  *         type: string
-		*         default: all
-	*/
+	 * @openapi
+	 * /info/covid:
+	 *  get:
+	 *    description: Get COVID stats on a country or the world.
+	 *    parameters:
+	 *       - name: country
+	 *         description: The country to get COVID stats from
+	 *         required: false
+	 *         type: string
+	 *         default: all
+	 */
 	router.get('/covid', async (req, res) => {
 		const country = (req.query.country ?? 'all') as string;
 
@@ -53,27 +52,32 @@ export function run(client: Client) {
 					data = (await axios.get('https://disease.sh/v3/covid-19/all')).data;
 					CovidHandler.data.set('all', data);
 				}
-				CovidHandler._addData({ id: country, data: data });
+				CovidHandler._addData({
+					id: country,
+					data: data,
+				});
 			} catch (err) {
 				client.Logger.error(axios.isAxiosError(err) ? JSON.stringify(err.response?.data) : err);
 				return Error.GenericError(res, `Failed to look up COVID-19 statisic ${country !== 'all' ? `in country ${country}.` : '.'}`);
 			}
 		}
 
-		res.json({ data: data });
+		res.json({
+			data: data,
+		});
 	});
 
 	/**
-	  * @openapi
-	  * /info/radio:
-	  *  get:
-	  *    description: Get a list of radio stations
-	  *    parameters:
-		*       - name: search
- 	  *         description: The query to search for radio station
- 	  *         required: true
- 	  *         type: string
-	*/
+	 * @openapi
+	 * /info/radio:
+	 *  get:
+	 *    description: Get a list of radio stations
+	 *    parameters:
+	 *       - name: search
+	 *         description: The query to search for radio station
+	 *         required: true
+	 *         type: string
+	 */
 	router.get('/radio', async (req, res) => {
 		const query = req.query.search as string;
 		if (!query) return Error.MissingQuery(res, 'search');
@@ -82,12 +86,14 @@ export function run(client: Client) {
 		const WEBSITE_REGEX = /(https:\/\/www\.|http:\/\/www\.|https:\/\/|http:\/\/)?[a-zA-Z0-9]{2,}(\.[a-zA-Z0-9]{2,})(\.[a-zA-Z0-9]{2,})?/g,
 			stations = [];
 		if (WEBSITE_REGEX.test(query)) {
-			stations.push(...(radioStationData as Array<RadioStation>).filter(r => r.website == query));
+			stations.push(...(radioStationData as Array<RadioStation>).filter((r) => r.website == query));
 		} else {
-			stations.push(...(radioStationData as Array<RadioStation>).filter(r => r.name.toLowerCase().startsWith(query.toLowerCase())).slice(0, 10));
+			stations.push(...(radioStationData as Array<RadioStation>).filter((r) => r.name.toLowerCase().startsWith(query.toLowerCase())).slice(0, 10));
 		}
 
-		res.json({ data: stations });
+		res.json({
+			data: stations,
+		});
 	});
 
 	/**
@@ -127,14 +133,19 @@ export function run(client: Client) {
 				if (!p) return Error.GenericError(res, `Subreddit: ${sub} does not exist or doesn't have any posts yet.`);
 
 				// Return the data
-				RedditHandler._addData({ id: `${sub}_${type}`, data: dataRes.data });
+				RedditHandler._addData({
+					id: `${sub}_${type}`,
+					data: dataRes.data,
+				});
 				sentData = new RedditPost(p);
 			} catch (err) {
 				client.Logger.error(axios.isAxiosError(err) ? JSON.stringify(err.response?.data) : err);
 				return Error.GenericError(res, `Failed to fetch posts from subreddit: ${sub}.`);
 			}
 		}
-		res.json({ data: sentData });
+		res.json({
+			data: sentData,
+		});
 	});
 
 	/**
@@ -148,28 +159,34 @@ export function run(client: Client) {
 	 *         description: The name of the package
 	 *         required: true
 	 *         type: string
-	*/
+	 */
 	router.get('/npm', async (req, res) => {
 		const npmPackage = req.query.package as string;
-		if (!npmPackage) return res.json({ error: 'No NPM package was provided in the query' });
+		if (!npmPackage)
+			return res.json({
+				error: 'No NPM package was provided in the query',
+			});
 
 		let sentData = {};
 		if (NPMHandler.data.get(npmPackage)) {
 			sentData = NPMHandler.data.get(npmPackage) as object;
 		} else {
 			try {
-				const { data } = (await axios.get(`https://registry.npmjs.com/${encodeURIComponent(req.query.package as string)}`));
+				const { data } = await axios.get(`https://registry.npmjs.com/${encodeURIComponent(req.query.package as string)}`);
 				const resp = {
 					version: Object.keys(data.versions).reverse(),
 					description: data.description,
 					contributors: data.contributors,
-					homepage:  data.homepage,
+					homepage: data.homepage,
 					keywords: data.keywords,
 					repository: data.repository,
 					bugs: data.bugs,
 					license: data.license,
 				};
-				NPMHandler._addData({ id: npmPackage, data: resp });
+				NPMHandler._addData({
+					id: npmPackage,
+					data: resp,
+				});
 				sentData = resp;
 			} catch (err) {
 				const error = `Failed to fetch NPM data with name: ${npmPackage}.`;
@@ -183,7 +200,9 @@ export function run(client: Client) {
 				}
 			}
 		}
-		res.json({ data: sentData });
+		res.json({
+			data: sentData,
+		});
 	});
 
 	/**
@@ -197,9 +216,11 @@ export function run(client: Client) {
 	 *         description: The text to translate
 	 *         required: true
 	 *         type: string
-	*/
+	 */
 	router.get('/stable-diffusion', async (_req, res) => {
-		res.json({ error: 'coming soon' });
+		res.json({
+			error: 'coming soon',
+		});
 	});
 
 	/**
@@ -218,19 +239,26 @@ export function run(client: Client) {
 	 *         required: false
 	 *         type: string
 	 *         default: English
-	*/
-	type stuff = 'English' | 'Afrikaans'
+	 */
+	type stuff = 'English' | 'Afrikaans';
 	router.get('/translate', async (req, res) => {
 		// Get text to translate
 		const text = req.query.text;
 		if (!text) return Error.MissingQuery(res, 'text');
 
-		const lang = languages[req.query.lang as unknown as stuff ?? 'English'];
-		if (!lang) return res.json({ error: 'Invalid language' });
+		const lang = languages[(req.query.lang as unknown as stuff) ?? 'English'];
+		if (!lang)
+			return res.json({
+				error: 'Invalid language',
+			});
 
 		try {
-			const { text: response } = await translate(text as string, { to: lang });
-			res.json({ data: response });
+			const { text: response } = await translate(text as string, {
+				to: lang,
+			});
+			res.json({
+				data: response,
+			});
 		} catch (err) {
 			client.Logger.error(err);
 			Error.GenericError(res, `Failed to translate text to language: ${lang}.`);
@@ -240,10 +268,14 @@ export function run(client: Client) {
 	/**
 	 * @openapi
 	 * /info/lyrics:
-	 *  get:
-	 *    description: Get lyrics of a song
-	 *    tags: info
-	 *    parameters:
+	 *   get:
+	 *     description: Get lyrics of a song
+	 *     tags: info
+	 *     parameters:
+	 *       - name: geniusApiKey
+	 *         description: The api key from genius
+	 *         required: true
+	 *         type: string
 	 *       - name: title
 	 *         description: The title of the song
 	 *         required: true
@@ -252,43 +284,77 @@ export function run(client: Client) {
 	 *         description: The artist of the song
 	 *         required: false
 	 *         type: string
-	*/
+	 *     responses:
+	 *       200:
+	 *         description: Successful response
+	 *         content:
+	 *           application/json:
+	 *             example:
+	 *               data:
+	 *                 title: "Song Title"
+	 *                 url: "https://genius.com/your-song"
+	 *                 albumArt: "https://example.com/album-art.jpg"
+	 *                 lyrics: ["Verse 1", "Chorus", "Verse 2", "Bridge"]
+	 *       400:
+	 *         description: Bad request
+	 *         content:
+	 *           application/json:
+	 *             example:
+	 *               error: "Missing required parameter: geniusApiKey"
+	 *       500:
+	 *         description: Internal server error
+	 *         content:
+	 *           application/json:
+	 *             example:
+	 *               error: "Failed to fetch lyrics from song: Artist - Title."
+	 */
 	router.get('/lyrics', async (req, res) => {
-		// Get text to translate
+		const geniusApiKey = req.query.apiKey as string;
 		const title = req.query.title as string;
 		const artist = req.query.artist as string;
+
+		if (!geniusApiKey) return Error.MissingQuery(res, 'geniusApiKey');
 		if (!title) return Error.MissingQuery(res, 'title');
+		if (!artist) return Error.MissingQuery(res, 'artist');
 
 		try {
-			const searchQuery = (artist == undefined) ? title : `${artist} - ${title}`;
-			const search = await LyricsFetcher.songs.search(searchQuery);
-			if (search.length == 0) return Error.GenericError(res, `No lyrics could be found from a song called: ${title}.`);
+			const options = {
+				apiKey: geniusApiKey,
+				title: title,
+				artist: artist,
+				optimizeQuery: true,
+			};
 
-			const lyrics = await search[0].lyrics();
-			res.json({ data: {
-				name: search[0].title,
-				artist: search[0].artist.name,
-				lyrics: lyrics.split('\n'),
-			},
+			const songInfo = await getSong(options);
+
+			if (!songInfo.lyrics) return Error.GenericError(res, `No lyrics could be found from a song called: ${title}.`);
+
+			res.json({
+				data: {
+					title: songInfo.title,
+					url: songInfo.url,
+					albumArt: songInfo.albumArt,
+					lyrics: songInfo.lyrics,
+				},
 			});
 		} catch (err) {
 			client.Logger.error(err);
-			Error.GenericError(res, `Failed to fetch lyrics from song: ${title}.`);
+			Error.GenericError(res, `Failed to fetch lyrics from song: ${artist} - ${title}.`);
 		}
 	});
 
 	/**
- * @openapi
- * /info/urban-dictionary:
- *  get:
- *    description: Translate a message
- *    tags: info
- *    parameters:
- *       - name: phrase
- *         description: The text to translate
- *         required: true
- *         type: string
-*/
+	 * @openapi
+	 * /info/urban-dictionary:
+	 *  get:
+	 *    description: Translate a message
+	 *    tags: info
+	 *    parameters:
+	 *       - name: phrase
+	 *         description: The text to translate
+	 *         required: true
+	 *         type: string
+	 */
 	router.get('/urban-dictionary', async (req, res) => {
 		// Get text to translate
 		const phrase = req.query.phrase as string;
@@ -296,7 +362,9 @@ export function run(client: Client) {
 
 		try {
 			const { data } = await axios.get(`https://api.urbandictionary.com/v0/define?term=${phrase}`);
-			res.json({ data });
+			res.json({
+				data,
+			});
 		} catch (err) {
 			client.Logger.error(axios.isAxiosError(err) ? JSON.stringify(err.response?.data) : err);
 			Error.GenericError(res, `Failed to fetch definition(s) of word: ${phrase}.`);
@@ -304,17 +372,17 @@ export function run(client: Client) {
 	});
 
 	/**
- * @openapi
- * /info/weather:
- *  get:
- *    description: Get the weather of a location
- *    tags: info
- *    parameters:
- *       - name: location
- *         description: The location for the weather
- *         required: true
- *         type: string
-*/
+	 * @openapi
+	 * /info/weather:
+	 *  get:
+	 *    description: Get the weather of a location
+	 *    tags: info
+	 *    parameters:
+	 *       - name: location
+	 *         description: The location for the weather
+	 *         required: true
+	 *         type: string
+	 */
 	router.get('/weather', async (req, res) => {
 		// Get location to get weather from
 		const location = encodeURIComponent(req.query.location as string);
@@ -326,18 +394,25 @@ export function run(client: Client) {
 		} else {
 			try {
 				const { data } = await axios.get(`https://api.weatherapi.com/v1/current.json?key=${process.env.weatherAPI}&q=${location}`);
-				WeatherHandler._addData({ id: `${location}`, data: data });
+				WeatherHandler._addData({
+					id: `${location}`,
+					data: data,
+				});
 				sentData = data;
 			} catch (err) {
 				client.Logger.error(axios.isAxiosError(err) ? JSON.stringify(err.response?.data) : err);
 				return Error.GenericError(res, `Failed to get weather for location: ${location}.`);
 			}
 		}
-		res.json({ data: sentData });
+		res.json({
+			data: sentData,
+		});
 	});
 
 	router.get('/validate', (_req, res) => {
-		res.json({ data: 'Correct API token' });
+		res.json({
+			data: 'Correct API token',
+		});
 	});
 
 	return router;
