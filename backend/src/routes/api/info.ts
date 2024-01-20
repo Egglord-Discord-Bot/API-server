@@ -162,10 +162,11 @@ export function run(client: Client) {
 	 */
 	router.get('/npm', async (req, res) => {
 		const npmPackage = req.query.package as string;
-		if (!npmPackage)
+		if (!npmPackage) {
 			return res.json({
 				error: 'No NPM package was provided in the query',
 			});
+		}
 
 		let sentData = {};
 		if (NPMHandler.data.get(npmPackage)) {
@@ -247,10 +248,11 @@ export function run(client: Client) {
 		if (!text) return Error.MissingQuery(res, 'text');
 
 		const lang = languages[(req.query.lang as unknown as stuff) ?? 'English'];
-		if (!lang)
+		if (!lang) {
 			return res.json({
 				error: 'Invalid language',
 			});
+		}
 
 		try {
 			const { text: response } = await translate(text as string, {
