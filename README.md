@@ -18,7 +18,7 @@
   •
   <a href="#Features">Features</a>
   •
-  <a href="#Installation">Installation</a>
+  <a href="https://github.com/Egglord-Discord-Bot/API-server/blob/master/docs/INSTALLATION_GUIDE.md">Installation</a>
   •
   <a href="#license">License</a>
 </p>
