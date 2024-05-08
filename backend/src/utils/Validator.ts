@@ -2,6 +2,8 @@ import type { Request, Response } from 'express';
 import type { Client } from '../helpers';
 import type { ExtendedEndpoint } from '../types/database';
 import type { ParamAPIEndpoint } from '../types';
+import URL from 'url';
+import querystring from 'querystring';
 import { Error } from './';
 
 export default class Validator {
@@ -77,5 +79,21 @@ export default class Validator {
 		if ((param.maximum && param.minimum) && (Number(query) <= param.minimum || Number(query) >= param.maximum)) return Error.InvalidRange(res, 'port', [param.minimum, param.maximum]);
 
 		return true;
+	}
+
+	public static parseURL(originalUrl: string) {
+		// Parse the original URL including existing query parameters
+		const parsedUrl = URL.parse(originalUrl);
+
+		// Parse query parameters of the original URL
+		const queryParams = querystring.parse(parsedUrl.query ?? '');
+		let constructedUrl = queryParams.url + (Object.keys(queryParams).length > 1 ? '&' : '');
+		for (const key in queryParams) {
+			if (key !== 'url') {
+				constructedUrl += `${key}=${queryParams[key]}&`;
+			}
+		}
+
+		return constructedUrl;
 	}
 }

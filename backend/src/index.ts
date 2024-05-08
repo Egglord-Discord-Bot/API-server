@@ -82,7 +82,7 @@ dotenv.config();
 	for (const endpoint of endpoints) {
 		client.Logger.debug(`Loading: ${endpoint.route} endpoint.`);
 		const file = await import(endpoint.path);
-		app.use(endpoint.route, file.run(client));
+		app.use(endpoint.route, await file.run(client));
 	}
 
 	// Run the server on port

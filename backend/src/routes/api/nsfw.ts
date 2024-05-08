@@ -3,11 +3,12 @@ const router = Router();
 import axios from 'axios';
 import * as tf from '@tensorflow/tfjs-node';
 import * as nsfwjs from 'nsfwjs';
-import type { Tensor3D } from '@tensorflow/tfjs-node';
-import { Error } from '../../utils';
+import { Error, Validator } from '../../utils';
 import type Client from '../../helpers/Client';
 
-export function run(client: Client) {
+
+export async function run(client: Client) {
+	const model = await nsfwjs.load();
 	/**
 		* @openapi
 		* /nsfw/check:
@@ -20,15 +21,25 @@ export function run(client: Client) {
 	  *         type: string
 	*/
 	router.get('/check', async (req, res) => {
+		// Valid URL
 		const url = req.query.url as string;
-		if (!url) return Error.MissingQuery(res, 'url');
+		try {
+			if (!url) return Error.MissingQuery(res, 'url');
+			new URL(url);
+		} catch {
+			return Error.IncorrectType(res, 'url', 'url');
+		}
+
+		// Correctly parse the URL
+		const parsedURL = Validator.parseURL(req.originalUrl);
 
 		try {
-			const model = await nsfwjs.load();
-			const image = await axios.get(url, { responseType: 'arraybuffer' });
+			const image = await axios.get(parsedURL, { headers: {
+				'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3',
+			}, responseType: 'arraybuffer' });
 			const imageBuffer = new Uint8Array(Buffer.from(image.data, 'utf-8'));
-			const decodedImage = tf.node.decodeImage(imageBuffer);
-			const data = await model.classify(decodedImage as Tensor3D);
+			const decodedImage = tf.node.decodeImage(imageBuffer, 3);
+			const data = await model.classify(decodedImage);
 			decodedImage.dispose();
 
 			res.json({ data: {
@@ -36,6 +47,7 @@ export function run(client: Client) {
 				probabilities: data },
 			});
 		} catch (err) {
+			console.log(err);
 			// See if image was failed to fetch
 			if (axios.isAxiosError(err)) {
 				client.Logger.error(JSON.stringify(err.response?.data));

@@ -36,8 +36,8 @@ export default class EndpointManager extends endpointData {
 	async checkEndpointData(client: Client) {
 		const endpointsBasedOnFiles = Utils.generateRoutes(join(__dirname, '../', 'routes')).filter(e => e.route !== '/index');
 		const fileData = await Promise.all(endpointsBasedOnFiles.map(e => import(`${e.path}`)));
-		const files = fileData
-			.map(e => e.run(client))
+		const funFunctions = await Promise.all(fileData.map(async e => await e.run(client)));
+		const files = funFunctions
 			.map((j: Router, index) => {
 				return [...new Set(j.stack.map(l => {
 					const text = l.regexp.toString();
