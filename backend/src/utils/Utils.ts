@@ -82,14 +82,17 @@ export default class Utils {
 
 		// Get session token (Could be secure or not so check both)
 		let sessionToken = parsedcookies.find(i => i[0] == '__Secure-next-auth.session-token')?.[1];
-		if (sessionToken == null) {
-			sessionToken = parsedcookies.find(i => i[0] == 'next-auth.session-token')?.[1];
-		}
+		if (sessionToken == null) sessionToken = parsedcookies.find(i => i[0] == 'next-auth.session-token')?.[1];
 		if (!sessionToken) return null;
 
-		const session = await decode({ token: sessionToken, secret: process.env.sessionSecret as string });
-		if (session == null) return null;
-		sessionStore[sessionToken] = session;
-		return session;
+		try {
+			const session = await decode({ token: sessionToken, secret: process.env.sessionSecret as string });
+			if (session == null) return null;
+			sessionStore[sessionToken] = session;
+			return session;
+		} catch (err) {
+			console.log(err);
+			return null;
+		}
 	}
 }
