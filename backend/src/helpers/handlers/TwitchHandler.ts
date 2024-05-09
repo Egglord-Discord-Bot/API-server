@@ -64,7 +64,7 @@ export default class TwitchHandler extends CacheHandler {
 	  * @param {string} id the ID of the user
 	*/
 	async getFollowersFromId(id: string): Promise<number> {
-		const followers = await this.request('/users/follows', { to_id: id }) as TwitchFollowersRequest;
+		const followers = await this.request('/channels/followers', { broadcaster_id: id }) as TwitchFollowersRequest;
 		return followers.total;
 	}
 
@@ -74,9 +74,5 @@ export default class TwitchHandler extends CacheHandler {
 	private async refreshTokens() {
 		const { data } = await axios.post(`https://id.twitch.tv/oauth2/token?client_id=${process.env.twitchId as string}&client_secret=${process.env.twitchSecret as string}&grant_type=client_credentials`);
 		this.access_token = data.access_token;
-	}
-
-	createAccount() {
-
 	}
 }
