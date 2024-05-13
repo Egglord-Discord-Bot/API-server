@@ -95,4 +95,20 @@ export default class Utils {
 			return null;
 		}
 	}
+
+	public static parseMySQLConnectionString(connectionString: string) {
+		const regex = /^mysql:\/\/([^:]+):([^/]+)@([^/:]+):(\d+)\/(.+)$/;
+		const match = connectionString.match(regex);
+
+		if (!match) throw new Error('Invalid MySQL connection string format');
+		const [, username, password, host, port, database] = match;
+
+		return {
+			username,
+			password,
+			host,
+			port: parseInt(port, 10),
+			database,
+		};
+	}
 }

@@ -5,3 +5,4 @@ node_modules
 /backend/src/utils/logs
 .env
 /frontend/.next
+/backend/backups
