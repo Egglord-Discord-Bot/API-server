@@ -33,6 +33,7 @@ steam -> Access it from here https://steamcommunity.com/dev/apikey
 twitchId -> Access it from here https://dev.twitch.tv/console
 twitchSecret -> Some from above
 twitterBearerToken -> DOES NOT WORK CURRENTLY
+weatherAPI="" Access it from here https://www.weatherapi.com/
 debug=false -> IF you want more logs in console or not
 ```
 
