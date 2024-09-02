@@ -139,7 +139,7 @@ export default function Settings() {
 					<form className="form-inline">
 						<h5>Your token:</h5>
 						<div className="input-group mb-3">
-							<input type="password" id="myInput" className="form-control" defaultValue={token} aria-label="Recipient's username" aria-describedby="basic-addon2" />
+							<input type="password" id="myInput" className="form-control" value={token} aria-label="Recipient's username" aria-describedby="basic-addon2" readOnly={true} />
 							<button className="input-group-text" id="basic-addon2" onClick={(e) => toggleTokenVisibility(e)}><FontAwesomeIcon icon={canSee ? faEyeSlash : faEye} /></button>
 						</div>
 						<button className="btn btn-primary mb-2" onClick={(e) => copyUserToken(e)}>Copy text</button>
