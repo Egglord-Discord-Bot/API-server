@@ -19,7 +19,7 @@ export default class EndpointManager extends endpointData {
 		if (this.cache.random()?.data != undefined) {
 			return [...this.cache.values()];
 		} else {
-			const endpoints: Array<ExtendedEndpoint> = [...(await this.fetchEndpoints()).values()];
+			const endpoints: Array<ExtendedEndpoint> = [...(await this.fetchEndpoints(true, true)).values()];
 			const openapiSpecification = JSON.parse(fs.readFileSync(`${process.cwd()}/src/assets/JSON/endpoints.json`).toString()) as swaggerJsdocType;
 			const endpointsWithData = endpoints.map(e => ({ ...e, data: openapiSpecification.paths[`${e.name.replace('/api', '')}`]?.get }));
 
