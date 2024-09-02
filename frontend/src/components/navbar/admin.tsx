@@ -3,16 +3,21 @@ import Image from 'next/image';
 import { signOut } from 'next-auth/react';
 import type { User } from '@/types/next-auth';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faBell, faFileAlt, faCogs, faSignOutAlt } from '@fortawesome/free-solid-svg-icons';
+import { faBell, faFileAlt, faCogs, faSignOutAlt, faBars, faX } from '@fortawesome/free-solid-svg-icons';
 
 interface Props {
-	user: User
+	user: User;
+	showSidebar: boolean;
+	setShowSidebar: (arg0: boolean) => void;
 }
 
-export default function Admin({ user }: Props) {
+export default function Admin({ user, showSidebar, setShowSidebar }: Props) {
 	return (
 		<nav className="navbar navbar-expand navbar-light static-top shadow" style={{ paddingLeft:'5px' }}>
 			<ul className="navbar-nav me-auto mb-2 mb-lg-0">
+				<a type="button" className="nav-link" onClick={() => setShowSidebar(!showSidebar)}>
+					<FontAwesomeIcon icon={showSidebar ? faX : faBars} />
+				</a>
 			</ul>
 			<ul className="navbar-nav ml-auto">
 				<li className="nav-item dropdown no-arrow mx-1">

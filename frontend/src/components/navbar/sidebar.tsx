@@ -4,11 +4,12 @@ import { faLaughWink, faTachometerAlt, faChartArea, faUsers, faCog, faFileLines 
 
 interface Props {
 	activeTab: 'dashboard' | 'users' | 'endpoint' | 'system' | 'logs'
+	showSidebar: boolean
 }
 
-export default function Sidebar({ activeTab }: Props) {
+export default function Sidebar({ activeTab, showSidebar }: Props) {
 	return (
-		<ul className="navbar-nav bg-primary sidebar sidebar-dark accordion" id="accordionSidebar" style={{ color: 'white', minHeight: '100vh' }}>
+		<ul className="navbar-nav bg-primary sidebar sidebar-dark accordion" id="accordionSidebar" style={{ color: 'white', minHeight: '100vh', display: showSidebar ? 'block' : 'none' }}>
 			<Link className="sidebar-brand d-flex align-items-center justify-content-center" href="/" style={{ color: 'white' }}>
 				<div className="sidebar-brand-icon rotate-n-15">
 					<FontAwesomeIcon icon={faLaughWink} />
