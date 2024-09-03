@@ -10,6 +10,7 @@ import type { UserHistory } from '@/types';
 type SortOrder = 'asc' | 'desc';
 type sortType = 'accessedAt' | 'statusCode'
 
+let filterTimeout: string | number | NodeJS.Timeout | undefined;
 export default function HistoryListCard() {
 	const [history, setHistory] = useState<Array<UserHistory>>([]);
 	const [total, setTotal] = useState(0);
@@ -37,21 +38,25 @@ export default function HistoryListCard() {
 	async function searchByName(e: SyntheticEvent) {
 		const { value } = (e.target as HTMLInputElement);
 		const query = value.length > 0 ? `/search?name=${value}` : '';
-		try {
-			const res = await fetch(`/api/session/admin/history${query}`, {
-				method: 'get',
-				headers: {
-					'Accept': 'application/json',
-					'Content-Type': 'application/json',
-				},
-			});
-			const data = await res.json();
 
-			setHistory(data.history);
-			setPage(0);
-		} catch (err) {
-			console.log(err);
-		}
+		clearTimeout(filterTimeout);
+		filterTimeout = setTimeout(async () => {
+			try {
+				const res = await fetch(`/api/session/admin/history${query}`, {
+					method: 'get',
+					headers: {
+						'Accept': 'application/json',
+						'Content-Type': 'application/json',
+					},
+				});
+				const data = await res.json();
+
+				setHistory(data.history);
+				setPage(0);
+			} catch (err) {
+				console.log(err);
+			}
+		}, 500);
 	}
 
 
