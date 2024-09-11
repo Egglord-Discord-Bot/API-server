@@ -84,3 +84,9 @@ export type ExtendedEndpoint = Endpoint & {
 export type pagination = {
 	page: number
 }
+
+export type createNotificationData = {
+	content: string
+	header: string
+	userId?: bigint
+}

@@ -329,6 +329,12 @@ export function run(client: Client) {
 				WeatherHandler._addData({ id: `${location}`, data: data });
 				sentData = data;
 			} catch (err) {
+				if (axios.isAxiosError(err)) {
+					client.NotificationManager.create({
+						header: 'Weather API failed to respond correctly.',
+						content: `${JSON.stringify(err.response?.data.error.message)}`,
+					});
+				}
 				client.Logger.error(axios.isAxiosError(err) ? JSON.stringify(err.response?.data) : err);
 				return Error.GenericError(res, `Failed to get weather for location: ${location}.`);
 			}

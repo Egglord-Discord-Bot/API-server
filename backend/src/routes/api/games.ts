@@ -204,6 +204,13 @@ export function run(client: Client) {
 			try {
 				summoner = await LeagueCacheHandler.getSummonerByUsername(region as validRegions, username);
 			} catch (err) {
+				if (axios.isAxiosError(err)) {
+					// Create the notification
+					client.NotificationManager.create({
+						header: 'RIOT API failed to respond correctly.',
+						content: `${JSON.stringify(err.response?.data)}`,
+					});
+				}
 				client.Logger.error(axios.isAxiosError(err) ? JSON.stringify(err.response?.data) : err);
 				return Error.GenericError(res, `Failed to find summoner with name ${username} in region ${region}.`);
 			}

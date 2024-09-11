@@ -21,6 +21,7 @@ model User {
   locale        String?
   email         String?
   history       UserHistory[]
+  notifications Notification[]
   role          Role          @default(USER)
   createdAt     DateTime      @default(now()) @map("created_at")
 }
@@ -65,4 +66,13 @@ model systemHistory {
   memoryUsage   String
   cpuUsage      Int
   createdAt     DateTime      @default(now()) @map("created_at")
+}
+
+model Notification {
+  id            Int         @id     @default(autoincrement())
+  user          User?       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId        BigInt?
+  header        String      
+  content       String
+  createdAt     DateTime    @default(now())
 }

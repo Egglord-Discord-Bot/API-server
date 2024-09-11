@@ -52,3 +52,11 @@ export type EndpointData = {
 export interface EndpointExtra extends Endpoint {
   data?: EndpointData
 }
+
+export type Notifications = {
+  id: string
+  userId: string
+  content: string
+  header: string
+  createdAt: Date
+}
