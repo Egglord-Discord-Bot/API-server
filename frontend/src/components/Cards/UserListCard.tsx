@@ -103,7 +103,7 @@ export default function UserCard({ total }: Props) {
 									)}
 								</div>
 							</th>
-							<th scope="col">Role</th>
+							<th scope="col" className="d-none d-lg-table-cell">Role</th>
 							<th scope="col">Edit</th>
 						</tr>
 					</thead>
@@ -114,7 +114,7 @@ export default function UserCard({ total }: Props) {
 								<th>{u.username}</th>
 								<th>{new Date(u.createdAt).toLocaleDateString('en-GB', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</th>
 								<th>{u._count?.history}</th>
-								<th>
+								<th className="d-none d-lg-table-cell">
 									<Tooltip place="top" content={`${u.role}`} id={`${index}_Tooltip`} />
 									{formatRoleIcon(u.role, index)}
 								</th>
