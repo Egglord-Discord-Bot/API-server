@@ -24,7 +24,7 @@ export function run(client: Client) {
 	const RedditHandler = new CacheHandler();
 	const NPMHandler = new CacheHandler();
 	const WeatherHandler = new CacheHandler();
-	const LyricsFetcher = new geniusLyrics.Client();
+	const LyricsFetcher = new geniusLyrics.Client(process.env.geniusAPISecret);
 
 	/**
 	  * @openapi
@@ -318,6 +318,7 @@ export function run(client: Client) {
 	router.get('/weather', async (req, res) => {
 		// Get location to get weather from
 		const location = encodeURIComponent(req.query.location as string);
+		console.log(location);
 		if (!location) return Error.MissingQuery(res, 'location');
 
 		let sentData = {};
