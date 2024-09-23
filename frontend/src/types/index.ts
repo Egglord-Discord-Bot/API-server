@@ -60,3 +60,18 @@ export type Notifications = {
   header: string
   createdAt: Date
 }
+
+export interface DatabaseUser {
+  id: string
+  username: string
+  email: string
+  avatar: string
+  token: string
+  createdAt: Date
+  role: 'USER' | 'ADMIN' | 'BLOCK' | 'PREMIUM'
+  locale: string
+  access_token: string
+  _count?: {
+    history: number
+  }
+}
