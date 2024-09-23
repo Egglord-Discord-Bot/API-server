@@ -3,7 +3,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faLaughWink, faTachometerAlt, faChartArea, faUsers, faCog, faFileLines } from '@fortawesome/free-solid-svg-icons';
 
 interface Props {
-	activeTab: 'dashboard' | 'users' | 'endpoint' | 'system' | 'logs'
+	activeTab: 'dashboard' | 'users' | 'endpoint' | 'system' | 'logs' | 'settings'
 	showSidebar: boolean
 }
 
@@ -48,18 +48,11 @@ export default function Sidebar({ activeTab, showSidebar }: Props) {
 					<span> Logs</span>
 				</Link>
 			</li>
-			<li className="nav-item">
-				<a className="nav-link collapsed" href="#" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="true" aria-controls="collapseTwo">
+			<li className={`nav-item ${activeTab == 'settings' ? 'active' : ''}`}>
+				<Link className="nav-link" href="/admin/settings">
 					<FontAwesomeIcon icon={faCog} />
-					<span> Extra</span>
-				</a>
-				<div id="collapseTwo" className="collapse" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
-					<div className="bg-white py-2 collapse-inner rounded">
-						<h6 className="collapse-header">COMING SOON:</h6>
-						<Link className="collapse-item" href="/">Stripe</Link>
-						<Link className="collapse-item" href="/admin/cloudflare">Cloudflare</Link>
-					</div>
-				</div>
+					<span> Settings</span>
+				</Link>
 			</li>
 			<hr className="sidebar-divider" />
 		</ul>
