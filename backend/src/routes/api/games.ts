@@ -133,11 +133,11 @@ export function run(client: Client) {
 		const regionAllowedTypes = ['apac', 'emea', 'ncsa'] as Array<regionType>;
 		if (!regionAllowedTypes.includes(region)) return Error.InvalidValue(res, 'region', regionAllowedTypes);
 
+		try {
 		// Get basic player info
 		const { 0: player } = await findByUsername(platform as platformType, username);
 		if (!player) return Error.GenericError(res, `User: ${username} does not exist on that platform (${platform}) or region (${region}).`);
 
-		try {
 			// Get player stats
 			const [{ 0: playerRank }, { 0: playerStats }, { 0: playerGame }] = await Promise.all([getRanks(platform, player.id),
 				getStats(platform, player.id), getProgression(platform, player.id)]);
