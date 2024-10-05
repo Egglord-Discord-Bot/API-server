@@ -7,7 +7,8 @@ import { RedditPost } from '../../types/socials/Reddit';
 import { translate } from '@vitalets/google-translate-api';
 import languages from '../../assets/JSON/languages.json';
 import radioStationData from '../../assets/JSON/radio-stations.json';
-import type { RadioStation } from '../../types';
+import locations from '../../assets/JSON/cities.json';
+import type { ILocation, RadioStation } from '../../types';
 import * as geniusLyrics from 'genius-lyrics';
 export type redditType = 'hot' | 'new';
 import type Client from '../../helpers/Client';
@@ -278,17 +279,17 @@ export function run(client: Client) {
 	});
 
 	/**
- * @openapi
- * /info/urban-dictionary:
- *  get:
- *    description: Translate a message
- *    tags: info
- *    parameters:
- *       - name: phrase
- *         description: The text to translate
- *         required: true
- *         type: string
-*/
+	 * @openapi
+	 * /info/urban-dictionary:
+	 *  get:
+	 *    description: Translate a message
+	 *    tags: info
+	 *    parameters:
+	 *       - name: phrase
+	 *         description: The text to translate
+	 *         required: true
+	 *         type: string
+	*/
 	router.get('/urban-dictionary', async (req, res) => {
 		// Get text to translate
 		const phrase = req.query.phrase as string;
@@ -304,21 +305,20 @@ export function run(client: Client) {
 	});
 
 	/**
- * @openapi
- * /info/weather:
- *  get:
- *    description: Get the weather of a location
- *    tags: info
- *    parameters:
- *       - name: location
- *         description: The location for the weather
- *         required: true
- *         type: string
-*/
+	 * @openapi
+	 * /info/weather:
+	 *  get:
+	 *    description: Get the weather of a location
+	 *    tags: info
+	 *    parameters:
+	 *       - name: location
+	 *         description: The location for the weather
+	 *         required: true
+	 *         type: string
+	*/
 	router.get('/weather', async (req, res) => {
 		// Get location to get weather from
 		const location = encodeURIComponent(req.query.location as string);
-		console.log(location);
 		if (!location) return Error.MissingQuery(res, 'location');
 
 		let sentData = {};
@@ -342,6 +342,27 @@ export function run(client: Client) {
 		}
 		res.json({ data: sentData });
 	});
+
+	/**
+	 * @openapi
+	 * /info/place:
+	 *  get:
+	 *    description: Get a list of places
+	 *    tags: info
+	 *    parameters:
+	 *       - name: location
+	 *         description: The name of location
+	 *         required: true
+	 *         type: string
+	*/
+	router.get('/place', async (req, res) => {
+		const query = req.query.location as string;
+		if (!query) return Error.MissingQuery(res, 'location');
+
+		const matchedLocations = (locations as ILocation[]).filter(r => r.name.toUpperCase().startsWith(query.toUpperCase())).slice(0, 10);
+		res.json({ data: matchedLocations.map(l => ({ name: l.name, lat: l.lat, lng: l.lng })) });
+	});
+
 
 	router.get('/validate', (_req, res) => {
 		res.json({ data: 'Correct API token' });
