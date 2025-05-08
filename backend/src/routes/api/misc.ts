@@ -7,6 +7,7 @@ import * as fs from 'fs';
 import { DuckDuckGoHandler } from '../../helpers';
 import validAnimals from '../../assets/JSON/animals.json';
 import adviceList from '../../assets/JSON/advice.json';
+import dadJokes from '../../assets/JSON/dad-jokes.json';
 import QRcode from 'qrcode';
 import { PassThrough } from 'stream';
 import type Client from '../../helpers/Client';
@@ -165,6 +166,22 @@ export function run(client: Client) {
 		res.set('Content-Disposition', 'inline; filename=qrcode.png');
 		res.setHeader('content-type', 'image/png');
 		qrStream.pipe(res);
+	});
+
+	/**
+		* @openapi
+		* /misc/dad-jokes:
+		*  get:
+		*    description: Get a dad joke
+	*/
+	router.get('/dad-jokes', async (_req, res) => {
+		try {
+			const dadJoke = dadJokes[Math.floor((Math.random() * dadJokes.length))];
+			res.json({ data: dadJoke });
+		} catch (err: any) {
+			client.Logger.error(err.message);
+			Error.GenericError(res, err.message);
+		}
 	});
 
 	return router;
